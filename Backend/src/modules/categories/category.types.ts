@@ -1,0 +1,25 @@
+export type CategoryStatus = 'ACTIVE' | 'INACTIVE';
+
+export interface CreateCategoryPayload {
+  name: string;
+  slug?: string;
+  description?: string;
+  image?: string;
+  parentCategory?: string;
+  sortOrder?: number;
+  createdBy?: string;
+}
+
+export interface UpdateCategoryPayload {
+  name?: string;
+  slug?: string;
+  description?: string;
+  image?: string;
+  parentCategory?: string | null;
+  sortOrder?: number;
+  updatedBy?: string;
+}
+
+export interface ChangeStatusPayload {
+  status: CategoryStatus;
+}

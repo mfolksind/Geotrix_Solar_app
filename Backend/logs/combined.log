@@ -1,0 +1,842 @@
+2026-07-17T09:25:31.871Z error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.mongodb.net
+    at QueryReqWrap.onresolve [as oncomplete] (node:internal/dns/promises:294:17) {"code":"ECONNREFUSED","syscall":"querySrv","hostname":"_mongodb._tcp.cluster0.mongodb.net"}
+2026-07-17T09:30:42.980Z error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.mongodb.net
+    at QueryReqWrap.onresolve [as oncomplete] (node:internal/dns/promises:294:17) {"code":"ECONNREFUSED","syscall":"querySrv","hostname":"_mongodb._tcp.cluster0.mongodb.net"}
+2026-07-17T09:30:43.238Z error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.mongodb.net
+    at QueryReqWrap.onresolve [as oncomplete] (node:internal/dns/promises:294:17) {"code":"ECONNREFUSED","syscall":"querySrv","hostname":"_mongodb._tcp.cluster0.mongodb.net"}
+2026-07-17T09:30:43.259Z error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.mongodb.net
+    at QueryReqWrap.onresolve [as oncomplete] (node:internal/dns/promises:294:17) {"code":"ECONNREFUSED","syscall":"querySrv","hostname":"_mongodb._tcp.cluster0.mongodb.net"}
+2026-07-17T09:30:43.281Z error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.mongodb.net
+    at QueryReqWrap.onresolve [as oncomplete] (node:internal/dns/promises:294:17) {"code":"ECONNREFUSED","syscall":"querySrv","hostname":"_mongodb._tcp.cluster0.mongodb.net"}
+2026-07-17T09:30:43.290Z error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.mongodb.net
+    at QueryReqWrap.onresolve [as oncomplete] (node:internal/dns/promises:294:17) {"code":"ECONNREFUSED","syscall":"querySrv","hostname":"_mongodb._tcp.cluster0.mongodb.net"}
+2026-07-17T09:30:55.203Z error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.mongodb.net
+    at QueryReqWrap.onresolve [as oncomplete] (node:internal/dns/promises:294:17) {"code":"ECONNREFUSED","syscall":"querySrv","hostname":"_mongodb._tcp.cluster0.mongodb.net"}
+2026-07-17T09:33:35.305Z info: MongoDB connected
+2026-07-17T09:33:35.313Z info: Server running on port 5000
+2026-07-17T09:45:25.304Z info: ::1 - - [17/Jul/2026:09:45:25 +0000] "POST /auth/register HTTP/1.1" 500 86 "-" "PostmanRuntime/7.54.0"
+2026-07-17T09:46:10.830Z info: MongoDB connected
+2026-07-17T09:46:10.830Z info: MongoDB connected
+2026-07-17T09:46:10.830Z info: MongoDB connected
+2026-07-17T09:46:10.835Z info: MongoDB connected
+2026-07-17T09:46:10.852Z info: Server running on port 5000
+2026-07-17T09:46:10.914Z info: MongoDB connected
+2026-07-17T09:46:11.090Z info: MongoDB connected
+2026-07-17T09:46:11.899Z info: MongoDB connected
+2026-07-17T09:46:28.531Z info: MongoDB connected
+2026-07-17T09:47:22.066Z info: MongoDB connected
+2026-07-17T09:47:22.071Z info: Server running on port 8000
+2026-07-17T09:47:48.673Z info: ::1 - - [17/Jul/2026:09:47:48 +0000] "POST /auth/register HTTP/1.1" 500 86 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:07:27.314Z info: Shutting down server due to SIGINT
+2026-07-17T10:07:34.971Z info: MongoDB connected
+2026-07-17T10:07:34.975Z info: Server running on port 8000
+2026-07-17T10:07:54.275Z info: ::1 - - [17/Jul/2026:10:07:54 +0000] "POST /auth/register HTTP/1.1" 500 69 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:09:31.642Z info: ::1 - - [17/Jul/2026:10:09:31 +0000] "GET /users HTTP/1.1" 200 26 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:10:40.893Z info: ::1 - - [17/Jul/2026:10:10:40 +0000] "POST /auth/register HTTP/1.1" 201 717 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:11:18.374Z info: ::1 - - [17/Jul/2026:10:11:18 +0000] "GET /users HTTP/1.1" 200 26 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:11:26.798Z info: ::1 - - [17/Jul/2026:10:11:26 +0000] "GET /users HTTP/1.1" 200 26 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:16:23.190Z info: ::1 - - [17/Jul/2026:10:16:23 +0000] "POST /auth/login HTTP/1.1" 200 710 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:18:02.900Z info: ::1 - - [17/Jul/2026:10:18:02 +0000] "POST /auth/logout HTTP/1.1" 200 56 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:25:51.102Z info: ::1 - - [17/Jul/2026:10:25:51 +0000] "POST /auth/register HTTP/1.1" 201 727 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:26:40.731Z info: ::1 - - [17/Jul/2026:10:26:40 +0000] "GET /users HTTP/1.1" 200 26 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:27:10.015Z info: ::1 - - [17/Jul/2026:10:27:10 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-17T10:35:02.117Z info: MongoDB connected
+2026-07-17T10:35:02.116Z info: MongoDB connected
+2026-07-17T10:35:02.117Z info: MongoDB connected
+2026-07-17T10:35:02.116Z info: MongoDB connected
+2026-07-17T10:35:02.119Z info: MongoDB connected
+2026-07-17T10:35:02.118Z info: MongoDB connected
+2026-07-17T10:35:02.137Z info: Server running on port 8000
+2026-07-17T10:35:25.197Z info: MongoDB connected
+2026-07-17T10:35:25.209Z info: Server running on port 8000
+2026-07-17T10:35:25.244Z info: MongoDB connected
+2026-07-17T10:35:25.352Z info: MongoDB connected
+2026-07-17T10:35:25.569Z info: MongoDB connected
+2026-07-17T10:35:25.893Z info: MongoDB connected
+2026-07-17T10:35:25.897Z info: MongoDB connected
+2026-07-17T10:36:15.935Z info: MongoDB connected
+2026-07-17T10:36:15.940Z info: MongoDB connected
+2026-07-17T10:36:15.946Z info: MongoDB connected
+2026-07-17T10:36:15.963Z info: Server running on port 8000
+2026-07-17T10:36:16.046Z info: MongoDB connected
+2026-07-17T10:36:16.312Z info: MongoDB connected
+2026-07-17T10:36:16.452Z info: MongoDB connected
+2026-07-17T10:38:18.649Z info: MongoDB connected
+2026-07-17T10:38:18.670Z info: Server running on port 8000
+2026-07-17T10:38:19.257Z info: MongoDB connected
+2026-07-17T10:38:19.499Z info: MongoDB connected
+2026-07-17T10:38:19.505Z info: MongoDB connected
+2026-07-17T10:38:20.003Z info: MongoDB connected
+2026-07-17T10:38:20.149Z info: MongoDB connected
+2026-07-17T10:40:44.954Z info: MongoDB connected
+2026-07-17T10:40:44.978Z info: Server running on port 8000
+2026-07-17T10:40:45.998Z info: MongoDB connected
+2026-07-17T10:40:46.411Z info: MongoDB connected
+2026-07-17T10:40:46.506Z info: MongoDB connected
+2026-07-17T10:40:46.635Z info: MongoDB connected
+2026-07-17T10:40:46.877Z info: MongoDB connected
+2026-07-17T10:45:23.502Z info: MongoDB connected
+2026-07-17T10:45:23.522Z info: Server running on port 8000
+2026-07-17T10:45:23.550Z info: MongoDB connected
+2026-07-17T10:45:23.621Z info: MongoDB connected
+2026-07-17T10:45:23.798Z info: MongoDB connected
+2026-07-17T10:45:23.838Z info: MongoDB connected
+2026-07-17T10:45:23.875Z info: MongoDB connected
+2026-07-17T10:46:21.542Z info: MongoDB connected
+2026-07-17T10:46:21.591Z info: Server running on port 8000
+2026-07-17T10:46:21.885Z info: MongoDB connected
+2026-07-17T10:46:22.071Z info: MongoDB connected
+2026-07-17T10:46:22.119Z info: MongoDB connected
+2026-07-17T10:46:22.246Z info: MongoDB connected
+2026-07-17T10:46:22.990Z info: MongoDB connected
+2026-07-17T10:48:48.809Z info: MongoDB connected
+2026-07-17T10:48:48.809Z info: MongoDB connected
+2026-07-17T10:48:48.807Z info: MongoDB connected
+2026-07-17T10:48:48.808Z info: MongoDB connected
+2026-07-17T10:48:48.810Z info: MongoDB connected
+2026-07-17T10:48:48.810Z info: MongoDB connected
+2026-07-17T10:48:48.831Z info: Server running on port 8000
+2026-07-17T10:52:16.649Z info: MongoDB connected
+2026-07-17T10:52:16.669Z info: Server running on port 8000
+2026-07-17T10:52:17.018Z info: MongoDB connected
+2026-07-17T10:52:17.038Z info: MongoDB connected
+2026-07-17T10:52:16.963Z info: MongoDB connected
+2026-07-17T10:52:17.227Z info: MongoDB connected
+2026-07-17T10:52:17.525Z info: MongoDB connected
+2026-07-17T10:54:46.661Z info: MongoDB connected
+2026-07-17T10:54:46.688Z info: MongoDB connected
+2026-07-17T10:54:46.717Z info: Server running on port 8000
+2026-07-17T10:54:46.853Z info: MongoDB connected
+2026-07-17T10:54:47.054Z info: MongoDB connected
+2026-07-17T10:54:47.577Z info: MongoDB connected
+2026-07-17T10:54:47.725Z info: MongoDB connected
+2026-07-17T10:56:33.758Z info: MongoDB connected
+2026-07-17T10:56:33.752Z info: MongoDB connected
+2026-07-17T10:56:33.753Z info: MongoDB connected
+2026-07-17T10:56:33.751Z info: MongoDB connected
+2026-07-17T10:56:33.751Z info: MongoDB connected
+2026-07-17T10:56:33.774Z info: Server running on port 8000
+2026-07-17T10:56:34.694Z info: MongoDB connected
+2026-07-17T10:57:45.373Z info: MongoDB connected
+2026-07-17T10:57:45.397Z info: Server running on port 8000
+2026-07-17T10:57:47.460Z info: MongoDB connected
+2026-07-17T10:57:47.561Z info: MongoDB connected
+2026-07-17T10:57:47.596Z info: MongoDB connected
+2026-07-17T10:57:49.345Z info: MongoDB connected
+2026-07-17T10:58:33.064Z info: MongoDB connected
+2026-07-17T10:58:33.090Z info: Server running on port 8000
+2026-07-17T10:59:00.790Z info: MongoDB connected
+2026-07-17T10:59:00.806Z info: Server running on port 8000
+2026-07-17T10:59:01.192Z info: MongoDB connected
+2026-07-17T10:59:01.193Z info: MongoDB connected
+2026-07-17T10:59:01.268Z info: MongoDB connected
+2026-07-17T10:59:01.302Z info: MongoDB connected
+2026-07-17T10:59:01.371Z info: MongoDB connected
+2026-07-17T11:01:05.405Z info: MongoDB connected
+2026-07-17T11:01:05.430Z info: Server running on port 8000
+2026-07-17T11:02:49.753Z info: MongoDB connected
+2026-07-17T11:02:49.745Z info: MongoDB connected
+2026-07-17T11:02:50.118Z info: MongoDB connected
+2026-07-17T11:02:50.202Z info: MongoDB connected
+2026-07-17T11:02:50.656Z info: MongoDB connected
+2026-07-17T11:02:51.183Z info: MongoDB connected
+2026-07-17T11:07:42.721Z info: MongoDB connected
+2026-07-17T11:07:42.723Z info: MongoDB connected
+2026-07-17T11:07:42.733Z info: MongoDB connected
+2026-07-17T11:07:42.871Z info: MongoDB connected
+2026-07-17T11:07:43.555Z info: MongoDB connected
+2026-07-17T11:07:43.568Z info: MongoDB connected
+2026-07-17T11:09:39.311Z info: MongoDB connected
+2026-07-17T11:09:39.375Z info: MongoDB connected
+2026-07-17T11:09:39.377Z info: MongoDB connected
+2026-07-17T11:09:39.380Z info: MongoDB connected
+2026-07-17T11:09:39.456Z info: MongoDB connected
+2026-07-17T11:09:39.475Z info: MongoDB connected
+2026-07-17T11:10:29.624Z info: MongoDB connected
+2026-07-17T11:10:31.264Z info: MongoDB connected
+2026-07-17T11:10:31.390Z info: MongoDB connected
+2026-07-17T11:10:31.611Z info: MongoDB connected
+2026-07-17T11:10:32.447Z info: MongoDB connected
+2026-07-17T11:10:33.076Z info: MongoDB connected
+2026-07-17T11:11:07.391Z info: MongoDB connected
+2026-07-17T11:11:08.244Z info: MongoDB connected
+2026-07-17T11:11:08.632Z info: MongoDB connected
+2026-07-17T11:11:08.662Z info: MongoDB connected
+2026-07-17T11:11:09.314Z info: MongoDB connected
+2026-07-17T11:11:09.489Z info: MongoDB connected
+2026-07-17T11:12:43.158Z info: MongoDB connected
+2026-07-17T11:12:43.180Z info: Server running on port 8000
+2026-07-17T11:12:43.290Z info: MongoDB connected
+2026-07-17T11:12:43.498Z info: MongoDB connected
+2026-07-17T11:12:43.524Z info: MongoDB connected
+2026-07-17T11:12:44.164Z info: MongoDB connected
+2026-07-17T11:12:45.258Z info: MongoDB connected
+2026-07-17T11:12:48.272Z info: MongoDB connected
+2026-07-17T11:13:08.149Z info: MongoDB connected
+2026-07-17T11:13:08.153Z info: Server running on port 4000
+2026-07-17T11:32:46.384Z info: MongoDB connected
+2026-07-17T11:32:46.376Z info: MongoDB connected
+2026-07-17T11:32:46.375Z info: MongoDB connected
+2026-07-17T11:32:46.409Z info: MongoDB connected
+2026-07-17T11:32:46.401Z info: Server running on port 4000
+2026-07-17T11:32:46.703Z info: MongoDB connected
+2026-07-17T11:32:46.812Z info: MongoDB connected
+2026-07-17T11:33:36.543Z info: MongoDB connected
+2026-07-17T11:33:36.581Z info: Server running on port 4000
+2026-07-17T11:37:16.404Z info: MongoDB connected
+2026-07-17T11:37:17.070Z info: MongoDB connected
+2026-07-17T11:37:17.121Z info: MongoDB connected
+2026-07-17T11:37:17.307Z info: MongoDB connected
+2026-07-17T11:37:17.464Z info: MongoDB connected
+2026-07-17T11:37:18.242Z info: MongoDB connected
+2026-07-17T11:40:30.594Z info: MongoDB connected
+2026-07-17T11:40:31.865Z info: MongoDB connected
+2026-07-17T11:40:32.206Z info: MongoDB connected
+2026-07-17T11:40:32.291Z info: MongoDB connected
+2026-07-17T11:40:32.312Z info: MongoDB connected
+2026-07-17T11:40:32.583Z info: MongoDB connected
+2026-07-17T11:41:10.667Z info: MongoDB connected
+2026-07-17T11:41:11.469Z info: MongoDB connected
+2026-07-17T11:41:11.589Z info: MongoDB connected
+2026-07-17T11:41:11.726Z info: MongoDB connected
+2026-07-17T11:41:12.093Z info: MongoDB connected
+2026-07-17T11:41:12.461Z info: MongoDB connected
+2026-07-17T11:41:55.333Z info: MongoDB connected
+2026-07-17T11:41:59.497Z info: MongoDB connected
+2026-07-17T11:41:59.959Z info: MongoDB connected
+2026-07-17T11:42:01.186Z info: MongoDB connected
+2026-07-17T11:42:01.255Z info: MongoDB connected
+2026-07-17T11:42:01.465Z info: MongoDB connected
+2026-07-17T11:43:06.888Z info: MongoDB connected
+2026-07-17T11:43:07.256Z info: MongoDB connected
+2026-07-17T11:43:07.336Z info: MongoDB connected
+2026-07-17T11:43:07.356Z info: MongoDB connected
+2026-07-17T11:43:07.576Z info: MongoDB connected
+2026-07-17T11:43:08.218Z info: MongoDB connected
+2026-07-17T11:44:47.750Z info: MongoDB connected
+2026-07-17T11:44:47.877Z info: MongoDB connected
+2026-07-17T11:44:47.992Z info: MongoDB connected
+2026-07-17T11:44:48.121Z info: MongoDB connected
+2026-07-17T11:44:48.193Z info: MongoDB connected
+2026-07-17T11:44:48.340Z info: MongoDB connected
+2026-07-18T05:08:55.451Z info: MongoDB connected
+2026-07-18T05:10:08.143Z info: MongoDB connected
+2026-07-18T05:10:09.067Z info: Server running on port 6000
+2026-07-18T05:10:09.514Z info: MongoDB connected
+2026-07-18T05:10:09.543Z info: MongoDB connected
+2026-07-18T05:10:09.554Z info: MongoDB connected
+2026-07-18T05:10:09.624Z info: MongoDB connected
+2026-07-18T05:10:10.351Z info: MongoDB connected
+2026-07-18T05:10:12.755Z info: MongoDB connected
+2026-07-18T05:14:57.312Z info: MongoDB connected
+2026-07-18T05:14:57.324Z info: Server running on port 6000
+2026-07-18T05:14:59.137Z info: MongoDB connected
+2026-07-18T05:14:59.611Z info: MongoDB connected
+2026-07-18T05:14:59.633Z info: MongoDB connected
+2026-07-18T05:14:59.777Z info: MongoDB connected
+2026-07-18T05:14:59.937Z info: MongoDB connected
+2026-07-18T05:15:02.633Z info: MongoDB connected
+2026-07-18T05:15:30.958Z info: MongoDB connected
+2026-07-18T05:15:30.963Z info: Server running on port 8000
+2026-07-18T05:21:19.600Z info: ::1 - - [18/Jul/2026:05:21:19 +0000] "POST /auth/register HTTP/1.1" 201 727 "-" "PostmanRuntime/7.54.0"
+2026-07-18T05:29:37.869Z info: ::1 - - [18/Jul/2026:05:29:37 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-18T05:31:27.413Z info: ::1 - - [18/Jul/2026:05:31:27 +0000] "GET /api/addresses HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T05:32:33.965Z info: ::1 - - [18/Jul/2026:05:32:33 +0000] "POST /api/addresses HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T05:36:19.562Z info: ::1 - - [18/Jul/2026:05:36:19 +0000] "GET /api/addresses HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T05:53:49.736Z info: MongoDB connected
+2026-07-18T05:53:49.769Z info: Server running on port 8000
+2026-07-18T05:54:14.723Z info: MongoDB connected
+2026-07-18T05:54:14.738Z info: Server running on port 8000
+2026-07-18T05:54:17.765Z info: MongoDB connected
+2026-07-18T05:54:19.053Z info: MongoDB connected
+2026-07-18T05:54:19.090Z info: MongoDB connected
+2026-07-18T05:54:19.155Z info: MongoDB connected
+2026-07-18T05:54:19.717Z info: MongoDB connected
+2026-07-18T05:54:20.566Z info: MongoDB connected
+2026-07-18T05:58:11.047Z info: MongoDB connected
+2026-07-18T05:58:28.167Z info: MongoDB connected
+2026-07-18T05:58:28.173Z info: Server running on port 6000
+2026-07-18T05:59:13.390Z info: ::1 - - [18/Jul/2026:05:59:13 +0000] "POST /api/addresses HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-18T05:59:28.419Z info: ::1 - - [18/Jul/2026:05:59:28 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:00:00.870Z info: ::1 - - [18/Jul/2026:06:00:00 +0000] "POST /api/addresses HTTP/1.1" 201 430 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:00:27.186Z info: ::1 - - [18/Jul/2026:06:00:27 +0000] "GET /api/addresses HTTP/1.1" 200 432 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:08:54.822Z info: ::1 - - [18/Jul/2026:06:08:54 +0000] "GET /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:09:28.185Z info: ::1 - - [18/Jul/2026:06:09:28 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:21:24.965Z info: MongoDB connected
+2026-07-18T06:21:24.991Z info: Server running on port 6000
+2026-07-18T06:21:26.642Z info: MongoDB connected
+2026-07-18T06:21:27.688Z info: MongoDB connected
+2026-07-18T06:21:27.745Z info: MongoDB connected
+2026-07-18T06:21:27.837Z info: MongoDB connected
+2026-07-18T06:21:27.867Z info: MongoDB connected
+2026-07-18T06:21:28.488Z info: MongoDB connected
+2026-07-18T06:37:07.667Z info: MongoDB connected
+2026-07-18T06:40:52.822Z info: MongoDB connected
+2026-07-18T06:40:52.827Z info: Server running on port 6000
+2026-07-18T06:41:04.856Z info: ::1 - - [18/Jul/2026:06:41:04 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:43:12.636Z info: ::1 - - [18/Jul/2026:06:43:12 +0000] "POST /auth/register_admin HTTP/1.1" 500 78 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:44:41.424Z info: ::1 - - [18/Jul/2026:06:44:41 +0000] "POST /auth/register_admin HTTP/1.1" 500 78 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:45:11.555Z info: MongoDB connected
+2026-07-18T06:45:11.568Z info: Server running on port 6000
+2026-07-18T06:45:11.593Z info: MongoDB connected
+2026-07-18T06:45:11.791Z info: MongoDB connected
+2026-07-18T06:45:11.903Z info: MongoDB connected
+2026-07-18T06:45:12.029Z info: MongoDB connected
+2026-07-18T06:45:12.148Z info: MongoDB connected
+2026-07-18T06:45:15.558Z info: MongoDB connected
+2026-07-18T06:46:24.175Z info: MongoDB connected
+2026-07-18T06:46:24.179Z info: Server running on port 6000
+2026-07-18T06:46:40.254Z info: ::1 - - [18/Jul/2026:06:46:40 +0000] "POST /auth/register_admin HTTP/1.1" 201 747 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:51:31.853Z info: ::1 - - [18/Jul/2026:06:51:31 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:52:36.984Z info: ::1 - - [18/Jul/2026:06:52:36 +0000] "GET /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T06:58:01.109Z info: ::1 - - [18/Jul/2026:06:58:01 +0000] "POST /api/categories HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:18:10.523Z info: MongoDB connected
+2026-07-18T07:18:10.530Z info: Server running on port 6000
+2026-07-18T07:21:48.401Z info: ::1 - - [18/Jul/2026:07:21:48 +0000] "POST /api/categories HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:23:04.109Z info: ::1 - - [18/Jul/2026:07:23:04 +0000] "POST /admin/categories HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:23:11.967Z info: ::1 - - [18/Jul/2026:07:23:11 +0000] "POST /auth/login HTTP/1.1" 404 69 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:23:39.780Z info: ::1 - - [18/Jul/2026:07:23:39 +0000] "POST /admin/login HTTP/1.1" 404 70 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:23:47.947Z info: ::1 - - [18/Jul/2026:07:23:47 +0000] "POST /api/login HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:23:57.420Z info: ::1 - - [18/Jul/2026:07:23:57 +0000] "POST /auth/login HTTP/1.1" 404 69 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:24:08.396Z info: ::1 - - [18/Jul/2026:07:24:08 +0000] "POST /auth/register_admin HTTP/1.1" 404 78 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:25:17.600Z info: ::1 - - [18/Jul/2026:07:25:17 +0000] "POST /auth/login HTTP/1.1" 404 69 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:25:29.267Z info: Shutting down server due to SIGINT
+2026-07-18T07:25:38.538Z info: MongoDB connected
+2026-07-18T07:25:38.544Z info: Server running on port 6000
+2026-07-18T07:25:54.014Z info: ::1 - - [18/Jul/2026:07:25:54 +0000] "POST /auth/login HTTP/1.1" 404 69 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:26:37.889Z info: MongoDB connected
+2026-07-18T07:28:06.631Z info: MongoDB connected
+2026-07-18T07:28:06.637Z info: Server running on port 6000
+2026-07-18T07:28:19.267Z info: ::1 - - [18/Jul/2026:07:28:19 +0000] "POST /auth/login HTTP/1.1" 404 69 "-" "PostmanRuntime/7.54.0"
+2026-07-18T07:30:10.659Z info: MongoDB connected
+2026-07-18T07:30:10.670Z info: Server running on port 6000
+2026-07-18T07:50:06.730Z info: MongoDB connected
+2026-07-18T07:55:33.223Z info: MongoDB connected
+2026-07-18T07:55:33.233Z info: Server running on port 6000
+2026-07-18T07:55:50.886Z info: ::ffff:127.0.0.1 - - [18/Jul/2026:07:55:50 +0000] "GET /api HTTP/1.1" 200 28 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.8875"
+2026-07-18T07:55:58.529Z info: ::ffff:127.0.0.1 - - [18/Jul/2026:07:55:58 +0000] "POST /auth/login HTTP/1.1" 400 137 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.8875"
+2026-07-18T07:59:40.106Z info: MongoDB connected
+2026-07-18T08:01:33.449Z info: MongoDB connected
+2026-07-18T08:01:33.460Z info: Server running on port 6000
+2026-07-18T08:01:50.637Z info: ::1 - - [18/Jul/2026:08:01:50 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-18T08:41:31.637Z info: ::1 - - [18/Jul/2026:08:41:31 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-18T08:42:00.661Z info: ::1 - - [18/Jul/2026:08:42:00 +0000] "POST /admin/categories HTTP/1.1" 500 98 "-" "PostmanRuntime/7.54.0"
+2026-07-18T08:43:22.224Z info: MongoDB connected
+2026-07-18T08:43:22.242Z info: Server running on port 6000
+2026-07-18T08:43:45.968Z info: MongoDB connected
+2026-07-18T08:43:45.973Z info: Server running on port 6000
+2026-07-18T08:43:56.969Z info: ::1 - - [18/Jul/2026:08:43:56 +0000] "POST /admin/categories HTTP/1.1" 400 103 "-" "PostmanRuntime/7.54.0"
+2026-07-18T08:48:26.817Z info: ::1 - - [18/Jul/2026:08:48:26 +0000] "POST /api/categories HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T08:48:34.612Z info: ::1 - - [18/Jul/2026:08:48:34 +0000] "POST /admin/categories HTTP/1.1" 400 103 "-" "PostmanRuntime/7.54.0"
+2026-07-18T08:52:58.203Z info: ::1 - - [18/Jul/2026:08:52:58 +0000] "POST /admin/categories HTTP/1.1" 400 103 "-" "PostmanRuntime/7.54.0"
+2026-07-18T08:55:03.687Z info: ::1 - - [18/Jul/2026:08:55:03 +0000] "GET /admin/categories%20 HTTP/1.1" 404 78 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:00:22.089Z info: Shutting down server due to SIGINT
+2026-07-18T09:00:23.325Z info: MongoDB connected
+2026-07-18T09:00:23.338Z info: Server running on port 6000
+2026-07-18T09:00:30.807Z info: MongoDB connected
+2026-07-18T09:00:30.814Z info: Server running on port 6000
+2026-07-18T09:00:53.615Z info: ::1 - - [18/Jul/2026:09:00:53 +0000] "POST /admin/categories HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:01:09.618Z info: ::1 - - [18/Jul/2026:09:01:09 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:01:49.061Z info: ::1 - - [18/Jul/2026:09:01:49 +0000] "POST /admin/categories HTTP/1.1" 400 103 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:06:32.695Z info: ::1 - - [18/Jul/2026:09:06:32 +0000] "POST /admin/categories HTTP/1.1" 201 274 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:06:55.996Z info: ::1 - - [18/Jul/2026:09:06:55 +0000] "GET /admin/categories%20 HTTP/1.1" 404 78 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:07:43.130Z info: ::1 - - [18/Jul/2026:09:07:43 +0000] "GET /admin/categories HTTP/1.1" 404 75 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:11:22.630Z info: MongoDB connected
+2026-07-18T09:11:22.637Z info: Server running on port 6000
+2026-07-18T09:12:37.816Z info: ::1 - - [18/Jul/2026:09:12:37 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:13:02.313Z info: MongoDB connected
+2026-07-18T09:13:02.338Z info: Server running on port 6000
+2026-07-18T09:14:22.134Z info: ::1 - - [18/Jul/2026:09:14:22 +0000] "GET /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:14:53.700Z info: ::1 - - [18/Jul/2026:09:14:53 +0000] "GET /admin/categories%20 HTTP/1.1" 404 78 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:15:16.402Z info: Shutting down server due to SIGINT
+2026-07-18T09:15:24.613Z info: MongoDB connected
+2026-07-18T09:15:24.618Z info: Server running on port 6000
+2026-07-18T09:15:30.160Z info: ::1 - - [18/Jul/2026:09:15:30 +0000] "GET /admin/categories%20 HTTP/1.1" 404 78 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:15:52.291Z info: ::1 - - [18/Jul/2026:09:15:52 +0000] "GET /admin/categories HTTP/1.1" 500 83 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:16:26.062Z info: Shutting down server due to SIGINT
+2026-07-18T09:16:38.839Z info: MongoDB connected
+2026-07-18T09:16:38.844Z info: Server running on port 6000
+2026-07-18T09:18:09.707Z info: ::1 - - [18/Jul/2026:09:18:09 +0000] "GET /admin/categories%20 HTTP/1.1" 404 78 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:19:38.067Z info: ::1 - - [18/Jul/2026:09:19:38 +0000] "GET /admin/categories HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:19:44.918Z info: ::1 - - [18/Jul/2026:09:19:44 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:20:30.012Z info: ::1 - - [18/Jul/2026:09:20:30 +0000] "GET /admin/categories HTTP/1.1" 200 276 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:20:51.946Z info: ::1 - - [18/Jul/2026:09:20:51 +0000] "POST /admin/categories HTTP/1.1" 201 274 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:20:58.538Z info: ::1 - - [18/Jul/2026:09:20:58 +0000] "GET /admin/categories HTTP/1.1" 200 527 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:21:52.220Z info: ::1 - - [18/Jul/2026:09:21:52 +0000] "GET /admin/categories HTTP/1.1" 500 77 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:22:00.717Z info: ::1 - - [18/Jul/2026:09:22:00 +0000] "GET /api/categories HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:22:23.533Z info: ::1 - - [18/Jul/2026:09:22:23 +0000] "POST /admin/categories HTTP/1.1" 500 77 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:22:42.368Z info: MongoDB connected
+2026-07-18T09:22:42.375Z info: Server running on port 6000
+2026-07-18T09:28:20.817Z info: MongoDB connected
+2026-07-18T09:28:20.823Z info: Server running on port 6000
+2026-07-18T09:28:41.282Z info: ::1 - - [18/Jul/2026:09:28:41 +0000] "GET /api/categories HTTP/1.1" 200 527 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:31:40.711Z info: ::1 - - [18/Jul/2026:09:31:40 +0000] "POST /api/products HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:31:52.450Z info: ::1 - - [18/Jul/2026:09:31:52 +0000] "POST /admin/products HTTP/1.1" 201 253 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:33:49.181Z info: ::1 - - [18/Jul/2026:09:33:49 +0000] "GET /admin/products HTTP/1.1" 404 73 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:34:03.879Z info: ::1 - - [18/Jul/2026:09:34:03 +0000] "GET /api/products HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:38:59.166Z info: ::1 - - [18/Jul/2026:09:38:59 +0000] "POST /admin/products HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:39:07.850Z info: ::1 - - [18/Jul/2026:09:39:07 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:39:33.216Z info: ::1 - - [18/Jul/2026:09:39:33 +0000] "POST /admin/products HTTP/1.1" 201 260 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:40:26.985Z info: MongoDB connected
+2026-07-18T09:40:26.993Z info: Server running on port 6000
+2026-07-18T09:41:09.197Z info: MongoDB connected
+2026-07-18T09:41:09.204Z info: Server running on port 6000
+2026-07-18T09:42:46.898Z info: ::1 - - [18/Jul/2026:09:42:46 +0000] "GET /api/products HTTP/1.1" 200 492 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:44:17.793Z info: ::1 - - [18/Jul/2026:09:44:17 +0000] "GET /admin/products HTTP/1.1" 200 492 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:44:36.342Z info: ::1 - - [18/Jul/2026:09:44:36 +0000] "GET /admin/products HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:44:46.114Z info: ::1 - - [18/Jul/2026:09:44:46 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:45:07.466Z info: ::1 - - [18/Jul/2026:09:45:07 +0000] "GET /admin/products HTTP/1.1" 500 77 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:45:30.170Z info: ::1 - - [18/Jul/2026:09:45:30 +0000] "GET /admin/products HTTP/1.1" 200 492 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:45:51.608Z info: ::1 - - [18/Jul/2026:09:45:51 +0000] "GET /api/products HTTP/1.1" 200 492 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:46:04.371Z info: MongoDB connected
+2026-07-18T09:46:04.382Z info: Server running on port 6000
+2026-07-18T09:48:45.526Z info: ::1 - - [18/Jul/2026:09:48:45 +0000] "POST /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:49:10.397Z info: ::1 - - [18/Jul/2026:09:49:10 +0000] "POST /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:50:07.508Z info: ::1 - - [18/Jul/2026:09:50:07 +0000] "PATCH /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 200 269 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:50:45.717Z info: ::1 - - [18/Jul/2026:09:50:45 +0000] "PATCH /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 200 262 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:51:06.048Z info: ::1 - - [18/Jul/2026:09:51:06 +0000] "PATCH /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 200 262 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:51:15.971Z info: ::1 - - [18/Jul/2026:09:51:15 +0000] "PATCH /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 200 263 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:54:47.314Z info: MongoDB connected
+2026-07-18T09:54:47.329Z info: Server running on port 6000
+2026-07-18T09:55:32.443Z info: MongoDB connected
+2026-07-18T09:55:32.448Z info: Server running on port 6000
+2026-07-18T09:56:42.103Z info: ::1 - - [18/Jul/2026:09:56:42 +0000] "PATCH /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 500 77 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:56:58.655Z info: ::1 - - [18/Jul/2026:09:56:58 +0000] "PATCH /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:57:08.036Z info: ::1 - - [18/Jul/2026:09:57:08 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:57:24.234Z info: ::1 - - [18/Jul/2026:09:57:24 +0000] "PATCH /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 200 301 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:57:52.773Z info: ::1 - - [18/Jul/2026:09:57:52 +0000] "GET /api/products HTTP/1.1" 200 533 "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:58:01.136Z info: ::1 - - [18/Jul/2026:09:58:01 +0000] "DELETE /api/products/6a5b49d53c5680409c23ae59 HTTP/1.1" 204 - "-" "PostmanRuntime/7.54.0"
+2026-07-18T09:58:12.126Z info: ::1 - - [18/Jul/2026:09:58:12 +0000] "GET /api/products HTTP/1.1" 200 255 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:10:12.254Z info: ::1 - - [18/Jul/2026:10:10:12 +0000] "POST /api/orders HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:10:38.103Z info: ::1 - - [18/Jul/2026:10:10:38 +0000] "POST /api/orders HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:11:13.470Z info: ::1 - - [18/Jul/2026:10:11:13 +0000] "POST /api/orders HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:12:12.415Z info: MongoDB connected
+2026-07-18T10:12:26.587Z info: MongoDB connected
+2026-07-18T10:12:26.601Z info: Server running on port 6000
+2026-07-18T10:12:39.065Z info: ::1 - - [18/Jul/2026:10:12:39 +0000] "POST /api/orders HTTP/1.1" 400 55 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:15:26.233Z info: ::1 - - [18/Jul/2026:10:15:26 +0000] "POST /api/carts/items HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:16:33.476Z info: ::1 - - [18/Jul/2026:10:16:33 +0000] "POST /api/carts/items HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:17:39.592Z info: MongoDB connected
+2026-07-18T10:17:39.609Z info: Server running on port 6000
+2026-07-18T10:17:46.185Z info: ::1 - - [18/Jul/2026:10:17:46 +0000] "POST /api/carts/items HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:23:31.604Z info: MongoDB connected
+2026-07-18T10:23:31.618Z info: Server running on port 6000
+2026-07-18T10:23:45.067Z info: ::1 - - [18/Jul/2026:10:23:45 +0000] "POST /api/carts/items HTTP/1.1" 400 119 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:24:52.745Z info: MongoDB connected
+2026-07-18T10:24:52.750Z info: Server running on port 6000
+2026-07-18T10:25:34.762Z info: ::1 - - [18/Jul/2026:10:25:34 +0000] "POST /api/carts/items HTTP/1.1" 400 119 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:25:53.186Z info: ::1 - - [18/Jul/2026:10:25:53 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:26:11.045Z info: ::1 - - [18/Jul/2026:10:26:11 +0000] "POST /api/carts/items HTTP/1.1" 400 119 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:29:32.021Z info: MongoDB connected
+2026-07-18T10:29:32.052Z info: Server running on port 6000
+2026-07-18T10:30:15.045Z info: ::1 - - [18/Jul/2026:10:30:15 +0000] "POST /api/carts/items HTTP/1.1" 500 67 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:34:16.826Z info: MongoDB connected
+2026-07-18T10:34:16.841Z info: Server running on port 6000
+2026-07-18T10:37:20.334Z info: MongoDB connected
+2026-07-18T10:37:20.338Z info: Server running on port 6000
+2026-07-18T10:38:39.567Z info: MongoDB connected
+2026-07-18T10:38:39.574Z info: Server running on port 6000
+2026-07-18T10:41:44.434Z info: ::1 - - [18/Jul/2026:10:41:44 +0000] "POST /api/carts/items HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:43:45.915Z info: Shutting down server due to SIGINT
+2026-07-18T10:43:55.655Z info: MongoDB connected
+2026-07-18T10:43:55.660Z info: Server running on port 6000
+2026-07-18T10:44:15.651Z info: ::1 - - [18/Jul/2026:10:44:15 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:44:37.051Z info: ::1 - - [18/Jul/2026:10:44:37 +0000] "POST /api/carts/items HTTP/1.1" 500 60 "-" "PostmanRuntime/7.54.0"
+2026-07-18T10:52:47.870Z info: MongoDB connected
+2026-07-18T10:52:47.883Z info: Server running on port 6000
+2026-07-18T10:53:56.627Z info: ::1 - - [18/Jul/2026:10:53:56 +0000] "POST /api/carts/items HTTP/1.1" 201 292 "-" "PostmanRuntime/7.54.0"
+2026-07-18T11:09:19.109Z info: MongoDB connected
+2026-07-18T11:40:54.193Z info: MongoDB connected
+2026-07-18T11:40:54.208Z info: Server running on port 6000
+2026-07-18T11:41:56.328Z info: MongoDB connected
+2026-07-18T11:41:56.334Z info: Server running on port 6000
+2026-07-18T11:54:29.871Z info: MongoDB connected
+2026-07-18T11:54:29.893Z info: Server running on port 6000
+2026-07-18T11:57:05.788Z info: ::1 - - [18/Jul/2026:11:57:05 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-18T11:57:25.627Z info: ::1 - - [18/Jul/2026:11:57:25 +0000] "POST /api/carts/items HTTP/1.1" 201 292 "-" "PostmanRuntime/7.54.0"
+2026-07-18T11:59:11.712Z info: MongoDB connected
+2026-07-18T11:59:11.727Z info: Server running on port 6000
+2026-07-18T12:00:59.832Z info: MongoDB connected
+2026-07-18T12:00:59.837Z info: Server running on port 6000
+2026-07-18T12:02:38.572Z info: ::1 - - [18/Jul/2026:12:02:38 +0000] "POST /api/carts/items HTTP/1.1" 201 292 "-" "PostmanRuntime/7.54.0"
+2026-07-18T12:03:11.192Z info: MongoDB connected
+2026-07-18T12:03:11.207Z info: Server running on port 6000
+2026-07-18T12:03:54.935Z info: MongoDB connected
+2026-07-18T12:03:54.941Z info: Server running on port 6000
+2026-07-18T12:04:24.547Z info: ::1 - - [18/Jul/2026:12:04:24 +0000] "POST /api/carts/items HTTP/1.1" 201 292 "-" "PostmanRuntime/7.54.0"
+2026-07-18T12:05:10.519Z info: ::1 - - [18/Jul/2026:12:05:10 +0000] "POST /admin/products HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-18T12:05:28.121Z info: ::1 - - [18/Jul/2026:12:05:28 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-18T12:05:47.296Z info: ::1 - - [18/Jul/2026:12:05:47 +0000] "POST /admin/products HTTP/1.1" 201 285 "-" "PostmanRuntime/7.54.0"
+2026-07-18T12:06:22.914Z info: ::1 - - [18/Jul/2026:12:06:22 +0000] "POST /api/carts/items HTTP/1.1" 201 307 "-" "PostmanRuntime/7.54.0"
+2026-07-18T12:10:37.010Z info: ::1 - - [18/Jul/2026:12:10:37 +0000] "GET /api/carts/items HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-18T12:11:00.685Z info: ::1 - - [18/Jul/2026:12:11:00 +0000] "GET /api/carts HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-19T15:31:21.804Z info: MongoDB connected
+2026-07-19T15:39:31.504Z info: MongoDB connected
+2026-07-19T15:39:31.524Z info: Server running on port 6000
+2026-07-19T15:56:27.027Z info: MongoDB connected
+2026-07-20T05:35:26.650Z info: ::1 - - [20/Jul/2026:05:35:26 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-20T05:37:11.039Z info: ::1 - - [20/Jul/2026:05:37:11 +0000] "POST /api/orders HTTP/1.1" 400 97 "-" "PostmanRuntime/7.54.0"
+2026-07-20T05:39:58.200Z info: ::1 - - [20/Jul/2026:05:39:58 +0000] "POST /api/carts/items HTTP/1.1" 201 307 "-" "PostmanRuntime/7.54.0"
+2026-07-20T05:48:23.952Z info: ::1 - - [20/Jul/2026:05:48:23 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-20T05:53:00.468Z info: ::1 - - [20/Jul/2026:05:53:00 +0000] "POST //admin/products/6a5b6c1b75fad683c3396d54/variants HTTP/1.1" 404 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T05:53:22.176Z info: ::1 - - [20/Jul/2026:05:53:22 +0000] "POST /admin/products/6a5b6c1b75fad683c3396d54/variants HTTP/1.1" 201 345 "-" "PostmanRuntime/7.54.0"
+2026-07-20T05:59:42.863Z info: ::1 - - [20/Jul/2026:05:59:42 +0000] "DELETE /api/carts HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T05:59:49.528Z info: ::1 - - [20/Jul/2026:05:59:49 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:00:33.476Z info: ::1 - - [20/Jul/2026:06:00:33 +0000] "DELETE /api/carts HTTP/1.1" 204 - "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:01:52.647Z info: ::1 - - [20/Jul/2026:06:01:52 +0000] "POST /api/carts/items HTTP/1.1" 201 307 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:02:04.513Z info: ::1 - - [20/Jul/2026:06:02:04 +0000] "POST /api/orders HTTP/1.1" 400 97 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:09:13.297Z info: ::1 - - [20/Jul/2026:06:09:13 +0000] "POST /admin/products HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:09:22.501Z info: ::1 - - [20/Jul/2026:06:09:22 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:09:37.697Z info: ::1 - - [20/Jul/2026:06:09:37 +0000] "POST /admin/products HTTP/1.1" 201 283 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:12:40.912Z info: ::1 - - [20/Jul/2026:06:12:40 +0000] "POST /admin/products/6a5dbba17fdebb95f3f6ca11/variants HTTP/1.1" 201 346 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:13:34.892Z info: ::1 - - [20/Jul/2026:06:13:34 +0000] "POST /api/carts/items HTTP/1.1" 201 297 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:14:26.609Z info: ::1 - - [20/Jul/2026:06:14:26 +0000] "POST /api/orders HTTP/1.1" 400 97 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:15:13.167Z info: ::1 - - [20/Jul/2026:06:15:13 +0000] "GET /api/carts HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:15:40.771Z info: ::1 - - [20/Jul/2026:06:15:40 +0000] "GET /api/carts HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:15:56.982Z info: ::1 - - [20/Jul/2026:06:15:56 +0000] "GET /api/carts HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:16:10.005Z info: ::1 - - [20/Jul/2026:06:16:10 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:16:24.390Z info: ::1 - - [20/Jul/2026:06:16:24 +0000] "GET /api/carts HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:16:48.738Z info: ::1 - - [20/Jul/2026:06:16:48 +0000] "DELETE /api/carts HTTP/1.1" 204 - "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:17:20.399Z info: ::1 - - [20/Jul/2026:06:17:20 +0000] "POST /api/carts/items HTTP/1.1" 201 297 "-" "PostmanRuntime/7.54.0"
+2026-07-20T06:17:53.311Z info: ::1 - - [20/Jul/2026:06:17:53 +0000] "POST /api/orders HTTP/1.1" 500 112 "-" "PostmanRuntime/7.54.0"
+2026-07-20T07:02:42.543Z info: Shutting down server due to SIGINT
+2026-07-20T07:02:42.593Z info: HTTP server closed
+2026-07-20T07:02:42.778Z info: MongoDB disconnected
+2026-07-20T07:03:49.593Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND 361e5896474f
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"361e5896474f:27017":{"address":"361e5896474f:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":252442465,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000001"},"maxSetVersion":1,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"361e5896474f:27017":{"address":"361e5896474f:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":252442465,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000001"},"maxSetVersion":1,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:11:51.922Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND mongo
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":252924748,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":252924748,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:13:17.736Z error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27018
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":253013047,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":253013047,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:14:44.151Z error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27018
+    at _handleConnectionErrors (/app/node_modules/mongoose/lib/connection.js:1169:11)
+    at NativeConnection.openUri (/app/node_modules/mongoose/lib/connection.js:1100:11)
+    at async connectMongoDB (/app/src/database/mongodb/connection.ts:11:5)
+    at async startServer (/app/server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":48912558,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":48912558,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:15:42.559Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND edbd5335b5d6
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"edbd5335b5d6:27017":{"address":"edbd5335b5d6:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":253155548,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000001"},"maxSetVersion":1,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"edbd5335b5d6:27017":{"address":"edbd5335b5d6:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":253155548,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000001"},"maxSetVersion":1,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:19:07.742Z error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"127.0.0.1:27017":{"address":"127.0.0.1:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":253362827,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"127.0.0.1:27017":{"address":"127.0.0.1:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":253362827,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:22:00.237Z error: MongooseServerSelectionError: Server selection timed out after 30000 ms
+    at _handleConnectionErrors (/app/node_modules/mongoose/lib/connection.js:1169:11)
+    at NativeConnection.openUri (/app/node_modules/mongoose/lib/connection.js:1100:11)
+    at async connectMongoDB (/app/src/database/mongodb/connection.ts:11:5)
+    at async startServer (/app/server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"RSGhost","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":21,"roundTripTime":7,"minRoundTripTime":3,"lastUpdateTime":49339612,"lastWriteDate":0,"error":null,"topologyVersion":{"processId":{"$oid":"6a5dcc662e6e4430c076b55e"},"counter":1},"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":30,"maxMessageSizeBytes":48000000,"maxWriteBatchSize":100000,"maxBsonObjectSize":16777216,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"RSGhost","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":21,"roundTripTime":7,"minRoundTripTime":3,"lastUpdateTime":49339612,"lastWriteDate":0,"error":null,"topologyVersion":{"processId":{"$oid":"6a5dcc662e6e4430c076b55e"},"counter":1},"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":30,"maxMessageSizeBytes":48000000,"maxWriteBatchSize":100000,"maxBsonObjectSize":16777216,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:22:09.907Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND mongo
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":253542779,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":253542779,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:26:42.920Z info: MongoDB connected
+2026-07-20T07:26:42.955Z info: Server running on port 6000
+2026-07-20T07:30:49.117Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND mongo
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":254061944,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":254061944,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:31:50.558Z error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"127.0.0.1:27017":{"address":"127.0.0.1:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":254125364,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"127.0.0.1:27017":{"address":"127.0.0.1:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":254125364,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:38:48.319Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND mongo
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":254541165,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":254541165,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T07:42:16.904Z info: Shutting down server due to SIGTERM
+2026-07-20T07:43:57.253Z info: MongoDB connected
+2026-07-20T07:43:57.261Z info: Server running on port 6000
+2026-07-20T08:44:26.022Z info: Shutting down server due to SIGTERM
+2026-07-20T08:45:33.070Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND mongo
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":258547520,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":258547520,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T08:48:52.052Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND mongo
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":258746496,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":258746496,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T08:50:42.797Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND mongo
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:11:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":258857194,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":258857194,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T08:51:41.554Z error: MongooseServerSelectionError: getaddrinfo ENOTFOUND mongo
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:16:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":258915961,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":258915961,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T09:07:22.127Z error: MongooseServerSelectionError: Server selection timed out after 5000 ms
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:18:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":259852664,"lastWriteDate":0,"error":null,"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":259852664,"lastWriteDate":0,"error":null,"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T09:11:17.487Z error: MongooseServerSelectionError: Server selection timed out after 5000 ms
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:18:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":260087964,"lastWriteDate":0,"error":null,"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"ReplicaSetNoPrimary","servers":{"mongo:27017":{"address":"mongo:27017","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":260087964,"lastWriteDate":0,"error":null,"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":"rs0","maxElectionId":{"$oid":"7fffffff0000000000000003"},"maxSetVersion":42000,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T09:11:56.140Z info: MongoDB connected
+2026-07-20T09:11:56.147Z info: Server running on port 6000
+2026-07-20T09:14:04.930Z info: ::1 - - [20/Jul/2026:09:14:04 +0000] "POST /auth/login HTTP/1.1" 500 67 "-" "PostmanRuntime/7.54.0"
+2026-07-20T09:14:18.625Z info: ::1 - - [20/Jul/2026:09:14:18 +0000] "POST /auth/login HTTP/1.1" 500 67 "-" "PostmanRuntime/7.54.0"
+2026-07-20T09:14:42.613Z info: ::1 - - [20/Jul/2026:09:14:42 +0000] "POST /auth/login HTTP/1.1" 500 67 "-" "PostmanRuntime/7.54.0"
+2026-07-20T09:16:10.477Z info: Shutting down server due to SIGINT
+2026-07-20T09:23:33.841Z info: MongoDB connected
+2026-07-20T09:23:33.860Z info: Server running on port 6000
+2026-07-20T09:58:32.506Z info: MongoDB connected
+2026-07-20T09:58:32.514Z info: Server running on port 6000
+2026-07-20T09:58:34.699Z error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27018
+    at _handleConnectionErrors (/app/node_modules/mongoose/lib/connection.js:1169:11)
+    at NativeConnection.openUri (/app/node_modules/mongoose/lib/connection.js:1100:11)
+    at async connectMongoDB (/app/src/database/mongodb/connection.ts:18:5)
+    at async startServer (/app/server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"Single","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":56617714,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":null,"maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"Single","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":56617714,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":null,"maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-20T09:59:08.017Z info: ::1 - - [20/Jul/2026:09:59:08 +0000] "POST /auth/register HTTP/1.1" 500 84 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:05:28.649Z info: Shutting down server due to SIGINT
+2026-07-20T10:07:07.114Z info: MongoDB connected
+2026-07-20T10:07:07.122Z info: Server running on port 6000
+2026-07-20T10:07:25.106Z info: ::1 - - [20/Jul/2026:10:07:25 +0000] "POST /auth/register HTTP/1.1" 201 727 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:08:36.064Z info: ::1 - - [20/Jul/2026:10:08:36 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:08:54.794Z info: ::1 - - [20/Jul/2026:10:08:54 +0000] "POST /auth/login HTTP/1.1" 500 67 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:09:03.829Z info: ::1 - - [20/Jul/2026:10:09:03 +0000] "POST /auth/register_admin HTTP/1.1" 201 747 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:09:09.814Z info: ::1 - - [20/Jul/2026:10:09:09 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:09:27.395Z info: ::1 - - [20/Jul/2026:10:09:27 +0000] "POST /api/addresses HTTP/1.1" 201 430 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:09:41.414Z info: ::1 - - [20/Jul/2026:10:09:41 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:09:55.239Z info: ::1 - - [20/Jul/2026:10:09:55 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:10:35.587Z info: ::1 - - [20/Jul/2026:10:10:35 +0000] "POST /admin/categories%20 HTTP/1.1" 404 78 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:10:49.229Z info: ::1 - - [20/Jul/2026:10:10:49 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:14:43.924Z info: ::1 - - [20/Jul/2026:10:14:43 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:14:57.956Z info: ::1 - - [20/Jul/2026:10:14:57 +0000] "GET /api/categories HTTP/1.1" 200 26 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:15:19.816Z info: ::1 - - [20/Jul/2026:10:15:19 +0000] "POST /admin/products HTTP/1.1" 201 283 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:15:40.092Z info: ::1 - - [20/Jul/2026:10:15:40 +0000] "POST /admin/products HTTP/1.1" 500 69 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:15:47.152Z info: ::1 - - [20/Jul/2026:10:15:47 +0000] "GET /api/products HTTP/1.1" 200 285 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:17:01.757Z info: ::1 - - [20/Jul/2026:10:17:01 +0000] "POST /admin/categories HTTP/1.1" 500 77 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:17:56.182Z info: ::1 - - [20/Jul/2026:10:17:56 +0000] "POST /admin/products/6a5dbba17fdebb95f3f6ca11/variants HTTP/1.1" 500 59 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:18:07.337Z info: ::1 - - [20/Jul/2026:10:18:07 +0000] "POST /admin/products/6a5df53754fb2f48d420bfaa/variants HTTP/1.1" 201 346 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:18:15.915Z info: ::1 - - [20/Jul/2026:10:18:15 +0000] "POST /api/carts/items HTTP/1.1" 201 297 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:20:07.597Z info: ::1 - - [20/Jul/2026:10:20:07 +0000] "POST /api/orders HTTP/1.1" 201 395 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:23:37.538Z info: ::1 - - [20/Jul/2026:10:23:37 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca HTTP/1.1" 500 83 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:23:46.644Z info: ::1 - - [20/Jul/2026:10:23:46 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca HTTP/1.1" 200 395 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:24:00.107Z info: ::1 - - [20/Jul/2026:10:24:00 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:24:06.358Z info: ::1 - - [20/Jul/2026:10:24:06 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:24:22.709Z info: ::1 - - [20/Jul/2026:10:24:22 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca HTTP/1.1" 200 395 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:24:58.895Z info: ::1 - - [20/Jul/2026:10:24:58 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca/status HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:25:15.454Z info: ::1 - - [20/Jul/2026:10:25:15 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca/status HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:27:27.258Z info: ::1 - - [20/Jul/2026:10:27:27 +0000] "PATCH /api/orders/6a5df65754fb2f48d420bfca/status HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:28:31.292Z info: ::1 - - [20/Jul/2026:10:28:31 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:29:13.761Z info: ::1 - - [20/Jul/2026:10:29:13 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:29:41.935Z info: ::1 - - [20/Jul/2026:10:29:41 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:30:06.920Z info: ::1 - - [20/Jul/2026:10:30:06 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca HTTP/1.1" 200 395 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:31:22.790Z info: ::1 - - [20/Jul/2026:10:31:22 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca/status HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:31:47.846Z info: ::1 - - [20/Jul/2026:10:31:47 +0000] "PATCH /api/orders/6a5df65754fb2f48d420bfca/status HTTP/1.1" 200 397 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:32:00.678Z info: ::1 - - [20/Jul/2026:10:32:00 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca HTTP/1.1" 200 397 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:34:07.983Z info: ::1 - - [20/Jul/2026:10:34:07 +0000] "GET /api/geotrixBills HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:34:13.948Z info: ::1 - - [20/Jul/2026:10:34:13 +0000] "POST /api/geotrixBills HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:36:29.809Z info: MongoDB connected
+2026-07-20T10:36:29.823Z info: Server running on port 6000
+2026-07-20T10:36:40.228Z info: MongoDB connected
+2026-07-20T10:36:40.234Z info: Server running on port 6000
+2026-07-20T10:50:33.916Z info: ::1 - - [20/Jul/2026:10:50:33 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:50:59.505Z info: ::1 - - [20/Jul/2026:10:50:59 +0000] "POST /api/geotrixBills HTTP/1.1" 201 417 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:53:22.506Z info: MongoDB connected
+2026-07-20T10:56:57.360Z info: ::1 - - [20/Jul/2026:10:56:57 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:57:12.960Z info: ::1 - - [20/Jul/2026:10:57:12 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:57:19.999Z info: ::1 - - [20/Jul/2026:10:57:19 +0000] "GET /api/categories HTTP/1.1" 200 26 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:57:58.745Z info: ::1 - - [20/Jul/2026:10:57:58 +0000] "POST /admin/categories%20 HTTP/1.1" 404 78 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:58:11.303Z info: ::1 - - [20/Jul/2026:10:58:11 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:58:17.636Z info: ::1 - - [20/Jul/2026:10:58:17 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:58:31.153Z info: ::1 - - [20/Jul/2026:10:58:31 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-20T10:58:47.708Z info: ::1 - - [20/Jul/2026:10:58:47 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:02:13.774Z info: ::1 - - [20/Jul/2026:11:02:13 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:10:32.173Z info: MongoDB connected
+2026-07-20T11:10:32.302Z info: Server running on port 6000
+2026-07-20T11:10:33.232Z info: ::1 - - [20/Jul/2026:11:10:33 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:10:44.711Z info: ::1 - - [20/Jul/2026:11:10:44 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:12:13.597Z info: ::1 - - [20/Jul/2026:11:12:13 +0000] "GET /api/users/me HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:12:38.735Z info: ::1 - - [20/Jul/2026:11:12:38 +0000] "GET /api/users/me HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:12:52.424Z info: ::1 - - [20/Jul/2026:11:12:52 +0000] "GET /api/users/me HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:12:57.458Z info: ::1 - - [20/Jul/2026:11:12:57 +0000] "GET /api/users/me HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:13:30.329Z info: ::1 - - [20/Jul/2026:11:13:30 +0000] "GET /api/users/me HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:15:44.833Z info: ::1 - - [20/Jul/2026:11:15:44 +0000] "GET /api/users/me HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:16:08.912Z info: ::1 - - [20/Jul/2026:11:16:08 +0000] "GET /api/users/me HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:24:10.283Z info: ::1 - - [20/Jul/2026:11:24:10 +0000] "GET /api/users/profile HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:24:18.956Z info: ::1 - - [20/Jul/2026:11:24:18 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:24:45.802Z info: ::1 - - [20/Jul/2026:11:24:45 +0000] "GET /api/users/profile HTTP/1.1" 200 306 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:25:16.465Z info: ::1 - - [20/Jul/2026:11:25:16 +0000] "GET /api/users/profile HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:25:25.641Z info: ::1 - - [20/Jul/2026:11:25:25 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:25:42.483Z info: ::1 - - [20/Jul/2026:11:25:42 +0000] "GET /api/users/profile HTTP/1.1" 200 292 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:27:10.353Z info: MongoDB connected
+2026-07-20T11:31:21.329Z info: MongoDB connected
+2026-07-20T11:31:21.359Z info: Server running on port 6000
+2026-07-20T11:31:40.246Z info: MongoDB connected
+2026-07-20T11:31:40.257Z info: Server running on port 6000
+2026-07-20T11:34:16.387Z info: MongoDB connected
+2026-07-20T11:34:16.441Z info: Server running on port 6000
+2026-07-20T11:34:16.472Z info: MongoDB connected
+2026-07-20T11:46:02.121Z info: ::1 - - [20/Jul/2026:11:46:02 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:47:03.951Z info: ::1 - - [20/Jul/2026:11:47:03 +0000] "GET /api/users/customers HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:48:06.580Z info: ::1 - - [20/Jul/2026:11:48:06 +0000] "GET /api/users/customers HTTP/1.1" 400 108 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:49:50.072Z info: MongoDB connected
+2026-07-20T11:49:50.080Z info: Server running on port 6000
+2026-07-20T11:49:54.230Z info: ::1 - - [20/Jul/2026:11:49:54 +0000] "GET /api/users/customers HTTP/1.1" 200 294 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:50:31.535Z info: MongoDB connected
+2026-07-20T11:50:31.540Z info: Server running on port 6000
+2026-07-20T11:53:16.393Z info: ::1 - - [20/Jul/2026:11:53:16 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T11:58:00.738Z info: MongoDB connected
+2026-07-20T11:58:00.746Z info: Server running on port 6000
+2026-07-20T11:59:39.506Z info: ::1 - - [20/Jul/2026:11:59:39 +0000] "POST /api/categories HTTP/1.1" 201 274 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.8875"
+2026-07-20T12:03:34.282Z info: MongoDB connected
+2026-07-20T12:03:34.287Z info: Server running on port 6000
+2026-07-20T12:04:03.079Z info: ::1 - - [20/Jul/2026:12:04:03 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-20T12:14:00.172Z info: MongoDB connected
+2026-07-20T12:14:00.173Z info: MongoDB connected
+2026-07-20T12:14:00.181Z info: Server running on port 6000
+2026-07-20T12:16:37.353Z info: MongoDB connected
+2026-07-20T12:16:37.362Z info: Server running on port 6000
+2026-07-20T12:16:37.369Z info: MongoDB connected
+2026-07-21T06:00:04.475Z info: ::1 - - [21/Jul/2026:06:00:04 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:08:59.648Z info: ::1 - - [21/Jul/2026:06:08:59 +0000] "POST /auth/refresh HTTP/1.1" 200 445 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:35:48.433Z info: ::1 - - [21/Jul/2026:06:35:48 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:36:30.832Z info: ::1 - - [21/Jul/2026:06:36:30 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:42:34.300Z info: MongoDB connected
+2026-07-21T06:42:34.412Z info: MongoDB connected
+2026-07-21T06:42:35.284Z info: Server running on port 6000
+2026-07-21T06:43:29.020Z info: MongoDB connected
+2026-07-21T06:43:29.113Z info: MongoDB connected
+2026-07-21T06:43:29.125Z info: Server running on port 6000
+2026-07-21T06:45:29.668Z info: MongoDB connected
+2026-07-21T06:45:29.676Z info: Server running on port 6000
+2026-07-21T06:45:39.622Z info: ::1 - - [21/Jul/2026:06:45:39 +0000] "POST /api/categories%20 HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:46:30.147Z info: ::1 - - [21/Jul/2026:06:46:30 +0000] "POST /api/categories HTTP/1.1" 201 311 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:50:09.528Z info: ::1 - - [21/Jul/2026:06:50:09 +0000] "POST /api/categories HTTP/1.1" 500 70 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:50:22.769Z info: ::1 - - [21/Jul/2026:06:50:22 +0000] "POST /api/categories HTTP/1.1" 201 312 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:51:07.345Z info: ::1 - - [21/Jul/2026:06:51:07 +0000] "GET /api/categories HTTP/1.1" 200 853 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:52:02.889Z info: ::1 - - [21/Jul/2026:06:52:02 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:52:25.894Z info: ::1 - - [21/Jul/2026:06:52:25 +0000] "GET /api/categories HTTP/1.1" 200 853 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:52:47.150Z info: ::1 - - [21/Jul/2026:06:52:47 +0000] "POST /api/categories HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:52:55.053Z info: ::1 - - [21/Jul/2026:06:52:55 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:53:14.664Z info: ::1 - - [21/Jul/2026:06:53:14 +0000] "POST /api/categories HTTP/1.1" 201 303 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:53:22.840Z info: ::1 - - [21/Jul/2026:06:53:22 +0000] "GET /api/categories HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:54:55.848Z info: ::1 - - [21/Jul/2026:06:54:55 +0000] "DELETE /api/categories/6a5df3bc54fb2f48d420bf9a HTTP/1.1" 500 77 "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:55:07.091Z info: ::1 - - [21/Jul/2026:06:55:07 +0000] "DELETE /api/categories/6a5df3bc54fb2f48d420bf9a HTTP/1.1" 204 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:55:14.687Z info: ::1 - - [21/Jul/2026:06:55:14 +0000] "GET /api/categories HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:55:23.955Z info: ::1 - - [21/Jul/2026:06:55:23 +0000] "GET /api/categories HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:55:41.362Z info: ::1 - - [21/Jul/2026:06:55:41 +0000] "DELETE /api/categories/6a5df3bc54fb2f48d420bf9a HTTP/1.1" 204 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:55:42.994Z info: ::1 - - [21/Jul/2026:06:55:42 +0000] "DELETE /api/categories/6a5df3bc54fb2f48d420bf9a HTTP/1.1" 204 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:55:54.488Z info: ::1 - - [21/Jul/2026:06:55:54 +0000] "GET /api/categories HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T06:56:08.678Z info: ::1 - - [21/Jul/2026:06:56:08 +0000] "GET /api/categories HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:02:13.517Z info: MongoDB connected
+2026-07-21T07:02:13.517Z info: MongoDB connected
+2026-07-21T07:02:13.534Z info: Server running on port 6000
+2026-07-21T07:04:22.664Z info: ::1 - - [21/Jul/2026:07:04:22 +0000] "DELETE /api/categories/6a5df3bc54fb2f48d420bf9a HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:04:41.805Z info: ::1 - - [21/Jul/2026:07:04:41 +0000] "GET /api/categories HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:04:46.126Z info: ::1 - - [21/Jul/2026:07:04:46 +0000] "GET /api/categories HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:05:02.685Z info: ::1 - - [21/Jul/2026:07:05:02 +0000] "GET /api/categories HTTP/1.1" 200 - "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:07:23.065Z info: ::1 - - [21/Jul/2026:07:07:23 +0000] "DELETE /api/categories/6a5f175ad739b171180f350f HTTP/1.1" 200 304 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:07:38.828Z info: ::1 - - [21/Jul/2026:07:07:38 +0000] "GET /api/categories HTTP/1.1" 200 853 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:10:25.402Z info: MongoDB connected
+2026-07-21T07:10:25.402Z info: MongoDB connected
+2026-07-21T07:10:25.423Z info: Server running on port 6000
+2026-07-21T07:14:43.410Z info: ::1 - - [21/Jul/2026:07:14:43 +0000] "POST /admin/products HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:14:52.433Z info: ::1 - - [21/Jul/2026:07:14:52 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:15:15.328Z info: ::1 - - [21/Jul/2026:07:15:15 +0000] "POST /admin/products HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:15:52.966Z info: ::1 - - [21/Jul/2026:07:15:52 +0000] "POST /admin/products HTTP/1.1" 201 283 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:15:59.398Z info: ::1 - - [21/Jul/2026:07:15:59 +0000] "GET /api/products HTTP/1.1" 200 545 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:17:53.832Z info: ::1 - - [21/Jul/2026:07:17:53 +0000] "POST /admin/products/6a5f1ca8b9e7d457db91e4f8/variants HTTP/1.1" 201 340 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:27:06.497Z info: ::1 - - [21/Jul/2026:07:27:06 +0000] "PATCH /admin/products/variants/6a5f1d21b9e7d457db91e4fd HTTP/1.1" 500 83 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:27:18.393Z info: ::1 - - [21/Jul/2026:07:27:18 +0000] "PATCH /admin/products/variants/6a5f1d21b9e7d457db91e4fd HTTP/1.1" 200 340 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:29:59.208Z info: ::1 - - [21/Jul/2026:07:29:59 +0000] "GET /api/carts/items HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:30:09.745Z info: ::1 - - [21/Jul/2026:07:30:09 +0000] "GET /api/carts HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:47:56.299Z info: ::1 - - [21/Jul/2026:07:47:56 +0000] "GET /admin/analytics/sales HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:48:10.187Z info: ::1 - - [21/Jul/2026:07:48:10 +0000] "POST /auth/login HTTP/1.1" 200 734 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:48:29.520Z info: ::1 - - [21/Jul/2026:07:48:29 +0000] "GET /admin/analytics/sales HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:49:38.078Z info: MongoDB connected
+2026-07-21T07:49:38.121Z info: Server running on port 6000
+2026-07-21T07:49:40.051Z info: MongoDB connected
+2026-07-21T07:51:52.160Z info: MongoDB connected
+2026-07-21T07:51:52.163Z info: MongoDB connected
+2026-07-21T07:51:52.191Z info: Server running on port 6000
+2026-07-21T07:52:06.063Z info: MongoDB connected
+2026-07-21T07:52:06.069Z info: Server running on port 6000
+2026-07-21T07:52:10.371Z info: ::1 - - [21/Jul/2026:07:52:10 +0000] "GET /admin/analytics/sales HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:52:28.518Z info: ::1 - - [21/Jul/2026:07:52:28 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:52:53.611Z info: ::1 - - [21/Jul/2026:07:52:53 +0000] "GET /admin/analytics/sales HTTP/1.1" 500 77 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:53:06.801Z info: ::1 - - [21/Jul/2026:07:53:06 +0000] "GET /admin/analytics/sales HTTP/1.1" 200 38 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:53:28.776Z info: ::1 - - [21/Jul/2026:07:53:28 +0000] "GET /api/orders/6a5df65754fb2f48d420bfca HTTP/1.1" 200 397 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:54:57.157Z info: ::1 - - [21/Jul/2026:07:54:57 +0000] "GET /api/addresses HTTP/1.1" 200 432 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:58:21.126Z info: ::1 - - [21/Jul/2026:07:58:21 +0000] "GET /api/addresses/:id HTTP/1.1" 500 83 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:59:33.550Z info: ::1 - - [21/Jul/2026:07:59:33 +0000] "PATCH /api/addresses/6a5df35754fb2f48d420bf8f HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T07:59:43.135Z info: ::1 - - [21/Jul/2026:07:59:43 +0000] "GET /api/addresses HTTP/1.1" 200 432 "-" "PostmanRuntime/7.54.0"
+2026-07-21T09:33:04.689Z info: ::1 - - [21/Jul/2026:09:33:04 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-21T09:33:26.136Z info: ::1 - - [21/Jul/2026:09:33:26 +0000] "PATCH /api/addresses/6a5df35754fb2f48d420bf8f HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T09:36:36.342Z info: MongoDB connected
+2026-07-21T09:36:36.342Z info: MongoDB connected
+2026-07-21T09:36:36.358Z info: Server running on port 6000
+2026-07-21T09:36:56.872Z info: MongoDB connected
+2026-07-21T09:36:56.876Z info: Server running on port 6000
+2026-07-21T09:37:10.332Z info: ::1 - - [21/Jul/2026:09:37:10 +0000] "PATCH /api/addresses/6a5df35754fb2f48d420bf8f HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T09:37:16.241Z info: ::1 - - [21/Jul/2026:09:37:16 +0000] "PATCH /api/addresses/6a5df35754fb2f48d420bf8f HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T09:49:06.531Z info: Shutting down server due to SIGINT
+2026-07-21T09:49:17.201Z info: MongoDB connected
+2026-07-21T09:49:17.206Z info: Server running on port 6000
+2026-07-21T09:50:37.380Z info: ::1 - - [21/Jul/2026:09:50:37 +0000] "PATCH /api/addresses/6a5df35754fb2f48d420bf8f HTTP/1.1" 500 66 "-" "PostmanRuntime/7.54.0"
+2026-07-21T09:50:53.920Z info: ::1 - - [21/Jul/2026:09:50:53 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-21T09:51:20.268Z info: ::1 - - [21/Jul/2026:09:51:20 +0000] "PATCH /api/addresses/6a5df35754fb2f48d420bf8f HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T09:57:04.928Z info: MongoDB connected
+2026-07-21T09:57:04.929Z info: MongoDB connected
+2026-07-21T09:57:04.947Z info: Server running on port 6000
+2026-07-21T09:58:09.722Z info: MongoDB connected
+2026-07-21T09:58:09.727Z info: Server running on port 6000
+2026-07-21T09:58:19.396Z info: ::1 - - [21/Jul/2026:09:58:19 +0000] "PATCH /api/addresses/6a5df35754fb2f48d420bf8f HTTP/1.1" 200 28 "-" "PostmanRuntime/7.54.0"
+2026-07-21T10:01:13.767Z info: ::1 - - [21/Jul/2026:10:01:13 +0000] "GET /api/addresses HTTP/1.1" 200 434 "-" "PostmanRuntime/7.54.0"
+2026-07-21T10:02:01.819Z info: ::1 - - [21/Jul/2026:10:02:01 +0000] "PATCH /api/addresses/6a5df3d754fb2f48d420bfa5 HTTP/1.1" 200 414 "-" "PostmanRuntime/7.54.0"
+2026-07-21T10:02:36.388Z info: ::1 - - [21/Jul/2026:10:02:36 +0000] "GET /api/addresses HTTP/1.1" 200 416 "-" "PostmanRuntime/7.54.0"
+2026-07-21T10:04:40.667Z info: MongoDB connected
+2026-07-21T10:04:40.665Z info: MongoDB connected
+2026-07-21T10:04:40.691Z info: Server running on port 6000
+2026-07-21T10:28:48.782Z info: MongoDB connected
+2026-07-21T10:28:48.783Z info: MongoDB connected
+2026-07-21T10:28:48.802Z info: Server running on port 6000
+2026-07-22T07:46:12.338Z info: ::1 - - [22/Jul/2026:07:46:12 +0000] "POST /auth/login HTTP/1.1" 200 720 "-" "PostmanRuntime/7.54.0"
+2026-07-23T05:32:13.870Z info: MongoDB connected
+2026-07-23T05:32:13.876Z info: Server running on port 6000
+2026-07-23T05:34:51.906Z info: MongoDB connected
+2026-07-23T05:34:51.912Z info: Server running on port 6000
+2026-07-23T05:43:48.531Z info: MongoDB connected
+2026-07-23T05:43:48.552Z info: Server running on port 6000
+2026-07-23T05:47:14.180Z info: ::1 - - [23/Jul/2026:05:47:14 +0000] "POST /api/geotrixBills HTTP/1.1" 201 712 "-" "PostmanRuntime/7.54.0"
+2026-07-23T05:50:16.420Z info: MongoDB connected
+2026-07-23T05:50:16.430Z info: Server running on port 6000
+2026-07-23T06:06:36.685Z info: Shutting down server due to SIGINT
+2026-07-23T06:06:47.892Z info: MongoDB connected
+2026-07-23T06:06:47.899Z info: Server running on port 6000
+2026-07-23T06:14:24.128Z info: ::1 - - [23/Jul/2026:06:14:24 +0000] "POST /api/uploads HTTP/1.1" 500 61 "-" "PostmanRuntime/7.54.0"
+2026-07-23T06:19:08.312Z info: MongoDB connected
+2026-07-23T06:19:08.325Z info: Server running on port 6000
+2026-07-23T06:19:47.880Z info: ::1 - - [23/Jul/2026:06:19:47 +0000] "POST /api/uploads HTTP/1.1" 500 61 "-" "PostmanRuntime/7.54.0"
+2026-07-23T06:22:26.750Z info: MongoDB connected
+2026-07-23T06:22:26.755Z info: Server running on port 6000
+2026-07-23T06:22:38.455Z info: ::1 - - [23/Jul/2026:06:22:38 +0000] "POST /api/uploads HTTP/1.1" 200 167 "-" "PostmanRuntime/7.54.0"
+2026-07-23T06:25:35.771Z info: MongoDB connected
+2026-07-23T06:25:35.781Z info: Server running on port 6000
+2026-07-23T06:43:03.542Z info: MongoDB connected
+2026-07-23T06:43:03.551Z info: Server running on port 6000
+2026-07-23T06:49:26.601Z info: MongoDB connected
+2026-07-23T06:49:26.611Z info: Server running on port 6000

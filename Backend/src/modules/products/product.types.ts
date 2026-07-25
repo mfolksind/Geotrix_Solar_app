@@ -1,0 +1,67 @@
+export type ProductStatus = 'ACTIVE' | 'INACTIVE';
+
+export interface CreateProductPayload {
+  name: string;
+  slug?: string;
+  description?: string;
+  category?: string;
+  brand?: string;
+  thumbnail?: string;
+  price: number;
+  discountPrice?: number;
+  status?: ProductStatus;
+  createdBy?: string;
+}
+
+export interface UpdateProductPayload {
+  name?: string;
+  slug?: string;
+  description?: string;
+  category?: string | null;
+  brand?: string;
+  thumbnail?: string;
+  status?: ProductStatus;
+  updatedBy?: string;
+}
+
+export interface CreateVariantPayload {
+  product: string;
+  variantName: string;
+  sku?: string;
+  price: number;
+  discountPrice?: number;
+  stock?: number;
+  unit?: string;
+  weight?: number;
+  dimensions?: string;
+  status?: ProductStatus;
+}
+
+export interface UpdateVariantPayload {
+  variantName?: string;
+  sku?: string;
+  price?: number;
+  discountPrice?: number;
+  stock?: number;
+  unit?: string;
+  weight?: number;
+  dimensions?: string;
+  status?: ProductStatus;
+}
+
+export interface UploadImagePayload {
+  variantId: string;
+  url: string;
+  publicId?: string;
+  isPrimary?: boolean;
+  sortOrder?: number;
+}
+
+export interface ListProductsQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  status?: ProductStatus;
+  sort?: string; // e.g. 'price:asc' or 'createdAt:desc'
+}
