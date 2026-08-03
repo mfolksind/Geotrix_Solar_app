@@ -11,6 +11,7 @@ router.delete('/:id', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller
 router.patch('/:id/status', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.changeStatus);
 router.post('/:id/images', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.uploadImage);
 router.delete('/images/:id', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.deleteImage);
+router.get('/:id/variants', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.getVariants);
 router.post('/:id/variants', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.createVariant);
 router.patch('/variants/:id', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.updateVariant);
 router.delete('/variants/:id', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.deleteVariant);

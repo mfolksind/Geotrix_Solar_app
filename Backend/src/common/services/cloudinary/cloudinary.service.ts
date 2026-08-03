@@ -43,6 +43,12 @@ export async function uploadImage(file: Express.Multer.File, folder = 'uploads')
   try {
     if (file.path) {
       const result = await cloudinary.uploader.upload(file.path, { folder });
+      // Clean up the local file after successful upload to Cloudinary
+      try {
+        require('fs').unlinkSync(file.path);
+      } catch (err) {
+        console.error('Failed to delete local file after Cloudinary upload', err);
+      }
       return mapResult(result);
     }
 

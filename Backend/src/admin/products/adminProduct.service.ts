@@ -37,6 +37,10 @@ export class AdminProductService {
     return this.service.deleteImage(id);
   }
 
+  public async getVariants(productId: string) {
+    return this.service.getVariants(productId);
+  }
+
   public async createVariant(productId: string, payload: any) {
     return this.service.createVariant(productId, payload);
   }

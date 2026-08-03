@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { GeotrixBillRepository } from '../repositories/geotrixBill.repository';
-import { Attachment, CreateBillPayload, UpdateBillPayload, UpdateStatusPayload } from '../types/geotrixBill.types';
+import { Attachment, CreateBillPayload, UpdateBillPayload } from '../types/geotrixBill.types';
 import { ApiError } from '../../../common/errors/ApiError';
 import { IGeotrixBillDocument } from '../interfaces/geotrixBill.interface';
 
@@ -59,7 +59,6 @@ export class GeotrixBillService {
     const attachments = normalizeAttachments(attachmentValue);
     const extraAttachments = normalizeAttachments(extraAttachmentValue);
     const title = typeof payload.title === 'string' && payload.title.trim() ? payload.title.trim() : customerName ? `${customerName} bill` : 'Geotrix Bill';
-    const status = userId ? 'DRAFT' : 'SUBMITTED';
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
@@ -79,12 +78,9 @@ export class GeotrixBillService {
           invoiceNumber: typeof normalizedPayload.invoiceNumber === 'string' ? normalizedPayload.invoiceNumber : undefined,
           billDate: payload.billDate ? new Date(payload.billDate) : undefined,
           dueDate: payload.dueDate ? new Date(payload.dueDate) : undefined,
-          priority: payload.priority,
           attachments,
           submittedBy: userId,
           createdBy: userId,
-          status,
-          statusHistory: [{ status, by: userId, at: new Date(), remarks: userId ? 'Created' : 'Submitted via public form' }],
         },
         session
       );
@@ -108,7 +104,6 @@ export class GeotrixBillService {
     const page = query.page ? Number(query.page) : 1;
     const limit = query.limit ? Number(query.limit) : 20;
     const search = typeof query.search === 'string' ? query.search : undefined;
-    const status = typeof query.status === 'string' ? query.status : undefined;
     const project = typeof query.project === 'string' ? query.project : undefined;
     const startDate = typeof query.startDate === 'string' ? new Date(query.startDate) : undefined;
     const endDate = typeof query.endDate === 'string' ? new Date(query.endDate) : undefined;
@@ -120,7 +115,7 @@ export class GeotrixBillService {
       sort = { updatedAt: -1 };
     }
 
-    return this.repo.findAll({ page, limit, search, status, project, startDate, endDate, sort });
+    return this.repo.findAll({ page, limit, search, project, startDate, endDate, sort });
   }
 
   public async updateBill(id: string, payload: UpdateBillPayload, userId: string) {
@@ -167,31 +162,11 @@ export class GeotrixBillService {
     if (typeof normalizedPayload.invoiceNumber === 'string') updates.invoiceNumber = normalizedPayload.invoiceNumber;
     if (payload.billDate) updates.billDate = new Date(payload.billDate);
     if (payload.dueDate) updates.dueDate = new Date(payload.dueDate);
-    if (payload.priority) updates.priority = payload.priority;
+    if (payload.dueDate) updates.dueDate = new Date(payload.dueDate);
 
     return this.repo.update(existing.id, updates);
   }
 
-  public async submitBill(id: string, userId: string) {
-    const existing = await this.repo.findById(id);
-    if (!existing) throw new ApiError(404, 'Bill not found');
-    if (existing.isDeleted) throw new ApiError(400, 'Cannot submit deleted bill');
-    return this.repo.updateStatus(id, 'SUBMITTED', userId, 'Submitted by user');
-  }
-
-  public async updateStatus(id: string, payload: UpdateStatusPayload, userId: string) {
-    const existing = await this.repo.findById(id);
-    if (!existing) throw new ApiError(404, 'Bill not found');
-    return this.repo.updateStatus(id, payload.status, userId, payload.remarks);
-  }
-
-  public async approveBill(id: string, remarks: string | undefined, userId: string) {
-    return this.updateStatus(id, { status: 'APPROVED', remarks }, userId);
-  }
-
-  public async rejectBill(id: string, remarks: string | undefined, userId: string) {
-    return this.updateStatus(id, { status: 'REJECTED', remarks }, userId);
-  }
 
   public async softDelete(id: string, userId: string) {
     const existing = await this.repo.findById(id);

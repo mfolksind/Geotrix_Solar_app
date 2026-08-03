@@ -50,6 +50,23 @@ export class ProductService {
     return this.repo.findAll({ search: query.search, category: query.category, status: query.status, page: query.page, limit: query.limit, sort });
   }
 
+  public async getVariants(productId: string) {
+    const variants = await this.variantRepo.findByProduct(productId);
+    
+    // Fetch images for all variants
+    const variantsWithImages = await Promise.all(
+      variants.map(async (v) => {
+        const images = await this.imageRepo.findByVariant(v.id);
+        return {
+          ...v.toObject(),
+          images,
+        };
+      })
+    );
+    
+    return variantsWithImages;
+  }
+
   public async createVariant(productId: string, payload: CreateVariantPayload) {
     // ensure product exists
     const product = await this.repo.findById(productId);

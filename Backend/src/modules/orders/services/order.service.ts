@@ -118,7 +118,10 @@ export class OrderService {
     return order;
   }
 
-  public async getOrders(userId: string) {
+  public async getOrders(userId: string, isAdmin: boolean = false) {
+    if (isAdmin) {
+      return this.orderRepo.findAll();
+    }
     return this.orderRepo.findByUser(userId);
   }
 

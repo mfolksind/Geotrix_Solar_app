@@ -41,7 +41,10 @@ export class AddressService {
     return this.repo.findById(id);
   }
 
-  public async getAddresses(userId: string) {
+  public async getAddresses(userId: string, isAdmin: boolean = false) {
+    if (isAdmin) {
+      return this.repo.findAll();
+    }
     return this.repo.findByUser(userId);
   }
 

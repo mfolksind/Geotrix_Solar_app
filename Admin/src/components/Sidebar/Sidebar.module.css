@@ -1,0 +1,61 @@
+.sidebar {
+  width: 260px;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.logoContainer {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.5px;
+}
+
+.nav {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  color: var(--foreground);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  opacity: 0.75;
+}
+
+.navItem:hover {
+  background-color: rgba(87, 197, 204, 0.1);
+  color: var(--primary);
+  opacity: 1;
+}
+
+.navItem.active {
+  background-color: var(--primary);
+  color: white;
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(87, 197, 204, 0.3);
+}
+
+.icon {
+  flex-shrink: 0;
+}

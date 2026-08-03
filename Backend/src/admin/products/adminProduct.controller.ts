@@ -47,6 +47,12 @@ export class AdminProductController {
     res.status(200).json({ success: true, data: deleted });
   });
 
+  public getVariants = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    const variants = await service.getVariants(id);
+    res.status(200).json({ success: true, data: variants });
+  });
+
   public createVariant = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
     const created = await service.createVariant(id, req.body);

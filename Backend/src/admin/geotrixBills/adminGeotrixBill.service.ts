@@ -13,15 +13,4 @@ export class AdminGeotrixBillService {
     return this.service.getBill(id);
   }
 
-  public async updateStatus(id: string, payload: any, userId: string) {
-    return this.service.updateStatus(id, payload, userId);
-  }
-
-  public async approve(id: string, remarks: string | undefined, userId: string) {
-    return this.service.approveBill(id, remarks, userId);
-  }
-
-  public async reject(id: string, remarks: string | undefined, userId: string) {
-    return this.service.rejectBill(id, remarks, userId);
-  }
 }

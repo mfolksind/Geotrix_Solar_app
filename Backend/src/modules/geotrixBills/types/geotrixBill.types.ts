@@ -1,6 +1,3 @@
-export type BillStatus = 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'PAID';
-
-export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
 export interface Attachment {
   url: string;
@@ -27,7 +24,6 @@ export interface CreateBillPayload {
   invoiceNumber?: string;
   billDate?: string; // ISO date
   dueDate?: string; // ISO date
-  priority?: Priority;
 }
 
 export interface UpdateBillPayload {
@@ -49,10 +45,5 @@ export interface UpdateBillPayload {
   invoiceNumber?: string;
   billDate?: string;
   dueDate?: string;
-  priority?: Priority;
 }
 
-export interface UpdateStatusPayload {
-  status: BillStatus;
-  remarks?: string;
-}

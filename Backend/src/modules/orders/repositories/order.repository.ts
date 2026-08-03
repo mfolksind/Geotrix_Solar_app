@@ -16,6 +16,17 @@ export class OrderRepository {
     return OrderModel.findOne({ orderNumber }).exec();
   }
 
+  public async findAll(options: { page?: number, limit?: number } = {}) {
+    const page = Math.max(1, options.page ?? 1);
+    const limit = Math.max(1, Math.min(100, options.limit ?? 20));
+    const skip = (page - 1) * limit;
+
+    const query = OrderModel.find().populate('user', 'name firstName lastName email').skip(skip).limit(limit).sort({ createdAt: -1 });
+    const [items, total] = await Promise.all([query.exec(), OrderModel.countDocuments().exec()]);
+    
+    return { items, total, page, limit };
+  }
+
   public async findByUser(userId: string) {
     return OrderModel.find({ user: userId }).sort({ createdAt: -1 }).exec();
   }

@@ -15,7 +15,9 @@ export function applySecurity(app: Application): void {
   }
 
   // Basic protections
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  }));
 
   // CORS - allow only client URL
   app.use(

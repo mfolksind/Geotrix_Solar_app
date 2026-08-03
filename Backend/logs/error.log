@@ -1523,3 +1523,34 @@
     at Function.listen (E:\mfolks_geotrix\Backend\node_modules\express\lib\application.js:635:24)
     at startServer (E:\mfolks_geotrix\Backend\server.ts:15:18)
     at processTicksAndRejections (node:internal/process/task_queues:103:5) {"code":"EADDRINUSE","errno":-4091,"syscall":"listen","address":"::","port":6000}
+2026-07-27T12:06:18.330Z error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27018
+    at _handleConnectionErrors (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1169:11)
+    at NativeConnection.openUri (E:\mfolks_geotrix\Backend\node_modules\mongoose\lib\connection.js:1100:11)
+    at async connectMongoDB (E:\mfolks_geotrix\Backend\src\database\mongodb\connection.ts:18:5)
+    at async startServer (E:\mfolks_geotrix\Backend\server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"Single","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":875417306,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":null,"maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"Single","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":875417306,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":null,"maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-27T12:07:37.030Z error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27018
+    at _handleConnectionErrors (/app/node_modules/mongoose/lib/connection.js:1169:11)
+    at NativeConnection.openUri (/app/node_modules/mongoose/lib/connection.js:1100:11)
+    at async connectMongoDB (/app/src/database/mongodb/connection.ts:18:5)
+    at async startServer (/app/server.ts:13:5) {"errorLabelSet":{},"reason":{"type":"Single","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":53070,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":null,"maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null},"cause":{"type":"Single","servers":{"127.0.0.1:27018":{"address":"127.0.0.1:27018","type":"Unknown","hosts":[],"passives":[],"arbiters":[],"tags":{},"minWireVersion":0,"maxWireVersion":0,"roundTripTime":-1,"minRoundTripTime":0,"lastUpdateTime":53070,"lastWriteDate":0,"error":{"errorLabelSet":{},"beforeHandshake":false},"topologyVersion":null,"setName":null,"setVersion":null,"electionId":null,"logicalSessionTimeoutMinutes":null,"maxMessageSizeBytes":null,"maxWriteBatchSize":null,"maxBsonObjectSize":null,"primary":null,"me":null,"$clusterTime":null,"iscryptd":false}},"stale":false,"compatible":true,"heartbeatFrequencyMS":10000,"localThresholdMS":15,"setName":null,"maxElectionId":null,"maxSetVersion":null,"commonWireVersion":0,"logicalSessionTimeoutMinutes":null}}
+2026-07-29T05:37:18.330Z error: Error: listen EADDRINUSE: address already in use :::6001
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (E:\mfolks_geotrix\Backend\node_modules\express\lib\application.js:635:24)
+    at startServer (E:\mfolks_geotrix\Backend\server.ts:15:18)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5) {"code":"EADDRINUSE","errno":-4091,"syscall":"listen","address":"::","port":6001}
+2026-07-29T05:39:38.105Z error: Error: listen EADDRINUSE: address already in use :::6001
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (E:\mfolks_geotrix\Backend\node_modules\express\lib\application.js:635:24)
+    at startServer (E:\mfolks_geotrix\Backend\server.ts:15:18)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5) {"code":"EADDRINUSE","errno":-4091,"syscall":"listen","address":"::","port":6001}
+2026-08-03T07:51:58.156Z error: Error: listen EADDRINUSE: address already in use :::6001
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at Function.listen (E:\mfolks_geotrix\Backend\node_modules\express\lib\application.js:635:24)
+    at startServer (E:\mfolks_geotrix\Backend\server.ts:15:18)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5) {"code":"EADDRINUSE","errno":-4091,"syscall":"listen","address":"::","port":6001}

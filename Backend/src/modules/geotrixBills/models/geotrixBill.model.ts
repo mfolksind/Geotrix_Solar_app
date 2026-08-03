@@ -10,15 +10,7 @@ const AttachmentSchema = new Schema(
   { _id: false }
 );
 
-const StatusHistorySchema = new Schema(
-  {
-    status: { type: String, required: true },
-    by: { type: Schema.Types.ObjectId, ref: 'User' },
-    at: { type: Date, default: Date.now },
-    remarks: { type: String },
-  },
-  { _id: false }
-);
+
 
 const geotrixBillSchema = new Schema<IGeotrixBillDocument>(
   {
@@ -36,14 +28,11 @@ const geotrixBillSchema = new Schema<IGeotrixBillDocument>(
     invoiceNumber: { type: String },
     billDate: { type: Date },
     dueDate: { type: Date },
-    status: { type: String, enum: ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'PAID'], default: 'DRAFT', index: true },
-    priority: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'], default: 'LOW', index: true },
     attachments: { type: [AttachmentSchema], default: [] },
     submittedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     approvedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     remarks: { type: String },
     isDeleted: { type: Boolean, default: false, index: true },
-    statusHistory: { type: [StatusHistorySchema], default: [] },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },

@@ -5,7 +5,7 @@
   "description": "Production-ready backend architecture for a scalable e-commerce application",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "kill-port 6000 && nodemon --watch . --ext ts --exec ts-node server.ts",
+    "dev": "kill-port 6001 && nodemon --watch . --ext ts --exec ts-node server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js"
   },

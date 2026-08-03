@@ -6,7 +6,6 @@ interface FindAllOptions {
   page?: number;
   limit?: number;
   search?: string;
-  status?: string;
   project?: string;
   startDate?: Date;
   endDate?: Date;
@@ -33,7 +32,6 @@ export class GeotrixBillRepository {
 
     const filters: Record<string, unknown> = { isDeleted: false };
     if (options.search) filters.billNumber = { $regex: options.search, $options: 'i' };
-    if (options.status) filters.status = options.status;
     if (options.project) filters.projectName = options.project;
     if (options.startDate || options.endDate) {
       filters.billDate = {} as any;
@@ -50,14 +48,6 @@ export class GeotrixBillRepository {
 
   public async update(id: string, updates: Partial<IGeotrixBillDocument>, session?: ClientSession) {
     return GeotrixBillModel.findByIdAndUpdate(id, { $set: updates }, { new: true, session }).exec();
-  }
-
-  public async updateStatus(id: string, status: string, by?: string, remarks?: string, session?: ClientSession) {
-    return GeotrixBillModel.findByIdAndUpdate(
-      id,
-      { $set: { status, remarks, updatedBy: by }, $push: { statusHistory: { status, by, at: new Date(), remarks } } },
-      { new: true, session }
-    ).exec();
   }
 
   public async softDelete(id: string, session?: ClientSession) {

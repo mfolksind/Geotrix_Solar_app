@@ -3,7 +3,7 @@ import asyncHandler from 'express-async-handler';
 import { OrderService } from '../services/order.service';
 import { CreateOrderPayload, UpdateOrderStatusPayload } from '../types/order.types';
 
-type AuthRequest = Request & { user?: { id: string } };
+type AuthRequest = Request & { user?: { id: string, role?: string } };
 
 export class OrderController {
   constructor(private readonly service: OrderService) {}
@@ -17,7 +17,8 @@ export class OrderController {
 
   public getOrders = asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id as string;
-    const orders = await this.service.getOrders(userId);
+    const isAdmin = ['admin', 'super_admin'].includes(req.user?.role?.toLowerCase() || '');
+    const orders = await this.service.getOrders(userId, isAdmin);
     res.status(200).json({ success: true, data: orders });
   });
 

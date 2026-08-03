@@ -3,7 +3,7 @@ import asyncHandler from 'express-async-handler';
 import { AddressService } from '../services/address.service';
 import { CreateAddressPayload, UpdateAddressPayload } from '../types/address.types';
 
-type AuthRequest = Request & { user?: { id: string } };
+type AuthRequest = Request & { user?: { id: string, role?: string } };
 
 export class AddressController {
   constructor(private readonly service: AddressService) {}
@@ -17,7 +17,8 @@ export class AddressController {
 
   public getAddresses = asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id as string;
-    const addresses = await this.service.getAddresses(userId);
+    const isAdmin = ['admin', 'super_admin'].includes(req.user?.role?.toLowerCase() || '');
+    const addresses = await this.service.getAddresses(userId, isAdmin);
     res.status(200).json({ success: true, data: addresses });
   });
 
