@@ -16,6 +16,7 @@ export interface IProductVariantDocument extends Document {
   variantName: string;
   slug: string;
   description?: string;
+  shortDescription?: string;
   category?: Types.ObjectId | string;
   thumbnail?: string;
   isDefault: boolean;

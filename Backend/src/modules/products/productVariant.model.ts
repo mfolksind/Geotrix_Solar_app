@@ -7,6 +7,7 @@ const variantSchema = new Schema<IProductVariantDocument>(
     variantName: { type: String, required: true, trim: true },
     slug: { type: String, required: true, trim: true, unique: true, index: true },
     description: { type: String, trim: true },
+    shortDescription: { type: String, trim: true },
     category: { type: Schema.Types.ObjectId, ref: 'Category', index: true },
     thumbnail: { type: String, trim: true },
     isDefault: { type: Boolean, default: false, index: true },

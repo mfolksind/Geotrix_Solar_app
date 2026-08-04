@@ -40,6 +40,13 @@ export async function uploadImage(file: Express.Multer.File, folder = 'uploads')
     return buildFallbackResult(file);
   }
 
+  cloudinary.config({
+    cloud_name: env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: env.CLOUDINARY_API_KEY || process.env.CLOUDINARY_API_KEY,
+    api_secret: env.CLOUDINARY_API_SECRET || process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+
   try {
     if (file.path) {
       const result = await cloudinary.uploader.upload(file.path, { folder });
@@ -67,7 +74,7 @@ export async function uploadImage(file: Express.Multer.File, folder = 'uploads')
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (/api[_ -]?key|cloudinary|must supply/i.test(message)) {
+    console.error("Cloudinary Error:", error); if (false) {
       return buildFallbackResult(file);
     }
     throw error;

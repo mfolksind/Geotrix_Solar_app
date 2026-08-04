@@ -2,13 +2,8 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Card } from '../../../../../components/Card/Card';
-import { Table } from '../../../../../components/Table/Table';
-import { Button } from '../../../../../components/Button/Button';
-import { Input } from '../../../../../components/Input/Input';
 import { fetchApi, API_URL } from '../../../../../utils/api';
-import { ArrowLeft, Trash2, Plus, Edit2, Image as ImageIcon, X } from 'lucide-react';
-import styles from './variants.module.css';
+import { ArrowLeft, Trash2, Plus, Edit2, Image as ImageIcon, X, Save, AlertCircle } from 'lucide-react';
 
 interface VariantImage {
   _id: string;
@@ -29,6 +24,7 @@ interface Variant {
   categoryId?: string;
   category?: { _id: string; name: string };
   description?: string;
+  shortDescription?: string;
   isDefault?: boolean;
 }
 
@@ -59,6 +55,7 @@ export default function VariantsPage() {
   const [status, setStatus] = useState('ACTIVE');
   const [categoryId, setCategoryId] = useState('');
   const [description, setDescription] = useState('');
+  const [shortDescription, setShortDescription] = useState('');
   const [isDefault, setIsDefault] = useState(false);
 
   const resetForm = () => {
@@ -76,6 +73,7 @@ export default function VariantsPage() {
     setStatus('ACTIVE');
     setCategoryId(categories.length > 0 ? categories[0]._id : '');
     setDescription('');
+    setShortDescription('');
     setIsDefault(false);
   };
 
@@ -143,12 +141,13 @@ export default function VariantsPage() {
         status,
         categoryId: categoryId || undefined,
         description,
+        shortDescription,
         isDefault
       };
 
       if (editingId) {
         // Update
-        const res = await fetchApi(`/admin/variants/${editingId}`, {
+        const res = await fetchApi(`/admin/products/variants/${editingId}`, {
           method: 'PATCH',
           body: JSON.stringify({ 
             variantName, 
@@ -160,6 +159,7 @@ export default function VariantsPage() {
             status,
             categoryId: categoryId || undefined,
             description,
+            shortDescription,
             isDefault
           }),
         });
@@ -200,14 +200,18 @@ export default function VariantsPage() {
     setStatus(v.status || 'ACTIVE');
     setCategoryId(v.category?._id || v.categoryId || (categories.length > 0 ? categories[0]._id : ''));
     setDescription(v.description || '');
+    setShortDescription(v.shortDescription || '');
     setIsDefault(!!v.isDefault);
     setDiscountPrice(v.discountPrice ? v.discountPrice.toString() : '');
+    
+    // Scroll to form nicely
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (variantId: string) => {
     if (!confirm('Are you sure you want to delete this variant?')) return;
     try {
-      const res = await fetchApi(`/admin/variants/${variantId}`, { method: 'DELETE' });
+      const res = await fetchApi(`/admin/products/variants/${variantId}`, { method: 'DELETE' });
       if (res.success) {
         loadVariants();
       } else {
@@ -276,180 +280,297 @@ export default function VariantsPage() {
   const editingVariant = variants.find(v => v._id === editingId);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <button className={styles.backBtn} onClick={() => router.push('/dashboard/products')}>
-          <ArrowLeft size={20} /> Back to Products
+    <div className="p-6 max-w-[1600px] mx-auto w-full">
+      {/* Header Section */}
+      <div className="mb-8">
+        <button 
+          onClick={() => router.push('/dashboard/products')}
+          className="flex items-center gap-2 text-foreground/60 hover:text-[#57c5cc] transition-colors mb-4 font-medium text-sm w-max"
+        >
+          <ArrowLeft size={16} /> Back to Products
         </button>
-        <h1 className={styles.title}>Manage Variants</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 className="text-2xl font-bold text-foreground tracking-tight">Manage Variants</h1>
+                <p className="text-sm text-foreground/60 mt-1">
+                    {product ? `For: ${product.name}` : 'Loading product details...'}
+                </p>
+            </div>
+            {editingId && (
+                <button 
+                    onClick={resetForm}
+                    className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors"
+                >
+                    <Plus size={16} /> Add New Variant Instead
+                </button>
+            )}
+        </div>
       </div>
 
-      <div className={styles.content}>
-        <div className={styles.listSection}>
-          <Card>
-            <Table headers={['Variant Info', 'Category', 'Price', 'Stock', 'Default', 'Actions']}>
-              {variants.map((v) => (
-                <tr key={v._id}>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      {v.images && v.images.length > 0 ? (
-                        <img src={v.images[0].url.startsWith('http') ? v.images[0].url : `${API_URL}${v.images[0].url}`} alt="variant" style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }} />
-                      ) : (
-                        <div style={{ width: 40, height: 40, borderRadius: 6, backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
-                          <ImageIcon size={20} />
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+        {/* FORM SECTION - Takes up 5 columns on XL */}
+        <div className="xl:col-span-5 w-full order-1 xl:order-2">
+            <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden sticky top-6">
+                <div className="px-6 py-5 border-b border-border bg-surface/50 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-foreground">
+                        {editingId ? 'Edit Variant' : 'Create Variant'}
+                    </h2>
+                    {editingId && <span className="px-2.5 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full">EDITING</span>}
+                </div>
+                
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label className="block text-sm font-medium text-foreground/90 mb-1.5">Variant Name</label>
+                            <input type="text" value={variantName} onChange={(e) => setVariantName(e.target.value)} required placeholder="e.g. 50mm, Blue" className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface" />
                         </div>
-                      )}
-                      <div>
-                        <div style={{ fontWeight: 500 }}>{v.variantName}</div>
-                        <div style={{ fontSize: '0.8rem', color: '#666' }}>SKU: {v.sku || 'N/A'}</div>
-                      </div>
+                        <div>
+                            <label className="block text-sm font-medium text-foreground/90 mb-1.5">SKU</label>
+                            <input type="text" value={sku} onChange={(e) => setSku(e.target.value)} required placeholder="e.g. EAR-50-BLU" className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface" />
+                        </div>
                     </div>
-                  </td>
-                  <td>
-                    <span className={styles.badge}>{v.category?.name || v.categoryId || 'N/A'}</span>
-                  </td>
-                  <td>${v.price}</td>
-                  <td>{v.stock}</td>
-                  <td>
-                    {v.isDefault ? (
-                      <span className={`${styles.statusBadge} ${styles.active}`}>Yes</span>
-                    ) : (
-                      <span className={styles.statusBadge}>No</span>
-                    )}
-                  </td>
-                  <td>
-                    <div className={styles.actions}>
-                      <button className={styles.iconBtn} onClick={() => handleEdit(v)}>
-                        <Edit2 size={18} />
-                      </button>
-                      <button className={styles.iconBtn} onClick={() => handleDelete(v._id)} style={{ color: 'var(--danger)' }}>
-                        <Trash2 size={18} />
-                      </button>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground/90 mb-1.5">Slug (URL)</label>
+                        <input type="text" value={slug} onChange={(e) => { setSlug(e.target.value); setIsSlugManuallyEdited(true); }} className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface text-foreground/60" />
                     </div>
-                  </td>
-                </tr>
-              ))}
-              {!loading && variants.length === 0 && (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No variants added yet.</td>
-                </tr>
-              )}
-            </Table>
-          </Card>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 border-y border-border py-5 my-5">
+                        <div>
+                            <label className="block text-sm font-medium text-foreground/90 mb-1.5">Price (₹)</label>
+                            <input type="number" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-foreground/90 mb-1.5">Discount (₹)</label>
+                            <input type="number" step="0.01" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface" />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-foreground/90 mb-1.5">Stock</label>
+                            <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} required className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground/90 mb-1.5">Category</label>
+                        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface">
+                        {categories.map(c => (
+                            <option key={c._id} value={c._id}>{c.name}</option>
+                        ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground/90 mb-1.5">
+                            Short Description (Bullets)
+                            <span className="text-foreground/50 font-normal ml-2">Used in top buying section</span>
+                        </label>
+                        <textarea 
+                            value={shortDescription}
+                            onChange={(e) => setShortDescription(e.target.value)}
+                            rows={3}
+                            placeholder="Bullet 1&#10;Bullet 2&#10;Bullet 3"
+                            className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface leading-relaxed"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-foreground/90 mb-1.5">
+                            Detailed Description
+                            <span className="text-foreground/50 font-normal ml-2">Used in bottom specs section</span>
+                        </label>
+                        <textarea 
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            rows={4}
+                            className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface leading-relaxed"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {!editingId && (
+                            <>
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground/90 mb-1.5">Weight</label>
+                                    <input type="number" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-foreground/90 mb-1.5">Dimensions</label>
+                                    <input type="text" value={dimensions} onChange={(e) => setDimensions(e.target.value)} placeholder="10x10x10" className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface" />
+                                </div>
+                            </>
+                        )}
+                        
+                        <div>
+                            <label className="block text-sm font-medium text-foreground/90 mb-1.5">Status</label>
+                            <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface">
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="INACTIVE">INACTIVE</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-3">
+                        <input 
+                            type="checkbox" 
+                            id="isDefaultCheckbox" 
+                            checked={isDefault} 
+                            onChange={(e) => setIsDefault(e.target.checked)} 
+                            className="w-5 h-5 rounded border-border text-[#57c5cc] focus:ring-[#57c5cc] transition-colors cursor-pointer"
+                        />
+                        <label htmlFor="isDefaultCheckbox" className="text-sm font-medium text-foreground/90 cursor-pointer select-none">
+                            Set as Default Variant
+                        </label>
+                    </div>
+
+                    <div className="flex gap-3 pt-6 border-t border-border">
+                        {editingId && (
+                            <button type="button" onClick={resetForm} className="flex-1 py-2.5 bg-surface border border-border text-foreground/90 rounded-lg font-medium hover:bg-background transition-colors shadow-sm">
+                                Cancel Edit
+                            </button>
+                        )}
+                        <button type="submit" disabled={isSubmitting} className="flex-1 py-2.5 bg-[#57c5cc] hover:bg-[#45a0a6] text-white rounded-lg font-medium transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <Save size={18} />
+                            {isSubmitting ? 'Saving...' : editingId ? 'Update Variant' : 'Create Variant'}
+                        </button>
+                    </div>
+                </form>
+
+                {/* IMAGES SECTION */}
+                {editingId && (
+                    <div className="p-6 border-t border-border bg-background">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-semibold text-foreground">Variant Images</h3>
+                            <button 
+                                type="button" 
+                                onClick={() => fileInputRef.current?.click()} 
+                                disabled={isUploadingImg}
+                                className="px-3 py-1.5 bg-surface border border-border text-foreground/90 rounded-md text-xs font-medium hover:bg-background transition-colors shadow-sm disabled:opacity-50 flex items-center gap-1.5"
+                            >
+                                <Plus size={14} />
+                                {isUploadingImg ? 'Uploading...' : 'Add Image'}
+                            </button>
+                            <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-3">
+                            {editingVariant?.images?.map(img => (
+                                <div key={img._id} className="relative w-20 h-20 rounded-lg border border-border bg-surface overflow-hidden group">
+                                    <img src={img.url.startsWith('http') ? img.url : `${API_URL}${img.url}`} alt="Variant" className="w-full h-full object-contain p-1" />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button 
+                                            type="button" 
+                                            onClick={() => handleDeleteImage(img._id)}
+                                            className="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors shadow-lg"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                            {(!editingVariant?.images || editingVariant.images.length === 0) && (
+                                <div className="w-full p-4 border-2 border-dashed border-border rounded-lg text-center">
+                                    <ImageIcon size={24} className="mx-auto text-foreground/50 mb-2" />
+                                    <p className="text-xs text-foreground/60">No images uploaded for this variant.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
 
-        <div className={styles.formSection}>
-          <Card>
-            <h2 className={styles.formTitle}>{editingId ? 'Edit Variant' : 'Add New Variant'}</h2>
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.row}>
-                <Input label="Variant Name" value={variantName} onChange={(e) => setVariantName(e.target.value)} required />
-                <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required />
-              </div>
-              <Input 
-                label="Slug" 
-                value={slug} 
-                onChange={(e) => {
-                  setSlug(e.target.value);
-                  setIsSlugManuallyEdited(true);
-                }} 
-              />
-              
-              <div className={styles.row}>
-                <Input label="Price ($)" type="number" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required />
-                <Input label="Discount Price ($)" type="number" step="0.01" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} />
-              </div>
-
-              <div className={styles.row}>
-                <Input label="Stock" type="number" value={stock} onChange={(e) => setStock(e.target.value)} required />
-                <div className={styles.inputGroup}>
-                  <label className={styles.label}>Category</label>
-                  <select className={styles.select} value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
-                    {categories.map(c => (
-                      <option key={c._id} value={c._id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Description</label>
-                <textarea 
-                  className={styles.textarea}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                />
-              </div>
-
-              {!editingId && (
-                <div className={styles.row}>
-                  <Input label="Weight" type="number" value={weight} onChange={(e) => setWeight(e.target.value)} />
-                  <Input label="Dimensions" value={dimensions} onChange={(e) => setDimensions(e.target.value)} placeholder="10x10x10" />
-                </div>
-              )}
-
-              <div className={styles.row}>
-                <div className={styles.inputGroup}>
-                  <label className={styles.label}>Status</label>
-                  <select className={styles.select} value={status} onChange={(e) => setStatus(e.target.value)}>
-                    <option value="ACTIVE">ACTIVE</option>
-                    <option value="INACTIVE">INACTIVE</option>
-                  </select>
+        {/* LIST SECTION - Takes up 7 columns on XL */}
+        <div className="xl:col-span-7 w-full order-2 xl:order-1">
+            <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden">
+                <div className="px-6 py-5 border-b border-border bg-surface/50">
+                    <h2 className="text-lg font-semibold text-foreground">Current Variants ({variants.length})</h2>
                 </div>
                 
-                <div className={styles.inputGroup} style={{ display: 'flex', alignItems: 'center', marginTop: '1.5rem', gap: '10px' }}>
-                  <input 
-                    type="checkbox" 
-                    id="isDefaultCheckbox" 
-                    checked={isDefault} 
-                    onChange={(e) => setIsDefault(e.target.checked)} 
-                    style={{ width: '18px', height: '18px' }}
-                  />
-                  <label htmlFor="isDefaultCheckbox" className={styles.label} style={{ margin: 0, cursor: 'pointer' }}>Set as Default Variant</label>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                        <thead className="bg-surface/80 text-foreground/60 font-medium border-b border-border">
+                            <tr>
+                                <th className="px-5 py-3">Variant</th>
+                                <th className="px-5 py-3">Price & Stock</th>
+                                <th className="px-5 py-3 text-center">Status</th>
+                                <th className="px-5 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border text-foreground/90">
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-12 text-center text-foreground/60">
+                                        <div className="w-6 h-6 border-2 border-[#57c5cc] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                                        <p>Loading variants...</p>
+                                    </td>
+                                </tr>
+                            ) : variants.length > 0 ? (
+                                variants.map((v) => (
+                                    <tr key={v._id} className={`hover:bg-background transition-colors ${editingId === v._id ? 'bg-indigo-50/50' : ''}`}>
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-12 h-12 rounded-lg border border-border bg-surface flex items-center justify-center shrink-0 overflow-hidden p-1">
+                                                    {v.images && v.images.length > 0 ? (
+                                                        <img src={v.images[0].url.startsWith('http') ? v.images[0].url : `${API_URL}${v.images[0].url}`} alt={v.variantName} className="w-full h-full object-contain" />
+                                                    ) : (
+                                                        <ImageIcon size={20} className="text-gray-300" />
+                                                    )}
+                                                </div>
+                                                <div className="max-w-[200px] overflow-hidden">
+                                                    <div className="font-semibold text-foreground truncate" title={v.variantName}>{v.variantName}</div>
+                                                    <div className="text-xs text-foreground/60 truncate" title={v.sku}>SKU: {v.sku || 'N/A'}</div>
+                                                    <div className="text-[10px] text-[#57c5cc] font-medium truncate mt-0.5">{v.category?.name || 'No Category'}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <div className="font-bold text-foreground">₹{v.price}</div>
+                                            <div className="text-xs text-foreground/60">Stock: {v.stock}</div>
+                                        </td>
+                                        <td className="px-5 py-4 text-center">
+                                            {v.isDefault ? (
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                                                    DEFAULT
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-background text-foreground/80 border border-border">
+                                                    STANDARD
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button 
+                                                    onClick={() => handleEdit(v)}
+                                                    className={`p-2 rounded-lg transition-colors ${editingId === v._id ? 'bg-[#57c5cc] text-white' : 'text-foreground/50 hover:text-[#57c5cc] hover:bg-[#57c5cc]/10'}`}
+                                                    title="Edit Variant"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDelete(v._id)}
+                                                    className="p-2 text-foreground/50 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="Delete Variant"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-16 text-center">
+                                        <AlertCircle size={32} className="mx-auto text-gray-300 mb-3" />
+                                        <p className="text-foreground/60 font-medium">No variants added yet</p>
+                                        <p className="text-sm text-foreground/50">Use the form to create your first variant.</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-              </div>
-
-              <div className={styles.formActions}>
-                {editingId && (
-                  <Button type="button" variant="outline" onClick={resetForm} fullWidth>Cancel</Button>
-                )}
-                <Button type="submit" disabled={isSubmitting} fullWidth>
-                  {isSubmitting ? 'Saving...' : editingId ? 'Update Variant' : 'Add Variant'}
-                </Button>
-              </div>
-            </form>
-
-            {editingId && (
-              <div style={{ marginTop: '2rem', borderTop: '1px solid #eaeaea', paddingTop: '1.5rem' }}>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  Variant Images
-                  <Button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUploadingImg} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
-                    {isUploadingImg ? 'Uploading...' : 'Add Image'}
-                  </Button>
-                  <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" style={{ display: 'none' }} />
-                </h3>
-                
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  {editingVariant?.images?.map(img => (
-                    <div key={img._id} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd' }}>
-                      <img src={img.url.startsWith('http') ? img.url : `${API_URL}${img.url}`} alt="Variant" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      <button 
-                        type="button" 
-                        onClick={() => handleDeleteImage(img._id)}
-                        style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ))}
-                  {(!editingVariant?.images || editingVariant.images.length === 0) && (
-                    <p style={{ fontSize: '0.9rem', color: '#888' }}>No images uploaded for this variant.</p>
-                  )}
-                </div>
-              </div>
-            )}
-          </Card>
+            </div>
         </div>
       </div>
     </div>
