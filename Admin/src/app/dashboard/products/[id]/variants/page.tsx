@@ -20,10 +20,16 @@ interface Variant {
   _id: string;
   variantName: string;
   sku: string;
+  slug?: string;
   price: number;
+  discountPrice?: number;
   stock: number;
   status: string;
   images: VariantImage[];
+  categoryId?: string;
+  category?: { _id: string; name: string };
+  description?: string;
+  isDefault?: boolean;
 }
 
 export default function VariantsPage() {
@@ -31,6 +37,8 @@ export default function VariantsPage() {
   const { id: productId } = useParams();
   
   const [variants, setVariants] = useState<Variant[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImg, setIsUploadingImg] = useState(false);
@@ -40,6 +48,8 @@ export default function VariantsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [variantName, setVariantName] = useState('');
   const [sku, setSku] = useState('');
+  const [slug, setSlug] = useState('');
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
   const [price, setPrice] = useState('');
   const [discountPrice, setDiscountPrice] = useState('');
   const [stock, setStock] = useState('');
@@ -47,11 +57,16 @@ export default function VariantsPage() {
   const [weight, setWeight] = useState('');
   const [dimensions, setDimensions] = useState('');
   const [status, setStatus] = useState('ACTIVE');
+  const [categoryId, setCategoryId] = useState('');
+  const [description, setDescription] = useState('');
+  const [isDefault, setIsDefault] = useState(false);
 
   const resetForm = () => {
     setEditingId(null);
     setVariantName('');
     setSku('');
+    setSlug('');
+    setIsSlugManuallyEdited(false);
     setPrice('');
     setDiscountPrice('');
     setStock('');
@@ -59,6 +74,9 @@ export default function VariantsPage() {
     setWeight('');
     setDimensions('');
     setStatus('ACTIVE');
+    setCategoryId(categories.length > 0 ? categories[0]._id : '');
+    setDescription('');
+    setIsDefault(false);
   };
 
   const loadVariants = async () => {
@@ -75,8 +93,38 @@ export default function VariantsPage() {
   };
 
   useEffect(() => {
-    loadVariants();
+    const init = async () => {
+      try {
+        const prodRes = await fetchApi(`/api/products/${productId}`);
+        if (prodRes.success) {
+          setProduct(prodRes.data);
+        }
+      } catch (err) {
+        console.error('Failed to load product', err);
+      }
+      try {
+        const catRes = await fetchApi('/api/categories');
+        if (catRes.success) {
+          setCategories(catRes.data);
+          if (catRes.data.length > 0) setCategoryId(catRes.data[0]._id);
+        }
+      } catch (err) {
+        console.error('Failed to load categories', err);
+      }
+      await loadVariants();
+    };
+    init();
   }, [productId]);
+
+  useEffect(() => {
+    if (!isSlugManuallyEdited && product && variantName && sku) {
+      const generatedSlug = `${product.name}-${variantName}-${sku}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      setSlug(generatedSlug);
+    }
+  }, [variantName, sku, product, isSlugManuallyEdited]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,20 +133,35 @@ export default function VariantsPage() {
       const payload = {
         variantName,
         sku,
+        slug,
         price: parseFloat(price),
         discountPrice: discountPrice ? parseFloat(discountPrice) : undefined,
         stock: parseInt(stock),
         unit,
         weight: weight ? parseFloat(weight) : undefined,
         dimensions,
-        status
+        status,
+        categoryId: categoryId || undefined,
+        description,
+        isDefault
       };
 
       if (editingId) {
         // Update
         const res = await fetchApi(`/admin/variants/${editingId}`, {
           method: 'PATCH',
-          body: JSON.stringify({ variantName, price: parseFloat(price), stock: parseInt(stock), status }),
+          body: JSON.stringify({ 
+            variantName, 
+            sku,
+            slug,
+            price: parseFloat(price), 
+            discountPrice: discountPrice ? parseFloat(discountPrice) : undefined,
+            stock: parseInt(stock), 
+            status,
+            categoryId: categoryId || undefined,
+            description,
+            isDefault
+          }),
         });
         if (res.success) {
           loadVariants();
@@ -130,9 +193,15 @@ export default function VariantsPage() {
     setEditingId(v._id);
     setVariantName(v.variantName);
     setSku(v.sku || '');
+    setSlug(v.slug || '');
+    setIsSlugManuallyEdited(!!v.slug);
     setPrice(v.price.toString());
     setStock(v.stock.toString());
     setStatus(v.status || 'ACTIVE');
+    setCategoryId(v.category?._id || v.categoryId || (categories.length > 0 ? categories[0]._id : ''));
+    setDescription(v.description || '');
+    setIsDefault(!!v.isDefault);
+    setDiscountPrice(v.discountPrice ? v.discountPrice.toString() : '');
   };
 
   const handleDelete = async (variantId: string) => {
@@ -218,7 +287,7 @@ export default function VariantsPage() {
       <div className={styles.content}>
         <div className={styles.listSection}>
           <Card>
-            <Table headers={['Variant Info', 'Price', 'Stock', 'Status', 'Actions']}>
+            <Table headers={['Variant Info', 'Category', 'Price', 'Stock', 'Default', 'Actions']}>
               {variants.map((v) => (
                 <tr key={v._id}>
                   <td>
@@ -236,12 +305,17 @@ export default function VariantsPage() {
                       </div>
                     </div>
                   </td>
+                  <td>
+                    <span className={styles.badge}>{v.category?.name || v.categoryId || 'N/A'}</span>
+                  </td>
                   <td>${v.price}</td>
                   <td>{v.stock}</td>
                   <td>
-                    <span className={`${styles.statusBadge} ${v.status === 'ACTIVE' ? styles.active : styles.inactive}`}>
-                      {v.status}
-                    </span>
+                    {v.isDefault ? (
+                      <span className={`${styles.statusBadge} ${styles.active}`}>Yes</span>
+                    ) : (
+                      <span className={styles.statusBadge}>No</span>
+                    )}
                   </td>
                   <td>
                     <div className={styles.actions}>
@@ -268,12 +342,44 @@ export default function VariantsPage() {
           <Card>
             <h2 className={styles.formTitle}>{editingId ? 'Edit Variant' : 'Add New Variant'}</h2>
             <form onSubmit={handleSubmit} className={styles.form}>
-              <Input label="Variant Name" value={variantName} onChange={(e) => setVariantName(e.target.value)} required />
-              {!editingId && <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required />}
+              <div className={styles.row}>
+                <Input label="Variant Name" value={variantName} onChange={(e) => setVariantName(e.target.value)} required />
+                <Input label="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required />
+              </div>
+              <Input 
+                label="Slug" 
+                value={slug} 
+                onChange={(e) => {
+                  setSlug(e.target.value);
+                  setIsSlugManuallyEdited(true);
+                }} 
+              />
               
               <div className={styles.row}>
                 <Input label="Price ($)" type="number" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} required />
+                <Input label="Discount Price ($)" type="number" step="0.01" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} />
+              </div>
+
+              <div className={styles.row}>
                 <Input label="Stock" type="number" value={stock} onChange={(e) => setStock(e.target.value)} required />
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Category</label>
+                  <select className={styles.select} value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
+                    {categories.map(c => (
+                      <option key={c._id} value={c._id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Description</label>
+                <textarea 
+                  className={styles.textarea}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                />
               </div>
 
               {!editingId && (
@@ -283,12 +389,25 @@ export default function VariantsPage() {
                 </div>
               )}
 
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Status</label>
-                <select className={styles.select} value={status} onChange={(e) => setStatus(e.target.value)}>
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="INACTIVE">INACTIVE</option>
-                </select>
+              <div className={styles.row}>
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Status</label>
+                  <select className={styles.select} value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                  </select>
+                </div>
+                
+                <div className={styles.inputGroup} style={{ display: 'flex', alignItems: 'center', marginTop: '1.5rem', gap: '10px' }}>
+                  <input 
+                    type="checkbox" 
+                    id="isDefaultCheckbox" 
+                    checked={isDefault} 
+                    onChange={(e) => setIsDefault(e.target.checked)} 
+                    style={{ width: '18px', height: '18px' }}
+                  />
+                  <label htmlFor="isDefaultCheckbox" className={styles.label} style={{ margin: 0, cursor: 'pointer' }}>Set as Default Variant</label>
+                </div>
               </div>
 
               <div className={styles.formActions}>

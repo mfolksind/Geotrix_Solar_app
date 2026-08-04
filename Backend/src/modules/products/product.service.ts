@@ -20,19 +20,10 @@ export class ProductService {
   ) {}
 
   public async createProduct(payload: CreateProductPayload) {
-    const slug = payload.slug && payload.slug.trim().length ? generateSlug(payload.slug) : generateSlug(payload.name);
-    const existing = await this.repo.findBySlug(slug);
-    if (existing) throw new Error('Product slug already exists');
-
-    const toCreate = { ...payload, slug } as Partial<CreateProductPayload>;
-    return this.repo.create(toCreate as any);
+    return this.repo.create(payload as any);
   }
 
   public async updateProduct(id: string, payload: UpdateProductPayload) {
-    if (payload.slug) payload.slug = generateSlug(payload.slug);
-    if (payload.name) {
-      // optional: enforce name uniqueness
-    }
     return this.repo.update(id, payload as any);
   }
 
@@ -40,17 +31,65 @@ export class ProductService {
     return this.repo.softDelete(id);
   }
 
-  public async getProduct(id: string) {
-    const product = await this.repo.findById(id);
-    return product;
+  public async getProduct(identifier: string) {
+    const variant = await this.variantRepo.findByIdOrSlug(identifier);
+    if (variant) return variant;
+    return this.repo.findById(identifier);
+  }
+
+  public async getRelatedProducts(identifier: string, limit: number = 4) {
+    const variant = await this.variantRepo.findByIdOrSlug(identifier);
+    if (!variant) return [];
+    const categoryId = variant.category ? variant.category.toString() : undefined;
+    const product = typeof variant.product === 'object' ? (variant.product as any)._id : variant.product;
+    return this.variantRepo.findRelated(product.toString(), categoryId, limit);
   }
 
   public async listProducts(query: ListProductsQuery) {
     const sort = parseSort(query.sort);
-    return this.repo.findAll({ search: query.search, category: query.category, status: query.status, page: query.page, limit: query.limit, sort });
+    const variants = await this.variantRepo.findAll({ 
+      search: query.search, 
+      category: query.category, 
+      status: query.status, 
+      page: query.page, 
+      limit: query.limit, 
+      sort,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      inStock: query.inStock
+    });
+    
+    // Fetch images for all variants
+    const variantsWithImages = await Promise.all(
+      variants.map(async (v: any) => {
+        const images = await this.imageRepo.findByVariant(v._id);
+        return {
+          ...(v.toObject ? v.toObject() : v),
+          images,
+        };
+      })
+    );
+    
+    return variantsWithImages;
   }
 
-  public async getVariants(productId: string) {
+  public async getVariants(identifier: string) {
+    let productId = identifier;
+    if (!identifier.match(/^[0-9a-fA-F]{24}$/)) { // If it's a slug
+       const variant = await this.variantRepo.findBySlug(identifier);
+       if (variant) {
+          productId = typeof variant.product === 'object' ? (variant.product as any)._id.toString() : variant.product.toString();
+       }
+    } else {
+       const product = await this.repo.findById(identifier);
+       if (!product) {
+          const variant = await this.variantRepo.findById(identifier);
+          if (variant) {
+             productId = typeof variant.product === 'object' ? (variant.product as any)._id.toString() : variant.product.toString();
+          }
+       }
+    }
+
     const variants = await this.variantRepo.findByProduct(productId);
     
     // Fetch images for all variants
@@ -68,15 +107,33 @@ export class ProductService {
   }
 
   public async createVariant(productId: string, payload: CreateVariantPayload) {
-    // ensure product exists
     const product = await this.repo.findById(productId);
     if (!product) throw new Error('Product not found');
 
-    const toCreate = { ...payload, product: productId };
+    let slug = payload.slug;
+    if (!slug) {
+       slug = generateSlug(`${product.name} ${payload.variantName}`);
+    } else {
+       slug = generateSlug(slug);
+    }
+    
+    let existing = await this.variantRepo.findBySlug(slug);
+    if (existing) {
+       slug = `${slug}-${Math.floor(Math.random() * 10000)}`;
+    }
+
+    const toCreate = { ...payload, slug, product: productId };
     return this.variantRepo.create(toCreate as any);
   }
 
   public async updateVariant(id: string, payload: UpdateVariantPayload) {
+    if (payload.slug) {
+      payload.slug = generateSlug(payload.slug);
+      const existing = await this.variantRepo.findBySlug(payload.slug);
+      if (existing && existing.id !== id) {
+         payload.slug = `${payload.slug}-${Math.floor(Math.random() * 10000)}`;
+      }
+    }
     return this.variantRepo.update(id, payload as any);
   }
 

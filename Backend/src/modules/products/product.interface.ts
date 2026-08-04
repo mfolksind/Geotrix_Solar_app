@@ -2,13 +2,7 @@ import { Document, Types } from 'mongoose';
 
 export interface IProductDocument extends Document {
   name: string;
-  slug: string;
-  description?: string;
-  category?: Types.ObjectId | string;
   brand?: string;
-  thumbnail?: string;
-  price: number;
-  discountPrice?: number;
   status: 'ACTIVE' | 'INACTIVE';
   isDeleted: boolean;
   createdBy?: Types.ObjectId | string;
@@ -20,6 +14,11 @@ export interface IProductDocument extends Document {
 export interface IProductVariantDocument extends Document {
   product: Types.ObjectId | IProductDocument | string;
   variantName: string;
+  slug: string;
+  description?: string;
+  category?: Types.ObjectId | string;
+  thumbnail?: string;
+  isDefault: boolean;
   sku?: string;
   price: number;
   discountPrice?: number;
@@ -28,6 +27,7 @@ export interface IProductVariantDocument extends Document {
   weight?: number;
   dimensions?: string;
   status: 'ACTIVE' | 'INACTIVE';
+  isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

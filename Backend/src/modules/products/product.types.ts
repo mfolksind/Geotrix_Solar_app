@@ -2,24 +2,14 @@ export type ProductStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface CreateProductPayload {
   name: string;
-  slug?: string;
-  description?: string;
-  category?: string;
   brand?: string;
-  thumbnail?: string;
-  price: number;
-  discountPrice?: number;
   status?: ProductStatus;
   createdBy?: string;
 }
 
 export interface UpdateProductPayload {
   name?: string;
-  slug?: string;
-  description?: string;
-  category?: string | null;
   brand?: string;
-  thumbnail?: string;
   status?: ProductStatus;
   updatedBy?: string;
 }
@@ -27,6 +17,11 @@ export interface UpdateProductPayload {
 export interface CreateVariantPayload {
   product: string;
   variantName: string;
+  slug?: string;
+  description?: string;
+  category?: string;
+  thumbnail?: string;
+  isDefault?: boolean;
   sku?: string;
   price: number;
   discountPrice?: number;
@@ -39,6 +34,11 @@ export interface CreateVariantPayload {
 
 export interface UpdateVariantPayload {
   variantName?: string;
+  slug?: string;
+  description?: string;
+  category?: string | null;
+  thumbnail?: string;
+  isDefault?: boolean;
   sku?: string;
   price?: number;
   discountPrice?: number;
@@ -64,4 +64,7 @@ export interface ListProductsQuery {
   category?: string;
   status?: ProductStatus;
   sort?: string; // e.g. 'price:asc' or 'createdAt:desc'
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
 }

@@ -1,10 +1,8 @@
 import OrderModel from '../../modules/orders/models/order.model';
-import { ProductRepository } from '../../modules/products/product.repository';
 import { UserRepository } from '../../modules/users/user.repository';
 import ProductModel from '../../modules/products/product.model';
 
 export class AnalyticsService {
-  private productRepo = new ProductRepository();
   private userRepo = new UserRepository();
 
   public async sales(period: { from?: Date; to?: Date }) {
@@ -27,7 +25,7 @@ export class AnalyticsService {
   }
 
   public async products() {
-    return this.productRepo.findAll({}) ?? [];
+    return ProductModel.find({ isDeleted: false }).exec() ?? [];
   }
 
   public async users() {

@@ -17,7 +17,57 @@ export class ProductVariantRepository {
   }
 
   public async findByProduct(productId: string) {
-    return ProductVariantModel.find({ product: productId }).exec();
+    return ProductVariantModel.find({ product: productId, isDeleted: false }).exec();
+  }
+
+  public async findBySlug(slug: string) {
+    return ProductVariantModel.findOne({ slug, isDeleted: false }).populate('product').exec();
+  }
+
+  public async findByIdOrSlug(identifier: string) {
+    if (Types.ObjectId.isValid(identifier)) {
+      const variant = await ProductVariantModel.findById(identifier).where({ isDeleted: false }).populate('product').exec();
+      if (variant) return variant;
+    }
+    return ProductVariantModel.findOne({ slug: identifier, isDeleted: false }).populate('product').exec();
+  }
+
+  public async findAll(query: { search?: string; category?: string; status?: string; page?: number; limit?: number; sort?: any; minPrice?: number; maxPrice?: number; inStock?: boolean }) {
+    const q: any = { isDeleted: false, isDefault: true };
+    if (query.status) q.status = query.status;
+    if (query.category) q.category = query.category;
+    if (query.search) q.$text = { $search: query.search };
+    
+    if (query.minPrice !== undefined || query.maxPrice !== undefined) {
+      const priceCondition: any = {};
+      if (query.minPrice !== undefined) priceCondition.$gte = query.minPrice;
+      if (query.maxPrice !== undefined) priceCondition.$lte = query.maxPrice;
+      
+      q.$or = [
+        { discountPrice: priceCondition },
+        { discountPrice: { $exists: false }, price: priceCondition },
+        { discountPrice: null, price: priceCondition }
+      ];
+    }
+    
+    if (query.inStock) {
+      q.stock = { $gt: 0 };
+    }
+
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.max(1, query.limit ?? 20);
+    const skip = (page - 1) * limit;
+
+    let cursor = ProductVariantModel.find(q).populate('product').skip(skip).limit(limit);
+    if (query.sort) cursor = cursor.sort(query.sort);
+    
+    return cursor.exec();
+  }
+
+  public async findRelated(productId: string, categoryId?: string, limit: number = 4) {
+    const q: any = { isDeleted: false, product: { $ne: productId }, isDefault: true };
+    if (categoryId) q.category = categoryId;
+    return ProductVariantModel.find(q).populate('product').limit(limit).exec();
   }
 
   public async update(id: string, update: Partial<IProductVariantDocument>) {
@@ -25,6 +75,6 @@ export class ProductVariantRepository {
   }
 
   public async delete(id: string) {
-    return ProductVariantModel.findByIdAndDelete(id).exec();
+    return ProductVariantModel.findByIdAndUpdate(id, { isDeleted: true, status: 'INACTIVE' }, { new: true }).exec();
   }
 }

@@ -10,7 +10,7 @@ export class AdminProductService {
   private service = new ProductService(this.repo, this.variantRepo, this.imageRepo);
 
   public async getAll(query: any) {
-    return this.service.listProducts(query);
+    return this.repo.findAll(query);
   }
 
   public async create(payload: any) {

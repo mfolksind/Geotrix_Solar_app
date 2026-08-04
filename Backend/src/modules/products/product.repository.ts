@@ -12,25 +12,30 @@ export class ProductRepository {
     return ProductModel.findById(id).where({ isDeleted: false }).exec();
   }
 
-  public async findBySlug(slug: string) {
-    return ProductModel.findOne({ slug, isDeleted: false }).exec();
-  }
+  public async findAll(query: any = {}) {
+    const { page = 1, limit = 10, search, status, sort } = query;
+    const filter: any = { isDeleted: false };
+    
+    if (search) {
+      filter.name = { $regex: search, $options: 'i' };
+    }
+    if (status) {
+      filter.status = status;
+    }
 
-  public async findAll(query: { search?: string; category?: string; status?: string; page?: number; limit?: number; sort?: any }) {
-    const q: any = { isDeleted: false };
-    if (query.status) q.status = query.status;
-    if (query.category) q.category = query.category;
-    if (query.search) q.$text = { $search: query.search };
+    let queryObj = ProductModel.find(filter);
+    
+    if (sort) {
+      const [field, order] = sort.split(':');
+      queryObj = queryObj.sort({ [field]: order === 'desc' ? -1 : 1 });
+    } else {
+      queryObj = queryObj.sort({ createdAt: -1 });
+    }
 
-    const page = Math.max(1, query.page ?? 1);
-    const limit = Math.max(1, query.limit ?? 20);
     const skip = (page - 1) * limit;
-
-    let cursor = ProductModel.find(q).skip(skip).limit(limit);
-
-    if (query.sort) cursor = cursor.sort(query.sort);
-    return cursor.exec();
+    return queryObj.skip(skip).limit(limit).exec();
   }
+
 
   public async update(id: string, update: Partial<IProductDocument>) {
     return ProductModel.findByIdAndUpdate(id, update, { new: true }).exec();

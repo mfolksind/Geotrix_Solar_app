@@ -24,20 +24,9 @@ export class CartService {
     if (variantId) {
       variant = await ProductVariantModel.findById(variantId).exec();
     } else {
-      variant = await ProductVariantModel.findOne({ product: productId, status: 'ACTIVE' }).exec();
+      variant = await ProductVariantModel.findOne({ product: productId, status: 'ACTIVE', isDefault: true }).exec();
       if (!variant) {
-        const product = await ProductModel.findById(productId).exec();
-        if (!product) throw new Error('Product not found');
-        if (!product.price || product.price <= 0) throw new Error('Product price is required to add this product to cart');
-
-        variant = await ProductVariantModel.create({
-          product: productId,
-          variantName: 'Default',
-          price: product.price,
-          discountPrice: product.discountPrice,
-          stock: 0,
-          status: 'ACTIVE',
-        });
+        variant = await ProductVariantModel.findOne({ product: productId, status: 'ACTIVE' }).exec();
       }
     }
     if (!variant) throw new Error('Product variant not found');

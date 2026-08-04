@@ -16,7 +16,27 @@ export class ProductController {
   });
 
   public listProducts = asyncHandler(async (req: Request, res: Response) => {
-    const query = req.query as any;
+    const query = { ...req.query } as any;
+    
+    if (query.minPrice !== undefined && query.minPrice !== '') {
+        const parsed = parseFloat(query.minPrice);
+        if (!isNaN(parsed)) query.minPrice = parsed;
+        else delete query.minPrice;
+    } else {
+        delete query.minPrice;
+    }
+
+    if (query.maxPrice !== undefined && query.maxPrice !== '') {
+        const parsed = parseFloat(query.maxPrice);
+        if (!isNaN(parsed)) query.maxPrice = parsed;
+        else delete query.maxPrice;
+    } else {
+        delete query.maxPrice;
+    }
+
+    if (query.inStock === 'true') query.inStock = true;
+    if (query.inStock === 'false') query.inStock = false;
+
     const products = await this.service.listProducts(query);
     res.status(200).json({ success: true, data: products });
   });
@@ -26,6 +46,20 @@ export class ProductController {
     const product = await this.service.getProduct(id);
     res.status(200).json({ success: true, data: product });
   });
+
+  public getRelatedProducts = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 4;
+    const products = await this.service.getRelatedProducts(id, limit);
+    res.status(200).json({ success: true, data: products });
+  });
+
+  public getProductVariants = asyncHandler(async (req: Request, res: Response) => {
+    const { productId } = req.params;
+    const variants = await this.service.getVariants(productId);
+    res.status(200).json({ success: true, data: variants });
+  });
+
 
   public updateProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params;

@@ -12,9 +12,7 @@ import styles from './products.module.css';
 interface Product {
   _id: string;
   name: string;
-  price: number;
-  categoryId: string;
-  thumbnail: string;
+  status: string;
 }
 
 export default function ProductsPage() {
@@ -66,23 +64,15 @@ export default function ProductsPage() {
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <Table headers={['Image', 'Name', 'Price', 'Category ID', 'Actions']}>
+          <Table headers={['Name', 'Status', 'Actions']}>
             {products.map((product) => (
               <tr key={product._id}>
-                <td>
-                  {product.thumbnail ? (
-                    <img 
-                      src={product.thumbnail.startsWith('http') ? product.thumbnail : `${API_URL}${product.thumbnail}`} 
-                      alt={product.name} 
-                      className={styles.productImage} 
-                    />
-                  ) : (
-                    <div className={styles.placeholderImage}>No Img</div>
-                  )}
-                </td>
                 <td style={{ fontWeight: 500 }}>{product.name}</td>
-                <td>${product.price.toLocaleString()}</td>
-                <td><span className={styles.badge}>{product.categoryId}</span></td>
+                <td>
+                  <span className={`${styles.badge} ${product.status === 'ACTIVE' ? styles.active : styles.inactive}`}>
+                    {product.status || 'ACTIVE'}
+                  </span>
+                </td>
                 <td>
                   <div className={styles.actions}>
                     <button 
@@ -112,7 +102,7 @@ export default function ProductsPage() {
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No products found.</td>
+                <td colSpan={3} style={{ textAlign: 'center', padding: '2rem' }}>No product families found.</td>
               </tr>
             )}
           </Table>

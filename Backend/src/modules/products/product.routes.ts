@@ -18,6 +18,8 @@ const controller = new ProductController(service);
 router.post('/', authenticate, authorize('SUPER_ADMIN','ADMIN'), validate(createProductSchema), controller.createProduct);
 router.get('/', validate(listProductsSchema, 'query'), controller.listProducts);
 router.get('/:id', controller.getProduct);
+router.get('/:id/related', controller.getRelatedProducts);
+router.get('/:productId/variants', controller.getProductVariants);
 router.patch('/:id', authenticate, authorize('SUPER_ADMIN','ADMIN'), validate(updateProductSchema), controller.updateProduct);
 router.delete('/:id', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.deleteProduct);
 
