@@ -9,7 +9,7 @@ export class OrderRepository {
 
   public async findById(id: string) {
     if (!Types.ObjectId.isValid(id)) return null;
-    return OrderModel.findById(id).exec();
+    return OrderModel.findById(id).populate('address').exec();
   }
 
   public async findByOrderNumber(orderNumber: string) {
@@ -33,5 +33,9 @@ export class OrderRepository {
 
   public async updateStatus(id: string, status: string, session?: ClientSession) {
     return OrderModel.findByIdAndUpdate(id, { status }, { new: true, session }).exec();
+  }
+
+  public async updatePaymentStatus(id: string, paymentStatus: string, session?: ClientSession) {
+    return OrderModel.findByIdAndUpdate(id, { paymentStatus }, { new: true, session }).exec();
   }
 }

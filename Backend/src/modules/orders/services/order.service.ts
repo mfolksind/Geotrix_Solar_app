@@ -23,34 +23,45 @@ export class OrderService {
     private readonly cartItemRepo: CartItemRepository
   ) {}
 
-  public async createOrder(userId: string, addressId: string, notes?: string) {
-    // load cart
-    const cart = await this.cartRepo.findByUser(userId);
-    if (!cart || cart.totalItems === 0) throw new ApiError(400, 'Cart is empty');
+  public async createOrder(userId: string, addressId: string, clientItems: { variantId: string, quantity: number }[], notes?: string) {
+    if (!clientItems || clientItems.length === 0) throw new ApiError(400, 'Cart is empty');
 
     // validate address
     const address = await AddressModel.findById(addressId).exec();
     if (!address) throw new ApiError(404, 'Address not found');
     if (address.user.toString() !== userId) throw new ApiError(403, 'Address does not belong to user');
 
-    const items = await this.cartItemRepo.findByCart(cart.id);
-    if (!items.length) throw new ApiError(400, 'Cart has no items');
+    let subtotal = 0;
+    const itemsData = [];
 
-    // validate product/variant availability
-    for (const item of items) {
-      const variant = await ProductVariantModel.findById(item.variant).exec();
+    // validate product/variant availability and calculate total
+    for (const item of clientItems) {
+      const variant = await ProductVariantModel.findById(item.variantId).exec();
       if (!variant) throw new ApiError(400, 'Product variant not found');
-      const product = await ProductModel.findById(item.product).exec();
+      
+      const product = await ProductModel.findById(variant.product).exec();
       if (!product || (product as any).isDeleted || (product as any).status !== 'ACTIVE') throw new ApiError(400, 'Product is not available');
+      
       if ((variant.stock ?? 0) < item.quantity) throw new ApiError(400, `Insufficient stock for variant ${variant.id}`);
+      
+      const unitPrice = variant.discountPrice || variant.price;
+      const itemSubtotal = unitPrice * item.quantity;
+      subtotal += itemSubtotal;
+      
+      itemsData.push({
+        product: product.id,
+        variant: variant.id,
+        productName: product.name,
+        variantName: variant.variantName,
+        quantity: item.quantity,
+        unitPrice,
+        subtotal: itemSubtotal
+      });
     }
 
-    const session = await mongoose.startSession();
     try {
-      session.startTransaction();
 
-      const subtotal = cart.totalAmount;
-      const discount = (cart as any).discountAmount ?? 0;
+      const discount = 0; // Or calculate if client provides discount codes
       const taxRate = Number(process.env.ORDER_TAX_RATE ?? 0.0);
       const tax = subtotal * taxRate;
       const shippingCharge = Number(process.env.SHIPPING_CHARGE ?? 0);
@@ -70,44 +81,38 @@ export class OrderService {
         notes,
       } as const;
 
-      const order = await this.orderRepo.create(orderPayload as any, session);
+      const order = await this.orderRepo.create(orderPayload as any);
 
       // build order items
-      const orderItems = items.map((it) => ({
+      const orderItems = itemsData.map((it) => ({
         order: order.id,
         product: it.product,
         variant: it.variant,
-        productName: (it as any).product?.name ?? '',
-        variantName: (it as any).variant?.variantName ?? '',
+        productName: it.productName,
+        variantName: it.variantName,
         quantity: it.quantity,
         unitPrice: it.unitPrice,
         subtotal: it.subtotal,
       }));
 
-      await this.orderItemRepo.createMany(orderItems as any[], session);
+      await this.orderItemRepo.createMany(orderItems as any[]);
 
       // deduct stock
-      for (const it of items) {
-        const variant = await ProductVariantModel.findById(it.variant).session(session).exec();
+      for (const it of itemsData) {
+        const variant = await ProductVariantModel.findById(it.variant).exec();
         if (!variant) throw new ApiError(400, 'Product variant not found during stock deduction');
         const newStock = (variant.stock ?? 0) - it.quantity;
         if (newStock < 0) throw new ApiError(400, 'Insufficient stock during order creation');
-        await ProductVariantModel.findByIdAndUpdate(variant.id, { stock: newStock }, { session }).exec();
+        await ProductVariantModel.findByIdAndUpdate(variant.id, { stock: newStock }).exec();
       }
 
-      // clear cart items and reset cart totals
-      await Promise.all(items.map((i) => this.cartItemRepo.delete(i.id)));
-      await this.cartRepo.clearCart(cart.id);
 
-      await session.commitTransaction();
-      session.endSession();
 
       // return populated order
       const populated = await this.orderRepo.findById(order.id);
       return populated;
     } catch (err) {
-      await session.abortTransaction();
-      session.endSession();
+
       throw ApiError.fromUnknown(err);
     }
   }
@@ -115,7 +120,13 @@ export class OrderService {
   public async getOrder(id: string) {
     const order = await this.orderRepo.findById(id);
     if (!order) throw new ApiError(404, 'Order not found');
-    return order;
+    const items = await this.orderItemRepo.findByOrder(id);
+    
+    // Return order with items array included
+    return {
+      ...order.toObject(),
+      items
+    };
   }
 
   public async getOrders(userId: string, isAdmin: boolean = false) {
@@ -130,6 +141,11 @@ export class OrderService {
     if (!order) throw new ApiError(404, 'Order not found');
     if (order.user.toString() !== userId) throw new ApiError(403, 'Cannot cancel order');
     if (order.status === 'CANCELLED') return order;
+    
+    // Also mark paymentStatus as FAILED if it was pending
+    if (order.paymentStatus === 'PENDING') {
+      await this.orderRepo.updatePaymentStatus(id, 'FAILED');
+    }
     return this.orderRepo.updateStatus(id, 'CANCELLED');
   }
 

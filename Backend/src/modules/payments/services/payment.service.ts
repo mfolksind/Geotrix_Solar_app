@@ -1,116 +1,81 @@
-import mongoose from 'mongoose';
-import { PaymentRepository } from '../repositories/payment.repository';
-import { OrderRepository } from '../../orders/repositories/order.repository';
-import { ApiError } from '../../../common/errors/ApiError';
-import PaymentModel from '../models/payment.model';
-import { CreatePaymentPayload, VerifyPaymentPayload } from '../types/payment.types';
-
-function validateAmount(orderAmount: number, paymentAmount: number) {
-  return Math.abs(orderAmount - paymentAmount) < 0.01;
-}
+import mongoose from "mongoose";
+import { PaymentRepository } from "../repositories/payment.repository";
+import { OrderRepository } from "../../orders/repositories/order.repository";
+import { ApiError } from "../../../common/errors/ApiError";
+import PaymentModel from "../models/payment.model";
+import Razorpay from "razorpay";
 
 export class PaymentService {
-  constructor(private readonly repo: PaymentRepository, private readonly orderRepo: OrderRepository) {}
+    private razorpay: Razorpay;
 
-  public async createPayment(payload: CreatePaymentPayload) {
-    const order = await this.orderRepo.findById(payload.orderId);
-    if (!order) throw new ApiError(404, 'Order not found');
-
-    if (!validateAmount(order.totalAmount, payload.amount)) throw new ApiError(400, 'Payment amount mismatch');
-
-    // prevent duplicate successful payment
-    const existingSuccess = await PaymentModel.findOne({ order: payload.orderId, status: 'SUCCESS' }).exec();
-    if (existingSuccess) throw new ApiError(400, 'Order already has a successful payment');
-
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-
-      const paymentPayload = {
-        order: payload.orderId,
-        user: payload.userId,
-        paymentMethod: payload.paymentMethod,
-        amount: payload.amount,
-        currency: payload.currency ?? 'INR',
-        metadata: payload.metadata ?? {},
-        status: 'PENDING',
-      } as const;
-
-      const payment = await this.repo.create(paymentPayload as Partial<typeof paymentPayload>, session);
-
-      await session.commitTransaction();
-      session.endSession();
-      return payment;
-    } catch (err) {
-      await session.abortTransaction();
-      session.endSession();
-      throw ApiError.fromUnknown(err);
+    constructor(
+        private readonly repo: PaymentRepository,
+        private readonly orderRepo: OrderRepository,
+    ) {
+        this.razorpay = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID || "placeholder_key",
+            key_secret: process.env.RAZORPAY_KEY_SECRET || "placeholder_secret",
+        });
     }
-  }
 
-  public async verifyPayment(payload: VerifyPaymentPayload) {
-    const existing = await this.repo.findByTransactionId(payload.transactionId);
-    if (!existing) throw new ApiError(404, 'Payment record not found');
+    // Removed legacy createPayment as requested
 
-    if (existing.status === 'SUCCESS') throw new ApiError(400, 'Payment already successful');
+    public async createRazorpayOrder(amount: number, currency: string = "INR", receipt: string) {
+        if (!amount || amount < 1) {
+            throw new ApiError(400, "Amount must be at least 1 INR");
+        }
 
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
+        const options = {
+            amount: Math.round(amount * 100), // amount in smallest currency unit (paise)
+            currency,
+            receipt,
+        };
 
-      const updates: Partial<Record<string, unknown>> = {
-        transactionId: payload.transactionId,
-        providerOrderId: payload.providerOrderId,
-        status: payload.status,
-        metadata: payload.metadata ?? existing.metadata,
-      };
-      if (payload.paidAt) updates.paidAt = new Date(payload.paidAt);
-      if (payload.failureReason) updates.failureReason = payload.failureReason;
-
-      const updated = await this.repo.updateStatus(existing.id, payload.status, updates as Partial<Record<string, unknown>>, session);
-
-      if (payload.status === 'SUCCESS') {
-        // update order paymentStatus
-        await this.orderRepo.updateStatus(existing.order.toString(), 'PAID', session as any);
-      }
-
-      await session.commitTransaction();
-      session.endSession();
-      return updated;
-    } catch (err) {
-      await session.abortTransaction();
-      session.endSession();
-      throw ApiError.fromUnknown(err);
+        try {
+            const order = await this.razorpay.orders.create(options);
+            return order;
+        } catch (err) {
+            console.error("Razorpay Error:", err);
+            throw new ApiError(500, "Failed to create Razorpay order");
+        }
     }
-  }
 
-  public async getPayment(id: string) {
-    return PaymentModel.findById(id).populate('order').populate('user').exec();
-  }
+    public async markRazorpaySuccess(orderId: string, transactionId: string, providerOrderId: string, userId: string) {
+        const order = await this.orderRepo.findById(orderId);
+        if (!order) throw new ApiError(404, "Order not found");
 
-  public async getPaymentsByUser(userId: string) {
-    return PaymentModel.find({ user: userId }).sort({ createdAt: -1 }).exec();
-  }
+        const existingSuccess = await PaymentModel.findOne({ order: orderId, status: "SUCCESS" }).exec();
+        if (existingSuccess) throw new ApiError(400, "Order already has a successful payment");
 
-  public async retryPayment(id: string) {
-    const payment = await PaymentModel.findById(id).exec();
-    if (!payment) throw new ApiError(404, 'Payment not found');
-    if (payment.status === 'SUCCESS') throw new ApiError(400, 'Cannot retry a successful payment');
+        try {
+            const paymentPayload = {
+                order: orderId,
+                user: userId,
+                paymentMethod: "RAZORPAY",
+                amount: order.totalAmount,
+                currency: "INR",
+                transactionId,
+                providerOrderId,
+                status: "SUCCESS",
+                paidAt: new Date(),
+            };
 
-    // create a new payment record as retry attempt
-    const retry = await this.repo.create({ order: payment.order, user: payment.user, paymentMethod: payment.paymentMethod, amount: payment.amount, currency: payment.currency, metadata: payment.metadata, status: 'PENDING' } as Partial<Record<string, unknown>>);
-    return retry;
-  }
+            const payment = await this.repo.create(paymentPayload as any);
+            await this.orderRepo.updateStatus(orderId, "PAID");
 
-  public async refundPayment(id: string, amount: number) {
-    const payment = await PaymentModel.findById(id).exec();
-    if (!payment) throw new ApiError(404, 'Payment not found');
-    if (payment.status !== 'SUCCESS') throw new ApiError(400, 'Only successful payments can be refunded');
+            return payment;
+        } catch (err) {
+            throw ApiError.fromUnknown(err);
+        }
+    }
 
-    // NOTE: actual provider refund integration should happen here; we mark refund locally
-    const updated = await this.repo.updateStatus(payment.id, 'REFUNDED', { metadata: { refundedAmount: amount } } as Partial<Record<string, unknown>>);
-    // update order paymentStatus
-    await this.orderRepo.updateStatus(payment.order.toString(), 'REFUNDED');
-    return updated;
-  }
+    public async getPayment(id: string) {
+        return PaymentModel.findById(id).populate("order").populate("user").exec();
+    }
+
+    public async getPaymentsByUser(userId: string) {
+        return PaymentModel.find({ user: userId }).sort({ createdAt: -1 }).exec();
+    }
+
+    // Removed retry and refund methods as requested
 }

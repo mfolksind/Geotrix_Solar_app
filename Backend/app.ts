@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
 import path from "path";
 // import { env } from './src/config/env';
 import applySecurity from "./src/common/middleware/security";
@@ -15,11 +16,10 @@ import { cartRoutes } from "./src/modules/carts";
 import { geotrixBillRoutes } from "./src/modules/geotrixBills";
 import uploadRoutes from "./src/modules/uploads/routes/upload.routes";
 import { leadRoutes } from "./src/modules/leads";
+import { paymentRoutes } from "./src/modules/payments";
 import adminRouter from "./src/admin";
 import errorHandler from "./src/common/errors/errorHandler";
 import notFound from "./src/common/errors/notFound";
-
-dotenv.config();
 
 const app = express();
 
@@ -41,6 +41,7 @@ app.use("/api/carts", cartRoutes);
 app.use("/api/geotrixbills", geotrixBillRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/leads", leadRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use("/admin", adminRouter);
 
 app.use("/api", (req, res) => {

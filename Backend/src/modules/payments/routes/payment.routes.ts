@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import validate from '../../../middlewares/validate.middleware';
-import { createPaymentSchema, verifyPaymentSchema, refundRequestSchema, idParamSchema } from '../validations/payment.validation';
+import { authenticate } from '../../auth/auth.middleware';
+import { z } from 'zod';
+
+const idParamSchema = z.object({ id: z.string().trim().min(1) });
 import { PaymentRepository } from '../repositories/payment.repository';
 import { OrderRepository } from '../../orders/repositories/order.repository';
 import { PaymentService } from '../services/payment.service';
@@ -12,11 +15,9 @@ const orderRepo = new OrderRepository();
 const service = new PaymentService(repo, orderRepo);
 const controller = new PaymentController(service);
 
-router.post('/create', validate(createPaymentSchema), controller.createPayment);
-router.post('/verify', validate(verifyPaymentSchema), controller.verifyPayment);
-router.post('/:id/retry', validate(idParamSchema, 'params'), controller.retryPayment);
-router.post('/:id/refund', validate(idParamSchema, 'params'), validate(refundRequestSchema), controller.refundPayment);
-router.get('/:id', validate(idParamSchema, 'params'), controller.getPayment);
-router.get('/user', controller.getPaymentsByUser);
+router.post('/razorpay/create-order', authenticate, controller.createRazorpayOrder);
+router.post('/razorpay/verify', authenticate, controller.verifyRazorpayPayment);
+router.get('/:id', authenticate, validate(idParamSchema, 'params'), controller.getPayment);
+router.get('/user', authenticate, controller.getPaymentsByUser);
 
 export default router;

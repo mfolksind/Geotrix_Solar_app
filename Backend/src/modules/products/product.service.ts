@@ -33,7 +33,10 @@ export class ProductService {
 
   public async getProduct(identifier: string) {
     const variant = await this.variantRepo.findByIdOrSlug(identifier);
-    if (variant) return variant;
+    if (variant) {
+      const images = await this.imageRepo.findByVariant(String(variant._id || variant.id));
+      return { ...(variant.toObject ? variant.toObject() : variant), images };
+    }
     return this.repo.findById(identifier);
   }
 
@@ -42,7 +45,13 @@ export class ProductService {
     if (!variant) return [];
     const categoryId = variant.category ? variant.category.toString() : undefined;
     const product = typeof variant.product === 'object' ? (variant.product as any)._id : variant.product;
-    return this.variantRepo.findRelated(product.toString(), categoryId, limit);
+    const related = await this.variantRepo.findRelated(product.toString(), categoryId, limit);
+    
+    // Attach images
+    return Promise.all(related.map(async (v: any) => {
+      const images = await this.imageRepo.findByVariant(String(v._id || v.id));
+      return { ...(v.toObject ? v.toObject() : v), images };
+    }));
   }
 
   public async listProducts(query: ListProductsQuery) {
@@ -142,7 +151,18 @@ export class ProductService {
   }
 
   public async uploadImage(payload: UploadImagePayload) {
-    return this.imageRepo.create({ variant: payload.variantId, url: payload.url, publicId: payload.publicId, isPrimary: !!payload.isPrimary, sortOrder: payload.sortOrder ?? 0 });
+    const image = await this.imageRepo.create({ variant: payload.variantId, url: payload.url, publicId: payload.publicId, isPrimary: !!payload.isPrimary, sortOrder: payload.sortOrder ?? 0 });
+    
+    if (payload.isPrimary) {
+      await this.variantRepo.update(payload.variantId, { thumbnail: payload.url } as any);
+    } else {
+      // If no thumbnail exists, set it
+      const variant = await this.variantRepo.findById(payload.variantId);
+      if (variant && !variant.thumbnail) {
+        await this.variantRepo.update(payload.variantId, { thumbnail: payload.url } as any);
+      }
+    }
+    return image;
   }
 
   public async deleteImage(id: string) {

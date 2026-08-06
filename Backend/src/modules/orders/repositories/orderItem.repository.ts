@@ -8,6 +8,6 @@ export class OrderItemRepository {
   }
 
   public async findByOrder(orderId: string) {
-    return OrderItemModel.find({ order: orderId }).exec();
+    return OrderItemModel.find({ order: orderId }).populate('product', 'thumbnail slug').populate('variant', 'images slug').exec();
   }
 }
