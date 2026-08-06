@@ -17,6 +17,7 @@ import { geotrixBillRoutes } from "./src/modules/geotrixBills";
 import uploadRoutes from "./src/modules/uploads/routes/upload.routes";
 import { leadRoutes } from "./src/modules/leads";
 import { paymentRoutes } from "./src/modules/payments";
+import { reviewRoutes } from "./src/modules/reviews";
 import adminRouter from "./src/admin";
 import errorHandler from "./src/common/errors/errorHandler";
 import notFound from "./src/common/errors/notFound";
@@ -42,6 +43,7 @@ app.use("/api/geotrixbills", geotrixBillRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/admin", adminRouter);
 
 app.use("/api", (req, res) => {
