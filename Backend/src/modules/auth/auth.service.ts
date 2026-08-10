@@ -9,12 +9,11 @@ import UserModel from '../users/user.model';
 const REFRESH_TOKEN_EXPIRES_IN_MS = Number(process.env.JWT_REFRESH_COOKIE_MAX_AGE ?? 7 * 24 * 60 * 60 * 1000);
 const PASSWORD_RESET_TOKEN_EXPIRES_IN_MS = Number(process.env.PASSWORD_RESET_TOKEN_EXPIRES_IN_MS ?? 60 * 60 * 1000);
 const EMAIL_VERIFY_TOKEN_EXPIRES_IN_MS = Number(process.env.EMAIL_VERIFY_TOKEN_EXPIRES_IN_MS ?? 24 * 60 * 60 * 1000);
-const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
 
 export class AuthService {
   constructor(private readonly authRepository: AuthRepository) {}
 
-  public async register(payload: RegisterPayload): Promise<{ user: unknown; tokens: AuthTokens }> {
+  public async register(payload: RegisterPayload, origin: string): Promise<{ user: unknown; tokens: AuthTokens }> {
     const existingUser = await this.authRepository.findByEmail(payload.email);
     if (existingUser) {
       throw new Error('Email is already registered');
@@ -41,8 +40,8 @@ export class AuthService {
     await sendEmail({
       to: user.email,
       subject: 'Verify your email',
-      text: `Verify your account by visiting ${frontendUrl}/verify-email?token=${emailToken}`,
-      html: `<p>Verify your account by visiting <a href="${frontendUrl}/verify-email?token=${emailToken}">${frontendUrl}/verify-email</a></p>`,
+      text: `Verify your account by visiting ${origin}/verify-email?token=${emailToken}`,
+      html: `<p>Verify your account by visiting <a href="${origin}/verify-email?token=${emailToken}">${origin}/verify-email</a></p>`,
     });
 
     const accessToken = generateAccessToken(user.id);
@@ -53,7 +52,7 @@ export class AuthService {
     return { user, tokens: { accessToken, refreshToken } };
   }
 
-  public async registerAdmin(payload: RegisterAdminPayload): Promise<{ user: unknown; tokens: AuthTokens }> {
+  public async registerAdmin(payload: RegisterAdminPayload, origin: string): Promise<{ user: unknown; tokens: AuthTokens }> {
     const adminKey = process.env.ADMIN_REGISTRATION_KEY;
     if (!adminKey) {
       throw new Error('Admin registration is not configured');
@@ -89,8 +88,8 @@ export class AuthService {
     await sendEmail({
       to: user.email,
       subject: 'Verify your email',
-      text: `Verify your account by visiting ${frontendUrl}/verify-email?token=${emailToken}`,
-      html: `<p>Verify your account by visiting <a href="${frontendUrl}/verify-email?token=${emailToken}">${frontendUrl}/verify-email</a></p>`,
+      text: `Verify your account by visiting ${origin}/verify-email?token=${emailToken}`,
+      html: `<p>Verify your account by visiting <a href="${origin}/verify-email?token=${emailToken}">${origin}/verify-email</a></p>`,
     });
 
     const accessToken = generateAccessToken(user.id);
@@ -179,7 +178,7 @@ export class AuthService {
     await this.authRepository.deleteRefreshToken(tokenHash);
   }
 
-  public async forgotPassword(payload: ForgotPasswordPayload): Promise<void> {
+  public async forgotPassword(payload: ForgotPasswordPayload, origin: string): Promise<void> {
     const user = await this.authRepository.findByEmail(payload.email);
     if (!user) {
       return;
@@ -193,8 +192,8 @@ export class AuthService {
     await sendEmail({
       to: user.email,
       subject: 'Reset your password',
-      text: `Use this link to reset your password: ${frontendUrl}/reset-password?token=${resetToken}`,
-      html: `<p>Use this link to reset your password: <a href="${frontendUrl}/reset-password?token=${resetToken}">${frontendUrl}/reset-password</a></p>`,
+      text: `Use this link to reset your password: ${origin}/reset-password?token=${resetToken}`,
+      html: `<p>Use this link to reset your password: <a href="${origin}/reset-password?token=${resetToken}">${origin}/reset-password</a></p>`,
     });
   }
 
@@ -221,7 +220,7 @@ export class AuthService {
     await this.authRepository.deleteEmailVerificationToken(tokenHash);
   }
 
-  public async resendVerificationEmail(email: string): Promise<void> {
+  public async resendVerificationEmail(email: string, origin: string): Promise<void> {
     const user = await this.authRepository.findByEmail(email);
     if (!user) {
       throw new Error('User not found');
@@ -239,8 +238,8 @@ export class AuthService {
     await sendEmail({
       to: user.email,
       subject: 'Verify your email',
-      text: `Verify your account by visiting ${frontendUrl}/verify-email?token=${verificationToken}`,
-      html: `<p>Verify your account by visiting <a href="${frontendUrl}/verify-email?token=${verificationToken}">${frontendUrl}/verify-email</a></p>`,
+      text: `Verify your account by visiting ${origin}/verify-email?token=${verificationToken}`,
+      html: `<p>Verify your account by visiting <a href="${origin}/verify-email?token=${verificationToken}">${origin}/verify-email</a></p>`,
     });
   }
 }

@@ -17,7 +17,7 @@ export default function EditProductPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const prodsRes = await fetchApi('/admin/products');
+        const prodsRes = await fetchApi('/admin/products?limit=1000000');
         
         if (prodsRes.success) {
           const product = prodsRes.data.find((p: any) => p._id === id);

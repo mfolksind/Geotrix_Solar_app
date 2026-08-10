@@ -62,6 +62,7 @@ export interface ListProductsQuery {
   limit?: number;
   search?: string;
   category?: string;
+  brand?: string;
   status?: ProductStatus;
   sort?: string; // e.g. 'price:asc' or 'createdAt:desc'
   minPrice?: number;

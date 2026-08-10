@@ -86,7 +86,7 @@ export default function VariantsPage() {
 
   const loadVariants = async () => {
     try {
-      const res = await fetchApi(`/admin/products/${productId}/variants`);
+      const res = await fetchApi(`/admin/products/${productId}/variants?limit=1000000`);
       if (res.success) {
         setVariants(res.data);
       }
@@ -108,7 +108,7 @@ export default function VariantsPage() {
         console.error('Failed to load product', err);
       }
       try {
-        const catRes = await fetchApi('/api/categories');
+        const catRes = await fetchApi('/api/categories?limit=1000000');
         if (catRes.success) {
           setCategories(catRes.data);
           if (catRes.data.length > 0) setCategoryId(catRes.data[0]._id);
@@ -117,7 +117,7 @@ export default function VariantsPage() {
         console.error('Failed to load categories', err);
       }
       try {
-        const allVarRes = await fetchApi('/api/products?limit=1000');
+        const allVarRes = await fetchApi('/api/products?limit=1000000');
         if (allVarRes.success && allVarRes.data?.data) {
           setAllVariants(allVarRes.data.data);
         }

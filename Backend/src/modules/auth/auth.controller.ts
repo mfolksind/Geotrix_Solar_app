@@ -2,13 +2,15 @@ import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import { AuthService } from './auth.service';
 import { RegisterPayload, RegisterAdminPayload, LoginPayload, GoogleLoginPayload, ForgotPasswordPayload, ResetPasswordPayload, VerifyEmailPayload } from './auth.types';
+import { env } from '../../config/env';
 
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   public register = asyncHandler(async (req: Request, res: Response) => {
     const payload = req.body as RegisterPayload;
-    const result = await this.authService.register(payload);
+    const origin = req.headers.origin || env.CLIENT_URLS[0] || 'http://localhost:3000';
+    const result = await this.authService.register(payload, origin);
 
     res.status(201).json({
       success: true,
@@ -19,7 +21,8 @@ export class AuthController {
 
   public registerAdmin = asyncHandler(async (req: Request, res: Response) => {
     const payload = req.body as RegisterAdminPayload;
-    const result = await this.authService.registerAdmin(payload);
+    const origin = req.headers.origin || env.CLIENT_URLS[0] || 'http://localhost:3000';
+    const result = await this.authService.registerAdmin(payload, origin);
 
     res.status(201).json({
       success: true,
@@ -96,7 +99,8 @@ export class AuthController {
 
   public forgotPassword = asyncHandler(async (req: Request, res: Response) => {
     const payload = req.body as ForgotPasswordPayload;
-    await this.authService.forgotPassword(payload);
+    const origin = req.headers.origin || env.CLIENT_URLS[0] || 'http://localhost:3000';
+    await this.authService.forgotPassword(payload, origin);
 
     res.status(200).json({
       success: true,
@@ -129,7 +133,8 @@ export class AuthController {
 
   public resendVerificationEmail = asyncHandler(async (req: Request, res: Response) => {
     const { email } = req.body as { email: string };
-    await this.authService.resendVerificationEmail(email);
+    const origin = req.headers.origin || env.CLIENT_URLS[0] || 'http://localhost:3000';
+    await this.authService.resendVerificationEmail(email, origin);
 
     res.status(200).json({
       success: true,

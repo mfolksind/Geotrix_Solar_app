@@ -1,6 +1,7 @@
 import ProductVariantModel from './productVariant.model';
 import { IProductVariantDocument } from './product.interface';
 import { Types } from 'mongoose';
+import ProductModel from './product.model';
 
 export class ProductVariantRepository {
   public async create(payload: Partial<IProductVariantDocument>) {
@@ -32,11 +33,17 @@ export class ProductVariantRepository {
     return ProductVariantModel.findOne({ slug: identifier, isDeleted: false }).populate('product').exec();
   }
 
-  public async findAll(query: { search?: string; category?: string; status?: string; page?: number; limit?: number; sort?: any; minPrice?: number; maxPrice?: number; inStock?: boolean }) {
+  public async findAll(query: { search?: string; category?: string; status?: string; brand?: string; page?: number; limit?: number; sort?: any; minPrice?: number; maxPrice?: number; inStock?: boolean }) {
     const q: any = { isDeleted: false, isDefault: true };
     if (query.status) q.status = query.status;
     if (query.category) q.category = query.category;
     if (query.search) q.$text = { $search: query.search };
+    
+    if (query.brand) {
+      const products = await ProductModel.find({ brand: query.brand }).select('_id').lean().exec();
+      const productIds = products.map((p: any) => p._id);
+      q.product = { $in: productIds };
+    }
     
     if (query.minPrice !== undefined || query.maxPrice !== undefined) {
       const priceCondition: any = {};

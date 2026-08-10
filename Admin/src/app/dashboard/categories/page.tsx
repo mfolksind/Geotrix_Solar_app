@@ -24,7 +24,7 @@ export default function CategoriesPage() {
 
   const loadCategories = async () => {
     try {
-      const response = await fetchApi('/api/categories');
+      const response = await fetchApi('/api/categories?limit=1000000');
       if (response.success) {
         setCategories(response.data);
       }

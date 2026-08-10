@@ -21,10 +21,18 @@ export function applySecurity(app: Application): void {
         }),
     );
 
-    // CORS - allow only client URL
+    // CORS - allow configured client URLs
     app.use(
         cors({
-            origin: [env.CLIENT_URL, "http://localhost:3001"],
+            origin: function (origin, callback) {
+                // allow requests with no origin (like mobile apps or curl requests)
+                if (!origin) return callback(null, true);
+                if (env.CLIENT_URLS.includes(origin)) {
+                    callback(null, true);
+                } else {
+                    callback(new Error("Not allowed by CORS"));
+                }
+            },
             credentials: true,
         }),
     );
@@ -34,10 +42,17 @@ export function applySecurity(app: Application): void {
 
     // Rate limiter - basic sizing, can be tuned via environment if needed
     const limiter = rateLimit({
-        windowMs: 15 * 60 * 1000, // 15 minutes
+        windowMs: 1 * 60 * 1000, // 15 minutes
         max: 100, // limit each IP to 100 requests per windowMs
         standardHeaders: true,
         legacyHeaders: false,
+        skip: (req) => {
+            const origin = req.headers.origin;
+            if (origin && (origin.includes("3000") || origin.toLowerCase().includes("admin"))) {
+                return true; // Bypass rate limit for admin panel
+            }
+            return false;
+        },
     });
     app.use(limiter);
 

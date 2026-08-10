@@ -64,6 +64,7 @@ export class ProductService {
       search: query.search, 
       category: query.category, 
       status: query.status, 
+      brand: query.brand,
       page, 
       limit, 
       sort,

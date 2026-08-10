@@ -66,6 +66,7 @@ export const listProductsSchema = z.object({
   limit: z.preprocess((v) => Number(v), z.number().int().min(1)).optional(),
   search: z.string().trim().optional(),
   category: z.string().trim().optional(),
+  brand: z.string().trim().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
   sort: z.string().trim().optional(),
 });
