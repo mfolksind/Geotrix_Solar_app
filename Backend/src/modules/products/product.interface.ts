@@ -27,6 +27,9 @@ export interface IProductVariantDocument extends Document {
   unit?: string;
   weight?: number;
   dimensions?: string;
+  relatedSystems?: Types.ObjectId[] | string[];
+  compatibleProducts?: Types.ObjectId[] | string[];
+  recommendedProducts?: Types.ObjectId[] | string[];
   status: 'ACTIVE' | 'INACTIVE';
   isDeleted: boolean;
   createdAt: Date;

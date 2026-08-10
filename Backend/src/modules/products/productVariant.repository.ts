@@ -61,7 +61,12 @@ export class ProductVariantRepository {
     let cursor = ProductVariantModel.find(q).populate('product').skip(skip).limit(limit);
     if (query.sort) cursor = cursor.sort(query.sort);
     
-    return cursor.exec();
+    const [data, total] = await Promise.all([
+      cursor.exec(),
+      ProductVariantModel.countDocuments(q).exec()
+    ]);
+
+    return { data, total };
   }
 
   public async findRelated(productId: string, categoryId?: string, limit: number = 4) {

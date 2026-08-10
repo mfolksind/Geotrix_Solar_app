@@ -34,6 +34,7 @@ export class ProductService {
   public async getProduct(identifier: string) {
     const variant = await this.variantRepo.findByIdOrSlug(identifier);
     if (variant) {
+      await variant.populate(['relatedSystems', 'compatibleProducts', 'recommendedProducts']);
       const images = await this.imageRepo.findByVariant(String(variant._id || variant.id));
       return { ...(variant.toObject ? variant.toObject() : variant), images };
     }
@@ -56,12 +57,15 @@ export class ProductService {
 
   public async listProducts(query: ListProductsQuery) {
     const sort = parseSort(query.sort);
-    const variants = await this.variantRepo.findAll({ 
+    const page = query.page ? Math.max(1, Number(query.page)) : 1;
+    const limit = query.limit ? Math.max(1, Number(query.limit)) : 20;
+
+    const { data: variants, total } = await this.variantRepo.findAll({ 
       search: query.search, 
       category: query.category, 
       status: query.status, 
-      page: query.page, 
-      limit: query.limit, 
+      page, 
+      limit, 
       sort,
       minPrice: query.minPrice,
       maxPrice: query.maxPrice,
@@ -79,7 +83,13 @@ export class ProductService {
       })
     );
     
-    return variantsWithImages;
+    return {
+      data: variantsWithImages,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
   public async getVariants(identifier: string) {

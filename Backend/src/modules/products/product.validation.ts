@@ -28,6 +28,9 @@ export const createVariantSchema = z.object({
   weight: z.number().optional(),
   dimensions: z.string().trim().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
+  relatedSystems: z.array(z.string()).optional(),
+  compatibleProducts: z.array(z.string()).optional(),
+  recommendedProducts: z.array(z.string()).optional(),
 });
 
 export const updateVariantSchema = z.object({
@@ -46,6 +49,9 @@ export const updateVariantSchema = z.object({
   weight: z.number().optional(),
   dimensions: z.string().trim().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
+  relatedSystems: z.array(z.string()).optional(),
+  compatibleProducts: z.array(z.string()).optional(),
+  recommendedProducts: z.array(z.string()).optional(),
 });
 
 export const uploadImagesSchema = z.object({

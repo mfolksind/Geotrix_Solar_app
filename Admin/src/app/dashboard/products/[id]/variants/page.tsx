@@ -35,6 +35,7 @@ export default function VariantsPage() {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [product, setProduct] = useState<any>(null);
+  const [allVariants, setAllVariants] = useState<Variant[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImg, setIsUploadingImg] = useState(false);
@@ -57,6 +58,9 @@ export default function VariantsPage() {
   const [description, setDescription] = useState('');
   const [shortDescription, setShortDescription] = useState('');
   const [isDefault, setIsDefault] = useState(false);
+  const [relatedSystems, setRelatedSystems] = useState<string[]>([]);
+  const [compatibleProducts, setCompatibleProducts] = useState<string[]>([]);
+  const [recommendedProducts, setRecommendedProducts] = useState<string[]>([]);
 
   const resetForm = () => {
     setEditingId(null);
@@ -75,6 +79,9 @@ export default function VariantsPage() {
     setDescription('');
     setShortDescription('');
     setIsDefault(false);
+    setRelatedSystems([]);
+    setCompatibleProducts([]);
+    setRecommendedProducts([]);
   };
 
   const loadVariants = async () => {
@@ -109,6 +116,14 @@ export default function VariantsPage() {
       } catch (err) {
         console.error('Failed to load categories', err);
       }
+      try {
+        const allVarRes = await fetchApi('/api/products?limit=1000');
+        if (allVarRes.success && allVarRes.data?.data) {
+          setAllVariants(allVarRes.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to load all variants for relationships', err);
+      }
       await loadVariants();
     };
     init();
@@ -142,7 +157,10 @@ export default function VariantsPage() {
         categoryId: categoryId || undefined,
         description,
         shortDescription,
-        isDefault
+        isDefault,
+        relatedSystems,
+        compatibleProducts,
+        recommendedProducts
       };
 
       if (editingId) {
@@ -160,7 +178,10 @@ export default function VariantsPage() {
             categoryId: categoryId || undefined,
             description,
             shortDescription,
-            isDefault
+            isDefault,
+            relatedSystems,
+            compatibleProducts,
+            recommendedProducts
           }),
         });
         if (res.success) {
@@ -203,6 +224,16 @@ export default function VariantsPage() {
     setShortDescription(v.shortDescription || '');
     setIsDefault(!!v.isDefault);
     setDiscountPrice(v.discountPrice ? v.discountPrice.toString() : '');
+    
+    // Extract IDs if populated, or use strings directly
+    const extractIds = (arr: any) => {
+        if (!arr) return [];
+        return arr.map((item: any) => typeof item === 'object' ? item._id : item);
+    };
+    
+    setRelatedSystems(extractIds((v as any).relatedSystems));
+    setCompatibleProducts(extractIds((v as any).compatibleProducts));
+    setRecommendedProducts(extractIds((v as any).recommendedProducts));
     
     // Scroll to form nicely
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -406,6 +437,85 @@ export default function VariantsPage() {
                                 <option value="ACTIVE">ACTIVE</option>
                                 <option value="INACTIVE">INACTIVE</option>
                             </select>
+                        </div>
+                    </div>
+
+                    {/* Relationship Selection */}
+                    <div className="border-t border-border py-6 my-6 space-y-6">
+                        <h3 className="font-semibold text-foreground">Product Relationships</h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Related Systems */}
+                            <div className="bg-surface rounded-md border border-border p-4">
+                                <label className="block text-sm font-medium text-foreground/90 mb-3">Related Systems</label>
+                                <div className="max-h-48 overflow-y-auto space-y-2.5 pr-2">
+                                    {allVariants.map(v => (
+                                        <label key={`rel-${v._id}`} className="flex items-start gap-2 text-sm cursor-pointer group">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={relatedSystems.includes(v._id)}
+                                                onChange={(e) => {
+                                                    if(e.target.checked) setRelatedSystems([...relatedSystems, v._id]);
+                                                    else setRelatedSystems(relatedSystems.filter(id => id !== v._id));
+                                                }}
+                                                className="mt-0.5 rounded border-gray-300 text-[#57c5cc] focus:ring-[#57c5cc] transition-colors cursor-pointer"
+                                            />
+                                            <span className="text-foreground/80 group-hover:text-foreground transition-colors leading-tight">
+                                                {v.variantName} <span className="text-foreground/50 text-xs block truncate" title={v.sku}>({v.sku})</span>
+                                            </span>
+                                        </label>
+                                    ))}
+                                    {allVariants.length === 0 && <span className="text-xs text-foreground/50">No variants found.</span>}
+                                </div>
+                            </div>
+
+                            {/* Compatible Products */}
+                            <div className="bg-surface rounded-md border border-border p-4">
+                                <label className="block text-sm font-medium text-foreground/90 mb-3">Compatible Products</label>
+                                <div className="max-h-48 overflow-y-auto space-y-2.5 pr-2">
+                                    {allVariants.map(v => (
+                                        <label key={`com-${v._id}`} className="flex items-start gap-2 text-sm cursor-pointer group">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={compatibleProducts.includes(v._id)}
+                                                onChange={(e) => {
+                                                    if(e.target.checked) setCompatibleProducts([...compatibleProducts, v._id]);
+                                                    else setCompatibleProducts(compatibleProducts.filter(id => id !== v._id));
+                                                }}
+                                                className="mt-0.5 rounded border-gray-300 text-[#57c5cc] focus:ring-[#57c5cc] transition-colors cursor-pointer"
+                                            />
+                                            <span className="text-foreground/80 group-hover:text-foreground transition-colors leading-tight">
+                                                {v.variantName} <span className="text-foreground/50 text-xs block truncate" title={v.sku}>({v.sku})</span>
+                                            </span>
+                                        </label>
+                                    ))}
+                                    {allVariants.length === 0 && <span className="text-xs text-foreground/50">No variants found.</span>}
+                                </div>
+                            </div>
+
+                            {/* Recommended Products */}
+                            <div className="bg-surface rounded-md border border-border p-4">
+                                <label className="block text-sm font-medium text-foreground/90 mb-3">Recommended Products</label>
+                                <div className="max-h-48 overflow-y-auto space-y-2.5 pr-2">
+                                    {allVariants.map(v => (
+                                        <label key={`rec-${v._id}`} className="flex items-start gap-2 text-sm cursor-pointer group">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={recommendedProducts.includes(v._id)}
+                                                onChange={(e) => {
+                                                    if(e.target.checked) setRecommendedProducts([...recommendedProducts, v._id]);
+                                                    else setRecommendedProducts(recommendedProducts.filter(id => id !== v._id));
+                                                }}
+                                                className="mt-0.5 rounded border-gray-300 text-[#57c5cc] focus:ring-[#57c5cc] transition-colors cursor-pointer"
+                                            />
+                                            <span className="text-foreground/80 group-hover:text-foreground transition-colors leading-tight">
+                                                {v.variantName} <span className="text-foreground/50 text-xs block truncate" title={v.sku}>({v.sku})</span>
+                                            </span>
+                                        </label>
+                                    ))}
+                                    {allVariants.length === 0 && <span className="text-xs text-foreground/50">No variants found.</span>}
+                                </div>
+                            </div>
                         </div>
                     </div>
 

@@ -9,6 +9,7 @@ export default function EditProductPage() {
   const router = useRouter();
   const { id } = useParams();
   const [name, setName] = useState('');
+  const [brand, setBrand] = useState('Geotrix');
   const [status, setStatus] = useState('ACTIVE');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,7 @@ export default function EditProductPage() {
           const product = prodsRes.data.find((p: any) => p._id === id);
           if (product) {
             setName(product.name);
+            setBrand(product.brand || 'Geotrix');
             setStatus(product.status || 'ACTIVE');
           }
         }
@@ -40,6 +42,7 @@ export default function EditProductPage() {
     try {
       const payload = {
         name,
+        brand,
         status
       };
 
@@ -113,6 +116,22 @@ export default function EditProductPage() {
                             placeholder="e.g. Copper Lightning Arrester"
                             className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all shadow-sm"
                         />
+                    </div>
+
+                    <div>
+                        <label htmlFor="brand" className="block text-sm font-medium text-foreground/90 mb-1.5">
+                            Brand
+                        </label>
+                        <select
+                            id="brand"
+                            value={brand}
+                            onChange={(e) => setBrand(e.target.value)}
+                            required
+                            className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all shadow-sm"
+                        >
+                            <option value="Geotrix">Geotrix</option>
+                            <option value="Thermox">Thermox</option>
+                        </select>
                     </div>
 
                     <div>
