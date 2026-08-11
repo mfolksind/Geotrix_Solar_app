@@ -23,7 +23,7 @@ const raw = {
     SMTP_PORT: getEnv(process.env.SMTP_PORT, process.env.EMAIL_PORT, "587"),
     SMTP_USER: getEnv(process.env.SMTP_USER, process.env.EMAIL_USER),
     SMTP_PASS: getEnv(process.env.SMTP_PASS, process.env.EMAIL_PASS),
-    CLIENT_URLS: getEnv(process.env.CLIENT_URL, process.env.FRONTEND_URL, "http://localhost:3000", "http://localhost:3001")
+    CLIENT_URLS: getEnv(process.env.CLIENT_URL)
         .split(",")
         .map((url) => url.trim())
         .filter(Boolean),
