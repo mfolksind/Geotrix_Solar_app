@@ -38,7 +38,7 @@ export default function AddressesPage() {
   const loadAddresses = async () => {
     setLoading(true);
     try {
-      const response = await fetchApi('/api/addresses');
+      const response = await fetchApi('/api/addresses?all=true');
       if (response.success) {
         const data = response.data?.items || response.data?.data || response.data;
         setAddresses(Array.isArray(data) ? data : []);

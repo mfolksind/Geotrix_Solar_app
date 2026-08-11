@@ -17,8 +17,9 @@ export class AddressController {
 
   public getAddresses = asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id as string;
+    const fetchAll = req.query.all === 'true';
     const isAdmin = ['admin', 'super_admin'].includes(req.user?.role?.toLowerCase() || '');
-    const addresses = await this.service.getAddresses(userId, isAdmin);
+    const addresses = await this.service.getAddresses(userId, isAdmin && fetchAll);
     res.status(200).json({ success: true, data: addresses });
   });
 

@@ -34,7 +34,7 @@ export default function OrdersPage() {
   const loadOrders = async () => {
     setLoading(true);
     try {
-      const response = await fetchApi('/api/orders');
+      const response = await fetchApi('/api/orders?all=true');
       if (response.success) {
         const data = response.data?.items || response.data?.data || response.data;
         setOrders(Array.isArray(data) ? data : []);

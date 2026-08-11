@@ -17,8 +17,9 @@ export class OrderController {
 
   public getOrders = asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id as string;
+    const fetchAll = req.query.all === 'true';
     const isAdmin = ['admin', 'super_admin'].includes(req.user?.role?.toLowerCase() || '');
-    const orders = await this.service.getOrders(userId, isAdmin);
+    const orders = await this.service.getOrders(userId, isAdmin && fetchAll);
     res.status(200).json({ success: true, data: orders });
   });
 
