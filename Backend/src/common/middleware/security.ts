@@ -21,34 +21,13 @@ export function applySecurity(app: Application): void {
         }),
     );
 
-    // CORS - allow configured client URLs
+    // CORS - automatically allow and reflect requesting origin
     app.use(
         cors({
-            origin: [
-                "https://admin.mfolks.com",
-                "https://mfolksgeotrix.com",
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "https://mfolks.com",
-                "https://www.mfolks.com",
-            ],
+            origin: true,
             credentials: true,
         }),
     );
-    // app.use(
-    //     cors({
-    //         origin: function (origin, callback) {
-    //             // allow requests with no origin (like mobile apps or curl requests)
-    //             if (!origin) return callback(null, true);
-    //             if (env.CLIENT_URLS.includes(origin)) {
-    //                 callback(null, true);
-    //             } else {
-    //                 callback(new Error("Not allowed by CORS"));
-    //             }
-    //         },
-    //         credentials: true,
-    //     }),
-    // );
 
     // Compression
     app.use(compression());
