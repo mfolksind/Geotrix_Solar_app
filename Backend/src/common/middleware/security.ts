@@ -34,8 +34,8 @@ export function applySecurity(app: Application): void {
 
     // Rate limiter - basic sizing, can be tuned via environment if needed
     const limiter = rateLimit({
-        windowMs: 1 * 60 * 1000, // 15 minutes
-        max: 100, // limit each IP to 100 requests per windowMs
+        windowMs: 1 * 60 * 1000,
+        max: 250, // limit each IP to 100 requests per windowMs
         standardHeaders: true,
         legacyHeaders: false,
         skip: (req) => {
