@@ -31,7 +31,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=6000
+ENV PORT=4000
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 expressjs
@@ -47,6 +47,6 @@ RUN chown -R expressjs:nodejs public logs
 
 USER expressjs
 
-EXPOSE 6000
+EXPOSE 4000
 
 CMD ["node", "dist/server.js"]
