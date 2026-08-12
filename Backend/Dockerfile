@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 RUN corepack enable pnpm
 COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Stage 2: Build the application
 FROM base AS builder
@@ -15,6 +15,7 @@ WORKDIR /app
 RUN corepack enable pnpm
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ENV CI=1
 RUN pnpm run build
 
 # Stage 3: Install production dependencies only
@@ -23,7 +24,7 @@ RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 RUN corepack enable pnpm
 COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # Stage 4: Production server
 FROM base AS runner
