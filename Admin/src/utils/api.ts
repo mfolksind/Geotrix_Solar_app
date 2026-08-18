@@ -1,4 +1,3 @@
-// export const API_URL = typeof window !== 'undefined' ? `http://${window.location.hostname}4000` : "http://localhost4000";
 export const API_URL = process.env.NODE_ENV === "production" ? "https://api.mfolks.com" : "http://localhost:4000";
 
 export const getAuthToken = () => {
