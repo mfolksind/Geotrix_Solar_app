@@ -2,7 +2,8 @@ import { Document, Types } from 'mongoose';
 
 export interface IProductDocument extends Document {
   name: string;
-  brand?: string;
+  family?: Types.ObjectId | string;
+  category?: Types.ObjectId | string;
   status: 'ACTIVE' | 'INACTIVE';
   isDeleted: boolean;
   createdBy?: Types.ObjectId | string;
@@ -17,7 +18,6 @@ export interface IProductVariantDocument extends Document {
   slug: string;
   description?: string;
   shortDescription?: string;
-  category?: Types.ObjectId | string;
   thumbnail?: string;
   isDefault: boolean;
   sku?: string;

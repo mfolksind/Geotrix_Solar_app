@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchApi } from '../../../../utils/api';
 import { ArrowLeft, Save, Box } from 'lucide-react';
@@ -8,8 +8,21 @@ import { ArrowLeft, Save, Box } from 'lucide-react';
 export default function AddProductPage() {
   const router = useRouter();
   const [name, setName] = useState('');
-  const [brand, setBrand] = useState('Geotrix');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const loadDependencies = async () => {
+      try {
+        const catRes = await fetchApi('/api/categories?limit=1000000');
+        if (catRes.success) setCategories(catRes.data);
+      } catch (err) {
+        console.error('Failed to load families or categories', err);
+      }
+    };
+    loadDependencies();
+  }, []);
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +30,7 @@ export default function AddProductPage() {
     try {
       const payload = {
         name,
-        brand
+        category
       };
 
       const res = await fetchApi('/admin/products', {
@@ -81,19 +94,21 @@ export default function AddProductPage() {
                     />
                 </div>
 
+
+
                 <div>
-                    <label htmlFor="brand" className="block text-sm font-medium text-foreground/90 mb-1.5">
-                        Brand
+                    <label htmlFor="category" className="block text-sm font-medium text-foreground/90 mb-1.5">
+                        Category
                     </label>
                     <select
-                        id="brand"
-                        value={brand}
-                        onChange={(e) => setBrand(e.target.value)}
+                        id="category"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
                         required
                         className="w-full px-4 py-2.5 rounded-lg border border-border bg-surface text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all shadow-sm"
                     >
-                        <option value="Geotrix">Geotrix</option>
-                        <option value="Thermox">Thermox</option>
+                        <option value="">Select a category</option>
+                        {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                     </select>
                 </div>
 

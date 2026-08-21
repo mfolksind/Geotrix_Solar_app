@@ -33,14 +33,16 @@ export class ProductVariantRepository {
     return ProductVariantModel.findOne({ slug: identifier, isDeleted: false }).populate('product').exec();
   }
 
-  public async findAll(query: { search?: string; category?: string; status?: string; brand?: string; page?: number; limit?: number; sort?: any; minPrice?: number; maxPrice?: number; inStock?: boolean }) {
+  public async findAll(query: { search?: string; category?: string; status?: string; family?: string; page?: number; limit?: number; sort?: any; minPrice?: number; maxPrice?: number; inStock?: boolean }) {
     const q: any = { isDeleted: false, isDefault: true };
     if (query.status) q.status = query.status;
-    if (query.category) q.category = query.category;
     if (query.search) q.$text = { $search: query.search };
     
-    if (query.brand) {
-      const products = await ProductModel.find({ brand: query.brand }).select('_id').lean().exec();
+    if (query.family || query.category) {
+      const pQuery: any = {};
+      if (query.family) pQuery.family = query.family;
+      if (query.category) pQuery.category = query.category;
+      const products = await ProductModel.find(pQuery).select('_id').lean().exec();
       const productIds = products.map((p: any) => p._id);
       q.product = { $in: productIds };
     }
@@ -78,7 +80,10 @@ export class ProductVariantRepository {
 
   public async findRelated(productId: string, categoryId?: string, limit: number = 4) {
     const q: any = { isDeleted: false, product: { $ne: productId }, isDefault: true };
-    if (categoryId) q.category = categoryId;
+    if (categoryId) {
+      const products = await ProductModel.find({ category: categoryId }).select('_id').lean().exec();
+      q.product = { $in: products.map((p: any) => p._id), $ne: productId };
+    }
     return ProductVariantModel.find(q).populate('product').limit(limit).exec();
   }
 

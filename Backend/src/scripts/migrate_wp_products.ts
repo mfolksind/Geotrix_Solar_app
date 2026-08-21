@@ -6,6 +6,7 @@ import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 import CategoryModel from "../modules/categories/category.model";
+import FamilyModel from "../modules/families/family.model";
 import ProductModel from "../modules/products/product.model";
 import ProductVariantModel from "../modules/products/productVariant.model";
 import ProductImageModel from "../modules/products/productImage.model";
@@ -126,11 +127,20 @@ async function migrate() {
     console.log("Connected to MongoDB successfully.");
 
     console.log("WIPING EXISTING DATA...");
+    await FamilyModel.deleteMany({});
     await CategoryModel.deleteMany({});
     await ProductModel.deleteMany({});
     await ProductVariantModel.deleteMany({});
     await ProductImageModel.deleteMany({});
-    console.log("Existing products and categories wiped.");
+    console.log("Existing products, families, and categories wiped.");
+
+    console.log("Creating default Geotrix Family...");
+    const geotrixFamily = await FamilyModel.create({
+        name: "Geotrix",
+        slug: "geotrix",
+        status: "ACTIVE",
+        requiresAdminApproval: false
+    });
 
     console.log("Fetching Categories from WordPress...");
     const catData = await fetchFromWP(ALL_CATEGORIES_QUERY);
@@ -144,6 +154,7 @@ async function migrate() {
                 name: cat.name,
                 slug: cat.slug,
                 status: "ACTIVE",
+                family: geotrixFamily._id
             });
             categoryMap.set(cat.slug, newCat._id);
             console.log(`Created Category: ${cat.name}`);
@@ -162,20 +173,21 @@ async function migrate() {
     const variantSlugMap = new Map<string, string>(); // wpSlug -> variantObjectId
 
     for (const wpProduct of products) {
-        // 1. Create Base Product
-        const product = await ProductModel.create({
-            name: wpProduct.title,
-            brand: "Geotrix", // Default brand
-            status: "ACTIVE",
-        });
-        totalProducts++;
-
         // 2. Determine Category
         let categoryId = null;
         if (wpProduct.productCategories?.nodes?.length > 0) {
             const wpCatSlug = wpProduct.productCategories.nodes[0].slug;
             categoryId = categoryMap.get(wpCatSlug) || null;
         }
+
+        // 1. Create Base Product
+        const product = await ProductModel.create({
+            name: wpProduct.title,
+            family: geotrixFamily._id,
+            category: categoryId,
+            status: "ACTIVE",
+        });
+        totalProducts++;
 
         // 3. Handle Variants
         const wpVariants = wpProduct.productData?.productVariants;
@@ -204,7 +216,6 @@ async function migrate() {
                     variantName: wpVariant.variantLabel || `${wpProduct.title} - Variant ${i + 1}`,
                     slug: `${wpProduct.slug}-${i + 1}`,
                     shortDescription: shortDesc,
-                    category: categoryId,
                     thumbnail: thumbnail,
                     isDefault: i === 0, // First is default
                     sku: wpVariant.variantSku || "",
@@ -235,7 +246,6 @@ async function migrate() {
                 variantName: wpProduct.title,
                 slug: wpProduct.slug,
                 shortDescription: shortDesc,
-                category: categoryId,
                 thumbnail: thumbnail,
                 isDefault: true,
                 price: 0, // Default to 0 if no price given at all

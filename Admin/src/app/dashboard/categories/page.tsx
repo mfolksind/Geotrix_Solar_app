@@ -13,30 +13,40 @@ interface Category {
   _id: string;
   name: string;
   description: string;
+  family?: string;
+}
+
+interface Family {
+  _id: string;
+  name: string;
 }
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [families, setFamilies] = useState<Family[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [family, setFamily] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const loadCategories = async () => {
+  const loadCategoriesAndFamilies = async () => {
     try {
-      const response = await fetchApi('/api/categories?limit=1000000');
-      if (response.success) {
-        setCategories(response.data);
-      }
+      const [catRes, famRes] = await Promise.all([
+        fetchApi('/api/categories?limit=1000000'),
+        fetchApi('/api/families')
+      ]);
+      if (catRes.success) setCategories(catRes.data);
+      if (famRes.success) setFamilies(famRes.data);
     } catch (err) {
-      console.error('Failed to load categories', err);
+      console.error('Failed to load data', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadCategories();
+    loadCategoriesAndFamilies();
   }, []);
 
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -45,12 +55,13 @@ export default function CategoriesPage() {
     try {
       const res = await fetchApi('/admin/categories', {
         method: 'POST',
-        body: JSON.stringify({ name, description }),
+        body: JSON.stringify({ name, description, family: family || undefined }),
       });
       if (res.success) {
         setName('');
         setDescription('');
-        loadCategories();
+        setFamily('');
+        loadCategoriesAndFamilies();
       } else {
         alert(res.message || 'Failed to add category');
       }
@@ -67,7 +78,7 @@ export default function CategoriesPage() {
     try {
       const res = await fetchApi(`/admin/categories/${id}`, { method: 'DELETE' });
       if (res.success) {
-        loadCategories();
+        loadCategoriesAndFamilies();
       } else {
         alert(res.message || 'Failed to delete');
       }
@@ -130,6 +141,17 @@ export default function CategoriesPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 required
               />
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Family</label>
+                <select 
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                  value={family}
+                  onChange={(e) => setFamily(e.target.value)}
+                >
+                  <option value="">No Family</option>
+                  {families.map(f => <option key={f._id} value={f._id}>{f.name}</option>)}
+                </select>
+              </div>
               <Button type="submit" disabled={isSubmitting} fullWidth>
                 <Plus size={18} />
                 {isSubmitting ? 'Adding...' : 'Add Category'}

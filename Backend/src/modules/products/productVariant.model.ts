@@ -8,7 +8,6 @@ const variantSchema = new Schema<IProductVariantDocument>(
     slug: { type: String, required: true, trim: true, unique: true, index: true },
     description: { type: String, trim: true },
     shortDescription: { type: String, trim: true },
-    category: { type: Schema.Types.ObjectId, ref: 'Category', index: true },
     thumbnail: { type: String, trim: true },
     isDefault: { type: Boolean, default: false, index: true },
     sku: { type: String, trim: true, index: true },
@@ -30,7 +29,6 @@ const variantSchema = new Schema<IProductVariantDocument>(
 variantSchema.index({ product: 1 });
 variantSchema.index({ slug: 1 });
 variantSchema.index({ sku: 1 });
-variantSchema.index({ category: 1 });
 
 // Ensure only one variant per product is the default
 variantSchema.pre('save', async function (next) {

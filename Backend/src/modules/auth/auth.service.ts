@@ -5,6 +5,7 @@ import { AuthTokens, CreateUserPayload, ForgotPasswordPayload, GoogleLoginPayloa
 import { generateAccessToken, generateRefreshToken, hashToken, verifyGoogleIdToken } from './auth.utils';
 import { sendEmail } from '../../common/services/email/email.service';
 import UserModel from '../users/user.model';
+import FamilyModel from '../families/family.model';
 
 const REFRESH_TOKEN_EXPIRES_IN_MS = Number(process.env.JWT_REFRESH_COOKIE_MAX_AGE ?? 7 * 24 * 60 * 60 * 1000);
 const PASSWORD_RESET_TOKEN_EXPIRES_IN_MS = Number(process.env.PASSWORD_RESET_TOKEN_EXPIRES_IN_MS ?? 60 * 60 * 1000);
@@ -19,16 +20,51 @@ export class AuthService {
       throw new Error('Email is already registered');
     }
 
+    let familyApprovalStatus: 'pending' | 'approved' | 'rejected' | null = null;
+    let initialStatus: 'active' | 'inactive' | 'blocked' = 'active';
+    let familyId = payload.family;
+
+    if (!familyId && payload.familySlug) {
+      const familyBySlug = await FamilyModel.findOne({ slug: payload.familySlug });
+      if (familyBySlug) {
+        familyId = familyBySlug._id.toString();
+      }
+    }
+
+    if (!familyId) {
+      const geotrixFamily = await FamilyModel.findOne({ slug: 'geotrix' });
+      if (geotrixFamily) {
+        familyId = geotrixFamily._id.toString();
+      }
+    }
+
+    if (familyId) {
+      const family = await FamilyModel.findById(familyId);
+      if (family) {
+        if (payload.source === 'website') {
+          familyApprovalStatus = 'approved';
+          initialStatus = 'active';
+        } else if (family.requiresAdminApproval) {
+          familyApprovalStatus = 'pending';
+          initialStatus = 'inactive';
+        } else {
+          familyApprovalStatus = 'approved';
+        }
+      }
+    }
+
     const passwordHash = await bcrypt.hash(payload.password, 12);
     const userPayload: CreateUserPayload = {
       name: payload.name,
       email: payload.email,
       password: passwordHash,
       phone: payload.phone,
+      family: familyId,
+      familyApprovalStatus,
       provider: 'local',
       role: 'customer',
       isVerified: false,
-      status: 'active',
+      status: initialStatus,
     };
 
     const user = await this.authRepository.createUser(userPayload);
@@ -136,14 +172,49 @@ export class AuthService {
 
     let user = await this.authRepository.findByEmail(email);
     if (!user) {
+      let familyId: string | undefined = payload.family;
+      let familyApprovalStatus: 'pending' | 'approved' | 'rejected' | null = null;
+      let initialStatus: 'active' | 'inactive' | 'blocked' = 'active';
+      
+      if (!familyId && payload.familySlug) {
+        const familyBySlug = await FamilyModel.findOne({ slug: payload.familySlug });
+        if (familyBySlug) {
+          familyId = familyBySlug._id.toString();
+        }
+      }
+
+      if (!familyId) {
+        const geotrixFamily = await FamilyModel.findOne({ slug: 'geotrix' });
+        if (geotrixFamily) {
+          familyId = geotrixFamily._id.toString();
+        }
+      }
+
+      if (familyId) {
+        const family = await FamilyModel.findById(familyId);
+        if (family) {
+          if (payload.source === 'website') {
+            familyApprovalStatus = 'approved';
+            initialStatus = 'active';
+          } else if (family.requiresAdminApproval) {
+            familyApprovalStatus = 'pending';
+            initialStatus = 'inactive';
+          } else {
+            familyApprovalStatus = 'approved';
+          }
+        }
+      }
+
       const userPayload: CreateUserPayload = {
         name,
         email,
         provider: 'google',
         providerId: googleId,
         role: 'customer',
+        family: familyId,
+        familyApprovalStatus,
         isVerified: true,
-        status: 'active',
+        status: initialStatus,
       };
       user = await this.authRepository.createUser(userPayload);
     }

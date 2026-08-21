@@ -6,6 +6,7 @@ export interface CreateCategoryPayload {
   description?: string;
   image?: string;
   parentCategory?: string;
+  family?: string;
   sortOrder?: number;
   createdBy?: string;
 }
@@ -16,6 +17,7 @@ export interface UpdateCategoryPayload {
   description?: string;
   image?: string;
   parentCategory?: string | null;
+  family?: string;
   sortOrder?: number;
   updatedBy?: string;
 }

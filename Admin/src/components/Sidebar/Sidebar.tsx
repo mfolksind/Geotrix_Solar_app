@@ -8,6 +8,7 @@ import styles from './Sidebar.module.css';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard/families', label: 'Families', icon: Users },
   { href: '/dashboard/categories', label: 'Categories', icon: Tags },
   { href: '/dashboard/products', label: 'Products', icon: Package },
   { href: '/dashboard/orders', label: 'Orders', icon: ShoppingCart },

@@ -2,14 +2,16 @@ export type ProductStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface CreateProductPayload {
   name: string;
-  brand?: string;
+  family?: string;
+  category?: string;
   status?: ProductStatus;
   createdBy?: string;
 }
 
 export interface UpdateProductPayload {
   name?: string;
-  brand?: string;
+  family?: string;
+  category?: string;
   status?: ProductStatus;
   updatedBy?: string;
 }
@@ -19,7 +21,6 @@ export interface CreateVariantPayload {
   variantName: string;
   slug?: string;
   description?: string;
-  category?: string;
   thumbnail?: string;
   isDefault?: boolean;
   sku?: string;
@@ -36,7 +37,6 @@ export interface UpdateVariantPayload {
   variantName?: string;
   slug?: string;
   description?: string;
-  category?: string | null;
   thumbnail?: string;
   isDefault?: boolean;
   sku?: string;
@@ -62,7 +62,7 @@ export interface ListProductsQuery {
   limit?: number;
   search?: string;
   category?: string;
-  brand?: string;
+  family?: string;
   status?: ProductStatus;
   sort?: string; // e.g. 'price:asc' or 'createdAt:desc'
   minPrice?: number;

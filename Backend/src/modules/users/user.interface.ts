@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { UserProvider, UserRole, UserStatus } from './user.types';
 
 export interface IUser {
@@ -10,6 +10,9 @@ export interface IUser {
   provider?: UserProvider;
   providerId?: string;
   role: UserRole;
+  family?: Types.ObjectId | string;
+  familyApprovalStatus?: 'pending' | 'approved' | 'rejected' | null;
+  approvedFamilies: Types.ObjectId[] | string[];
   isVerified: boolean;
   status: UserStatus;
   createdAt: Date;

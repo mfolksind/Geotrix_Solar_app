@@ -8,6 +8,7 @@ const categorySchema = new Schema<ICategoryDocument>(
     description: { type: String, trim: true },
     image: { type: String, trim: true },
     parentCategory: { type: Schema.Types.ObjectId, ref: 'Category', default: null },
+    family: { type: Schema.Types.ObjectId, ref: 'Family' },
     status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE', index: true },
     sortOrder: { type: Number, default: 0 },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },

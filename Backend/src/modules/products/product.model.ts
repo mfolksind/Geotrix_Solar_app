@@ -4,7 +4,8 @@ import { IProductDocument } from './product.interface';
 const productSchema = new Schema<IProductDocument>(
   {
     name: { type: String, required: true, trim: true, index: true },
-    brand: { type: String, trim: true },
+    family: { type: Schema.Types.ObjectId, ref: 'Family' },
+    category: { type: Schema.Types.ObjectId, ref: 'Category' },
     status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE', index: true },
     isDeleted: { type: Boolean, default: false },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },

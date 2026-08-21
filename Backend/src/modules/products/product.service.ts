@@ -44,9 +44,12 @@ export class ProductService {
   public async getRelatedProducts(identifier: string, limit: number = 4) {
     const variant = await this.variantRepo.findByIdOrSlug(identifier);
     if (!variant) return [];
-    const categoryId = variant.category ? variant.category.toString() : undefined;
-    const product = typeof variant.product === 'object' ? (variant.product as any)._id : variant.product;
-    const related = await this.variantRepo.findRelated(product.toString(), categoryId, limit);
+    
+    // We assume variant.product might be populated
+    const product = typeof variant.product === 'object' ? (variant.product as any) : await this.repo.findById(variant.product.toString());
+    const categoryId = product && product.category ? product.category.toString() : undefined;
+    const productId = typeof variant.product === 'object' ? (variant.product as any)._id : variant.product;
+    const related = await this.variantRepo.findRelated(productId.toString(), categoryId, limit);
     
     // Attach images
     return Promise.all(related.map(async (v: any) => {
@@ -64,7 +67,7 @@ export class ProductService {
       search: query.search, 
       category: query.category, 
       status: query.status, 
-      brand: query.brand,
+      family: query.family,
       page, 
       limit, 
       sort,

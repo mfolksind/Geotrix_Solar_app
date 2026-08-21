@@ -12,10 +12,15 @@ export interface UpdateProfilePayload {
   name?: string;
   phone?: string;
   profilePicture?: string;
+  family?: string;
 }
 
 export interface ChangeStatusPayload {
   status: UserStatus;
+}
+
+export interface ApproveFamilyPayload {
+  status: 'approved' | 'rejected';
 }
 
 export type CreateUserPayload = Omit<

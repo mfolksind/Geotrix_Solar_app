@@ -20,9 +20,10 @@ export class CategoryRepository {
     return CategoryModel.findOne({ name, isDeleted: false }).exec();
   }
 
-  public async findAll(filter: { status?: string; includeDeleted?: boolean } = {}) {
+  public async findAll(filter: { status?: string; includeDeleted?: boolean; family?: string } = {}) {
     const q: any = {};
     if (filter.status) q.status = filter.status;
+    if (filter.family) q.family = filter.family;
     if (!filter.includeDeleted) q.isDeleted = false;
 
     return CategoryModel.find(q).sort({ sortOrder: 1, name: 1 }).exec();

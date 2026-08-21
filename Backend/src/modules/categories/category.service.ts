@@ -60,8 +60,8 @@ export class CategoryService {
     return this.repo.findById(id);
   }
 
-  public async getCategories(filter?: { status?: string }) {
-    return this.repo.findAll({ status: filter?.status });
+  public async getCategories(filter?: { status?: string; family?: string }) {
+    return this.repo.findAll({ status: filter?.status, family: filter?.family });
   }
 
   public async changeStatus(id: string, status: 'ACTIVE' | 'INACTIVE') {

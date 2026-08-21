@@ -12,6 +12,7 @@ export interface AuthUser {
   id: string;
   role: AuthRole;
   status: string;
+  family?: string;
 }
 
 export interface AuthRequest extends Request {
@@ -54,6 +55,7 @@ export const authenticate = asyncHandler(async (req: AuthRequest, res: Response,
     id: user.id,
     role: user.role as AuthRole,
     status: user.status,
+    family: user.family?.toString(),
   };
 
   next();

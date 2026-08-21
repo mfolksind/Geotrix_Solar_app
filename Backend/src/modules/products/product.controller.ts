@@ -3,7 +3,7 @@ import asyncHandler from 'express-async-handler';
 import { ProductService } from './product.service';
 import { CreateProductPayload, UpdateProductPayload, CreateVariantPayload, UpdateVariantPayload, UploadImagePayload } from './product.types';
 
-type AuthRequest = Request & { user?: { id: string } };
+type AuthRequest = Request & { user?: { id: string; role?: string; family?: string } };
 
 export class ProductController {
   constructor(private readonly service: ProductService) {}
@@ -11,12 +11,36 @@ export class ProductController {
   public createProduct = asyncHandler(async (req: AuthRequest, res: Response) => {
     const payload = req.body as CreateProductPayload;
     payload.createdBy = payload.createdBy ?? req.user?.id;
+    
+    if (payload.category) {
+      const CategoryModel = (await import('../categories/category.model')).default;
+      const category = await CategoryModel.findById(payload.category);
+      if (category && category.family) {
+        payload.family = category.family.toString();
+      }
+    }
+    
     const product = await this.service.createProduct(payload);
     res.status(201).json({ success: true, data: product });
   });
 
-  public listProducts = asyncHandler(async (req: Request, res: Response) => {
+  public listProducts = asyncHandler(async (req: AuthRequest, res: Response) => {
     const query = { ...req.query } as any;
+
+    if (req.user && req.user.role !== 'admin' && req.user.role !== 'seller') {
+      if (req.user.family) {
+        query.family = req.user.family;
+      }
+    }
+
+    if (query.familySlug) {
+      const FamilyModel = (await import('../families/family.model')).default;
+      const family = await FamilyModel.findOne({ slug: query.familySlug });
+      if (family) {
+        query.family = family._id.toString();
+      }
+      delete query.familySlug;
+    }
     
     if (query.minPrice !== undefined && query.minPrice !== '') {
         const parsed = parseFloat(query.minPrice);
@@ -65,6 +89,15 @@ export class ProductController {
     const { id } = req.params;
     const payload = req.body as UpdateProductPayload;
     payload.updatedBy = payload.updatedBy ?? req.user?.id;
+    
+    if (payload.category) {
+      const CategoryModel = (await import('../categories/category.model')).default;
+      const category = await CategoryModel.findById(payload.category);
+      if (category && category.family) {
+        payload.family = category.family.toString();
+      }
+    }
+    
     const product = await this.service.updateProduct(id, payload);
     res.status(200).json({ success: true, data: product });
   });

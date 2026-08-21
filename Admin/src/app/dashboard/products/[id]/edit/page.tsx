@@ -9,21 +9,27 @@ export default function EditProductPage() {
   const router = useRouter();
   const { id } = useParams();
   const [name, setName] = useState('');
-  const [brand, setBrand] = useState('Geotrix');
+  const [category, setCategory] = useState('');
   const [status, setStatus] = useState('ACTIVE');
+  const [categories, setCategories] = useState<any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const prodsRes = await fetchApi('/admin/products?limit=1000000');
+        const [prodsRes, catRes] = await Promise.all([
+          fetchApi('/admin/products?limit=1000000'),
+          fetchApi('/api/categories?limit=1000000')
+        ]);
         
+        if (catRes.success) setCategories(catRes.data);
+
         if (prodsRes.success) {
           const product = prodsRes.data.find((p: any) => p._id === id);
           if (product) {
             setName(product.name);
-            setBrand(product.brand || 'Geotrix');
+            setCategory(product.category?._id || product.category || '');
             setStatus(product.status || 'ACTIVE');
           }
         }
@@ -42,7 +48,7 @@ export default function EditProductPage() {
     try {
       const payload = {
         name,
-        brand,
+        category: category || undefined,
         status
       };
 
@@ -118,19 +124,21 @@ export default function EditProductPage() {
                         />
                     </div>
 
+
+
                     <div>
-                        <label htmlFor="brand" className="block text-sm font-medium text-foreground/90 mb-1.5">
-                            Brand
+                        <label htmlFor="category" className="block text-sm font-medium text-foreground/90 mb-1.5">
+                            Category
                         </label>
                         <select
-                            id="brand"
-                            value={brand}
-                            onChange={(e) => setBrand(e.target.value)}
+                            id="category"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
                             required
-                            className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all shadow-sm"
+                            className="w-full px-4 py-2.5 rounded-lg border border-border bg-surface text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all shadow-sm"
                         >
-                            <option value="Geotrix">Geotrix</option>
-                            <option value="Thermox">Thermox</option>
+                            <option value="">Select a category</option>
+                            {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                         </select>
                     </div>
 

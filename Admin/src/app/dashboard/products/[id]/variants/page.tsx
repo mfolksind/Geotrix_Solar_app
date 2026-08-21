@@ -22,7 +22,6 @@ interface Variant {
   status: string;
   images: VariantImage[];
   categoryId?: string;
-  category?: { _id: string; name: string };
   description?: string;
   shortDescription?: string;
   isDefault?: boolean;
@@ -33,7 +32,6 @@ export default function VariantsPage() {
   const { id: productId } = useParams();
   
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
   const [product, setProduct] = useState<any>(null);
   const [allVariants, setAllVariants] = useState<Variant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +52,6 @@ export default function VariantsPage() {
   const [weight, setWeight] = useState('');
   const [dimensions, setDimensions] = useState('');
   const [status, setStatus] = useState('ACTIVE');
-  const [categoryId, setCategoryId] = useState('');
   const [description, setDescription] = useState('');
   const [shortDescription, setShortDescription] = useState('');
   const [isDefault, setIsDefault] = useState(false);
@@ -75,7 +72,6 @@ export default function VariantsPage() {
     setWeight('');
     setDimensions('');
     setStatus('ACTIVE');
-    setCategoryId(categories.length > 0 ? categories[0]._id : '');
     setDescription('');
     setShortDescription('');
     setIsDefault(false);
@@ -106,15 +102,6 @@ export default function VariantsPage() {
         }
       } catch (err) {
         console.error('Failed to load product', err);
-      }
-      try {
-        const catRes = await fetchApi('/api/categories?limit=1000000');
-        if (catRes.success) {
-          setCategories(catRes.data);
-          if (catRes.data.length > 0) setCategoryId(catRes.data[0]._id);
-        }
-      } catch (err) {
-        console.error('Failed to load categories', err);
       }
       try {
         const allVarRes = await fetchApi('/api/products?limit=1000000');
@@ -154,7 +141,6 @@ export default function VariantsPage() {
         weight: weight ? parseFloat(weight) : undefined,
         dimensions,
         status,
-        categoryId: categoryId || undefined,
         description,
         shortDescription,
         isDefault,
@@ -175,7 +161,6 @@ export default function VariantsPage() {
             discountPrice: discountPrice ? parseFloat(discountPrice) : undefined,
             stock: parseInt(stock), 
             status,
-            categoryId: categoryId || undefined,
             description,
             shortDescription,
             isDefault,
@@ -219,7 +204,6 @@ export default function VariantsPage() {
     setPrice(v.price.toString());
     setStock(v.stock.toString());
     setStatus(v.status || 'ACTIVE');
-    setCategoryId(v.category?._id || v.categoryId || (categories.length > 0 ? categories[0]._id : ''));
     setDescription(v.description || '');
     setShortDescription(v.shortDescription || '');
     setIsDefault(!!v.isDefault);
@@ -379,15 +363,6 @@ export default function VariantsPage() {
                             <label className="block text-sm font-medium text-foreground/90 mb-1.5">Stock</label>
                             <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} required className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface" />
                         </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-foreground/90 mb-1.5">Category</label>
-                        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required className="w-full px-3 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] transition-all bg-surface">
-                        {categories.map(c => (
-                            <option key={c._id} value={c._id}>{c.name}</option>
-                        ))}
-                        </select>
                     </div>
 
                     <div>
@@ -629,7 +604,7 @@ export default function VariantsPage() {
                                                 <div className="max-w-[200px] overflow-hidden">
                                                     <div className="font-semibold text-foreground truncate" title={v.variantName}>{v.variantName}</div>
                                                     <div className="text-xs text-foreground/60 truncate" title={v.sku}>SKU: {v.sku || 'N/A'}</div>
-                                                    <div className="text-[10px] text-[#57c5cc] font-medium truncate mt-0.5">{v.category?.name || 'No Category'}</div>
+                                                    <div className="text-[10px] text-[#57c5cc] font-medium truncate mt-0.5">{v.sku || ''}</div>
                                                 </div>
                                             </div>
                                         </td>

@@ -5,6 +5,7 @@ export const registerSchema = z.object({
   email: z.string().trim().email('Valid email is required'),
   password: z.string().trim().min(8, 'Password must be at least 8 characters'),
   phone: z.string().trim().optional(),
+  family: z.string().trim().optional(),
 });
 
 export const registerAdminSchema = z.object({

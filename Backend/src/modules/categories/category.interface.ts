@@ -8,6 +8,7 @@ export interface ICategoryDocument extends Document {
   description?: string;
   image?: string;
   parentCategory?: Types.ObjectId | ICategoryDocument | null;
+  family?: Types.ObjectId | string;
   status: CategoryStatus;
   sortOrder: number;
   createdBy?: Types.ObjectId;

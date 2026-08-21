@@ -2,13 +2,15 @@ import { z } from 'zod';
 
 export const createProductSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
-  brand: z.string().trim().optional(),
+  family: z.string().trim().optional(),
+  category: z.string().trim().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
 });
 
 export const updateProductSchema = z.object({
   name: z.string().trim().optional(),
-  brand: z.string().trim().optional(),
+  family: z.string().trim().optional(),
+  category: z.string().trim().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
 });
 
@@ -17,7 +19,6 @@ export const createVariantSchema = z.object({
   slug: z.string().trim().optional(),
   description: z.string().trim().optional(),
   shortDescription: z.string().trim().optional(),
-  category: z.string().trim().optional(),
   thumbnail: z.string().trim().optional(),
   isDefault: z.boolean().optional(),
   sku: z.string().trim().optional(),
@@ -38,7 +39,6 @@ export const updateVariantSchema = z.object({
   slug: z.string().trim().optional(),
   description: z.string().trim().optional(),
   shortDescription: z.string().trim().optional(),
-  category: z.string().trim().optional().nullable(),
   thumbnail: z.string().trim().optional(),
   isDefault: z.boolean().optional(),
   sku: z.string().trim().optional(),
@@ -66,7 +66,7 @@ export const listProductsSchema = z.object({
   limit: z.preprocess((v) => Number(v), z.number().int().min(1)).optional(),
   search: z.string().trim().optional(),
   category: z.string().trim().optional(),
-  brand: z.string().trim().optional(),
+  family: z.string().trim().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
   sort: z.string().trim().optional(),
 });

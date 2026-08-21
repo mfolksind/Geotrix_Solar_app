@@ -8,8 +8,13 @@ export const updateProfileSchema = z.object({
   name: z.string().trim().min(1).optional(),
   phone: z.string().trim().optional(),
   profilePicture: z.string().trim().url().optional(),
+  family: z.string().trim().optional(),
 });
 
 export const changeStatusSchema = z.object({
   status: z.enum(['active', 'inactive', 'blocked']),
+});
+
+export const approveFamilySchema = z.object({
+  status: z.enum(['approved', 'rejected']),
 });

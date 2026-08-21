@@ -17,7 +17,18 @@ export class CategoryController {
 
   public getCategories = asyncHandler(async (req: Request, res: Response) => {
     const status = typeof req.query.status === 'string' ? req.query.status : undefined;
-    const categories = await this.service.getCategories({ status });
+    const familySlug = typeof req.query.familySlug === 'string' ? req.query.familySlug : undefined;
+    
+    let familyId: string | undefined = undefined;
+    if (familySlug) {
+      const FamilyModel = (await import('../families/family.model')).default;
+      const family = await FamilyModel.findOne({ slug: familySlug });
+      if (family) {
+        familyId = family._id.toString();
+      }
+    }
+
+    const categories = await this.service.getCategories({ status, family: familyId });
     res.status(200).json({ success: true, data: categories });
   });
 

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import { UserService } from './user.service';
-import { UpdateProfilePayload, ChangeStatusPayload, UserQuery } from './user.types';
+import { UpdateProfilePayload, ChangeStatusPayload, UserQuery, ApproveFamilyPayload } from './user.types';
 
 type AuthRequest = Request & { user?: { id: string; role?: string } };
 
@@ -83,6 +83,17 @@ export class UserController {
     const { id } = req.params;
     const payload = req.body as ChangeStatusPayload;
     const user = await this.userService.changeUserStatus(id, payload);
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  });
+
+  public approveFamily = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const payload = req.body as ApproveFamilyPayload;
+    const user = await this.userService.approveFamily(id, payload);
 
     res.status(200).json({
       success: true,

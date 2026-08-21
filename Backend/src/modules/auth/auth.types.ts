@@ -5,6 +5,9 @@ export interface RegisterPayload {
   email: string;
   password: string;
   phone?: string;
+  family?: string;
+  familySlug?: string;
+  source?: 'website' | 'app';
 }
 
 export interface RegisterAdminPayload extends RegisterPayload {
@@ -18,6 +21,9 @@ export interface LoginPayload {
 
 export interface GoogleLoginPayload {
   idToken: string;
+  family?: string;
+  familySlug?: string;
+  source?: 'website' | 'app';
 }
 
 export interface RefreshTokenPayload {
@@ -55,6 +61,8 @@ export interface CreateUserPayload {
   provider: UserProvider;
   providerId?: string;
   role: UserRole;
+  family?: string;
+  familyApprovalStatus?: 'pending' | 'approved' | 'rejected' | null;
   isVerified: boolean;
   status: UserStatus;
 }

@@ -1,0 +1,73 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.content {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.listSection {
+  flex: 2;
+}
+
+.formSection {
+  flex: 1;
+  position: sticky;
+  top: 90px;
+}
+
+.formTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.iconBtn:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 900px) {
+  .content {
+    flex-direction: column-reverse;
+  }
+  .formSection {
+    position: static;
+    width: 100%;
+  }
+}

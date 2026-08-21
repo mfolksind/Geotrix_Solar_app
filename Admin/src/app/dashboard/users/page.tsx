@@ -16,6 +16,7 @@ interface User {
   phone?: string;
   role: string;
   status: string;
+  familyApprovalStatus?: string;
   isVerified: boolean;
   createdAt: string;
 }
@@ -33,7 +34,7 @@ export default function UsersPage() {
 
   // Form states
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'USER' });
-  const [editFormData, setEditFormData] = useState({ role: '', status: '' });
+  const [editFormData, setEditFormData] = useState({ role: '', status: '', familyApprovalStatus: '' });
 
   const loadUsers = async () => {
     setLoading(true);
@@ -92,6 +93,16 @@ export default function UsersPage() {
           body: JSON.stringify({ status: editFormData.status }),
         });
       }
+      
+      // Family Approval Update
+      if (editFormData.familyApprovalStatus && editFormData.familyApprovalStatus !== selectedUser.familyApprovalStatus) {
+        // Backend route is /api/users/:id/family-approval
+        // Using /api/users to match the newly added user.routes.ts 
+        await fetchApi(`/api/users/${selectedUser._id}/family-approval`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status: editFormData.familyApprovalStatus }),
+        });
+      }
 
       setShowEditModal(false);
       loadUsers();
@@ -117,7 +128,7 @@ export default function UsersPage() {
 
   const openEditModal = (user: User) => {
     setSelectedUser(user);
-    setEditFormData({ role: user.role, status: user.status });
+    setEditFormData({ role: user.role, status: user.status, familyApprovalStatus: user.familyApprovalStatus || '' });
     setShowEditModal(true);
   };
 
@@ -144,7 +155,7 @@ export default function UsersPage() {
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <Table headers={['Name', 'Email', 'Role', 'Status', 'Verified', 'Actions']}>
+          <Table headers={['Name', 'Email', 'Role', 'Status', 'Family Approval', 'Actions']}>
             {users.map((user) => (
               <tr key={user._id}>
                 <td style={{ fontWeight: 500 }}>{user.name}</td>
@@ -159,7 +170,13 @@ export default function UsersPage() {
                     {user.status}
                   </span>
                 </td>
-                <td>{user.isVerified ? 'Yes' : 'No'}</td>
+                <td>
+                  {user.familyApprovalStatus ? (
+                    <span className={`${styles.badge} ${user.familyApprovalStatus === 'approved' ? styles.statusActive : user.familyApprovalStatus === 'rejected' ? styles.statusSuspended : styles.statusInactive}`}>
+                      {user.familyApprovalStatus}
+                    </span>
+                  ) : 'N/A'}
+                </td>
                 <td>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button
@@ -274,6 +291,19 @@ export default function UsersPage() {
                   <option value="ACTIVE">Active</option>
                   <option value="INACTIVE">Inactive</option>
                   <option value="SUSPENDED">Blocked</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Family Approval</label>
+                <select
+                  className={styles.select}
+                  value={editFormData.familyApprovalStatus}
+                  onChange={e => setEditFormData({ ...editFormData, familyApprovalStatus: e.target.value })}
+                >
+                  <option value="">N/A</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
                 </select>
               </div>
 
