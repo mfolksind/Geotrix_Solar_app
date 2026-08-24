@@ -139,7 +139,7 @@ async function migrate() {
         name: "Geotrix",
         slug: "geotrix",
         status: "ACTIVE",
-        requiresAdminApproval: false
+        requiresAdminApproval: true,
     });
 
     console.log("Fetching Categories from WordPress...");
@@ -154,7 +154,7 @@ async function migrate() {
                 name: cat.name,
                 slug: cat.slug,
                 status: "ACTIVE",
-                family: geotrixFamily._id
+                family: geotrixFamily._id,
             });
             categoryMap.set(cat.slug, newCat._id);
             console.log(`Created Category: ${cat.name}`);

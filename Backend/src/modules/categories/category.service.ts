@@ -32,7 +32,7 @@ export class CategoryService {
       slug,
       description: payload.description,
       image: payload.image,
-      parentCategory: payload.parentCategory ? payload.parentCategory : null,
+      family: payload.family || undefined,
       sortOrder: payload.sortOrder ?? 0,
       createdBy: payload.createdBy,
     } as const;

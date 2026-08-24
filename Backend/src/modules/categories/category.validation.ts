@@ -5,7 +5,6 @@ export const createCategorySchema = z.object({
   slug: z.string().trim().optional(),
   description: z.string().trim().optional(),
   image: z.string().trim().optional(),
-  parentCategory: z.string().trim().optional(),
   family: z.string().trim().optional(),
   sortOrder: z.number().int().optional(),
 });
@@ -15,7 +14,6 @@ export const updateCategorySchema = z.object({
   slug: z.string().trim().optional(),
   description: z.string().trim().optional(),
   image: z.string().trim().optional(),
-  parentCategory: z.string().trim().optional().nullable(),
   family: z.string().trim().optional(),
   sortOrder: z.number().int().optional(),
 });

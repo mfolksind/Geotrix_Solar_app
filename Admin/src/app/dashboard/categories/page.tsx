@@ -13,7 +13,7 @@ interface Category {
   _id: string;
   name: string;
   description: string;
-  family?: string;
+  family?: any;
 }
 
 interface Family {
@@ -99,11 +99,12 @@ export default function CategoriesPage() {
             {loading ? (
               <p>Loading...</p>
             ) : (
-              <Table headers={['Name', 'Description', 'Actions']}>
+              <Table headers={['Name', 'Description', 'Family', 'Actions']}>
                 {categories.map((cat) => (
                   <tr key={cat._id}>
                     <td style={{ fontWeight: 500 }}>{cat.name}</td>
                     <td>{cat.description}</td>
+                    <td>{families.find(f => f._id === (typeof cat.family === 'object' ? (cat.family as any)._id : cat.family))?.name || 'None'}</td>
                     <td>
                       <button 
                         className={styles.iconBtn} 
@@ -117,7 +118,7 @@ export default function CategoriesPage() {
                 ))}
                 {categories.length === 0 && (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', padding: '2rem' }}>No categories found.</td>
+                    <td colSpan={4} style={{ textAlign: 'center', padding: '2rem' }}>No categories found.</td>
                   </tr>
                 )}
               </Table>
