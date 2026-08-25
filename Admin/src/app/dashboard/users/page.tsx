@@ -17,12 +17,14 @@ interface User {
   role: string;
   status: string;
   familyApprovalStatus?: string;
+  family?: any;
   isVerified: boolean;
   createdAt: string;
 }
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [families, setFamilies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modals state
@@ -34,7 +36,7 @@ export default function UsersPage() {
 
   // Form states
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'USER' });
-  const [editFormData, setEditFormData] = useState({ role: '', status: '', familyApprovalStatus: '' });
+  const [editFormData, setEditFormData] = useState({ role: '', status: '', familyApprovalStatus: '', family: '' });
 
   const loadUsers = async () => {
     setLoading(true);
@@ -51,8 +53,20 @@ export default function UsersPage() {
     }
   };
 
+  const loadFamilies = async () => {
+    try {
+      const response = await fetchApi('/api/families');
+      if (response.success) {
+        setFamilies(response.data);
+      }
+    } catch (err) {
+      console.error('Failed to load families', err);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
+    loadFamilies();
   }, []);
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
@@ -104,6 +118,14 @@ export default function UsersPage() {
         });
       }
 
+      // Family Update
+      if (editFormData.family && editFormData.family !== (selectedUser.family?._id || selectedUser.family)) {
+        await fetchApi(`/api/users/${selectedUser._id}/family`, {
+          method: 'PATCH',
+          body: JSON.stringify({ family: editFormData.family }),
+        });
+      }
+
       setShowEditModal(false);
       loadUsers();
     } catch (error) {
@@ -128,7 +150,12 @@ export default function UsersPage() {
 
   const openEditModal = (user: User) => {
     setSelectedUser(user);
-    setEditFormData({ role: user.role, status: user.status, familyApprovalStatus: user.familyApprovalStatus || '' });
+    setEditFormData({ 
+      role: user.role, 
+      status: user.status, 
+      familyApprovalStatus: user.familyApprovalStatus || '',
+      family: user.family?._id || user.family || ''
+    });
     setShowEditModal(true);
   };
 
@@ -304,6 +331,19 @@ export default function UsersPage() {
                   <option value="pending">Pending</option>
                   <option value="approved">Approved</option>
                   <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Family</label>
+                <select
+                  className={styles.select}
+                  value={editFormData.family}
+                  onChange={e => setEditFormData({ ...editFormData, family: e.target.value })}
+                >
+                  <option value="">Select a family</option>
+                  {families.map(fam => (
+                    <option key={fam._id} value={fam._id}>{fam.name}</option>
+                  ))}
                 </select>
               </div>
 

@@ -101,6 +101,17 @@ export class UserController {
     });
   });
 
+  public changeUserFamily = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { family } = req.body;
+    const user = await this.userService.changeUserFamily(id, family);
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  });
+
   public deleteUser = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const deleted = await this.userService.deleteUser(id);

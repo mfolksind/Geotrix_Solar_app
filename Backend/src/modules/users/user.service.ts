@@ -73,14 +73,35 @@ export class UserService {
     
     if (updatedUser) {
       const family = await FamilyModel.findById(updatedUser.family);
-      await sendEmail({
-        to: updatedUser.email,
-        subject: `Your family request has been ${payload.status}`,
-        text: `Your request to join the family ${family?.name || ''} has been ${payload.status}.`,
-        html: `<p>Your request to join the family <b>${family?.name || ''}</b> has been ${payload.status}.</p>`,
-      });
+      try {
+        await sendEmail({
+          to: updatedUser.email,
+          subject: `Your family request has been ${payload.status}`,
+          text: `Your request to join the family ${family?.name || ''} has been ${payload.status}.`,
+          html: `<p>Your request to join the family <b>${family?.name || ''}</b> has been ${payload.status}.</p>`,
+        });
+      } catch (error) {
+        console.error('Failed to send approval email:', error);
+      }
     }
 
     return updatedUser;
+  }
+  public async changeUserFamily(userId: string, familyId: string): Promise<IUserDocument | null> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    const updatePayload: any = { 
+      family: familyId,
+      familyApprovalStatus: 'approved',
+      status: 'active'
+    };
+
+    const isAlreadyApproved = user.approvedFamilies?.some(f => f.toString() === familyId);
+    if (!isAlreadyApproved) {
+      updatePayload.approvedFamilies = [...(user.approvedFamilies || []), familyId];
+    }
+
+    return this.userRepository.update(userId, updatePayload);
   }
 }

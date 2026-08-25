@@ -14,7 +14,7 @@ export class AuthController {
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful',
+      message: result.message || 'Registration successful',
       data: result,
     });
   });
@@ -53,16 +53,18 @@ export class AuthController {
     const payload = req.body as GoogleLoginPayload;
     const result = await this.authService.googleLogin(payload);
 
-    res.cookie('refreshToken', result.tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/auth',
-    });
+    if (result.tokens) {
+      res.cookie('refreshToken', result.tokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/auth',
+      });
+    }
 
     res.status(200).json({
       success: true,
-      message: 'Google login successful',
+      message: result.message || 'Google login successful',
       data: result,
     });
   });

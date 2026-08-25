@@ -23,6 +23,7 @@ export default function FamiliesPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [requiresAdminApproval, setRequiresAdminApproval] = useState(false);
+  const [status, setStatus] = useState('ACTIVE');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingFamily, setEditingFamily] = useState<Family | null>(null);
 
@@ -51,12 +52,12 @@ export default function FamiliesPage() {
       if (editingFamily) {
         res = await fetchApi(`/api/families/${editingFamily._id}`, {
           method: 'PATCH',
-          body: JSON.stringify({ name, description, requiresAdminApproval }),
+          body: JSON.stringify({ name, description, requiresAdminApproval, status }),
         });
       } else {
         res = await fetchApi('/api/families', {
           method: 'POST',
-          body: JSON.stringify({ name, description, requiresAdminApproval, status: 'ACTIVE' }),
+          body: JSON.stringify({ name, description, requiresAdminApproval, status }),
         });
       }
 
@@ -79,6 +80,7 @@ export default function FamiliesPage() {
     setName(family.name);
     setDescription(family.description);
     setRequiresAdminApproval(family.requiresAdminApproval);
+    setStatus(family.status || 'ACTIVE');
   };
 
   const handleCancelEdit = () => {
@@ -86,6 +88,7 @@ export default function FamiliesPage() {
     setName('');
     setDescription('');
     setRequiresAdminApproval(false);
+    setStatus('ACTIVE');
   };
 
   return (
@@ -161,6 +164,18 @@ export default function FamiliesPage() {
                   onChange={(e) => setRequiresAdminApproval(e.target.checked)}
                 />
                 <label htmlFor="requiresApproval">Requires Admin Approval</label>
+              </div>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem' }}>Status</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid #e2e8f0', background: '#fff' }}
+                >
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="INACTIVE">INACTIVE</option>
+                  <option value="SUSPENDED">SUSPENDED</option>
+                </select>
               </div>
               <Button type="submit" disabled={isSubmitting} fullWidth>
                 {editingFamily ? <Edit2 size={18} /> : <Plus size={18} />}

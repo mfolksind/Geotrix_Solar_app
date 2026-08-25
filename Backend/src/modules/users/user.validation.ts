@@ -15,6 +15,10 @@ export const changeStatusSchema = z.object({
   status: z.enum(['active', 'inactive', 'blocked']),
 });
 
+export const changeFamilySchema = z.object({
+  family: z.string().trim().min(1, 'Family ID is required'),
+});
+
 export const approveFamilySchema = z.object({
   status: z.enum(['approved', 'rejected']),
 });

@@ -14,7 +14,7 @@ const EMAIL_VERIFY_TOKEN_EXPIRES_IN_MS = Number(process.env.EMAIL_VERIFY_TOKEN_E
 export class AuthService {
   constructor(private readonly authRepository: AuthRepository) {}
 
-  public async register(payload: RegisterPayload, origin: string): Promise<{ user: unknown; tokens: AuthTokens }> {
+  public async register(payload: RegisterPayload, origin: string): Promise<{ user: unknown; tokens?: AuthTokens; message?: string }> {
     const existingUser = await this.authRepository.findByEmail(payload.email);
     if (existingUser) {
       throw new Error('Email is already registered');
@@ -63,22 +63,15 @@ export class AuthService {
       familyApprovalStatus,
       provider: 'local',
       role: 'customer',
-      isVerified: false,
+      isVerified: true,
       status: initialStatus,
     };
 
     const user = await this.authRepository.createUser(userPayload);
-    const emailToken = crypto.randomUUID();
-    const emailTokenHash = hashToken(emailToken);
-    const expiresAt = new Date(Date.now() + EMAIL_VERIFY_TOKEN_EXPIRES_IN_MS);
 
-    await this.authRepository.saveEmailVerificationToken(user.id, emailTokenHash, expiresAt);
-    await sendEmail({
-      to: user.email,
-      subject: 'Verify your email',
-      text: `Verify your account by visiting ${origin}/verify-email?token=${emailToken}`,
-      html: `<p>Verify your account by visiting <a href="${origin}/verify-email?token=${emailToken}">${origin}/verify-email</a></p>`,
-    });
+    if (payload.source === 'app' && familyApprovalStatus === 'pending') {
+      return { user, message: 'Registration pending admin approval.' };
+    }
 
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
@@ -111,22 +104,11 @@ export class AuthService {
       phone: payload.phone,
       provider: 'local',
       role: 'admin',
-      isVerified: false,
+      isVerified: true,
       status: 'active',
     };
 
     const user = await this.authRepository.createUser(userPayload);
-    const emailToken = crypto.randomUUID();
-    const emailTokenHash = hashToken(emailToken);
-    const expiresAt = new Date(Date.now() + EMAIL_VERIFY_TOKEN_EXPIRES_IN_MS);
-
-    await this.authRepository.saveEmailVerificationToken(user.id, emailTokenHash, expiresAt);
-    await sendEmail({
-      to: user.email,
-      subject: 'Verify your email',
-      text: `Verify your account by visiting ${origin}/verify-email?token=${emailToken}`,
-      html: `<p>Verify your account by visiting <a href="${origin}/verify-email?token=${emailToken}">${origin}/verify-email</a></p>`,
-    });
 
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
@@ -160,7 +142,7 @@ export class AuthService {
     return { user, tokens: { accessToken, refreshToken } };
   }
 
-  public async googleLogin(payload: GoogleLoginPayload): Promise<{ user: unknown; tokens: AuthTokens }> {
+  public async googleLogin(payload: GoogleLoginPayload): Promise<{ user: unknown; tokens?: AuthTokens; message?: string }> {
     const decoded = await verifyGoogleIdToken(payload.idToken);
     const email = decoded.email;
     const googleId = decoded.sub;
@@ -217,6 +199,10 @@ export class AuthService {
         status: initialStatus,
       };
       user = await this.authRepository.createUser(userPayload);
+    }
+
+    if (payload.source === 'app' && user.familyApprovalStatus === 'pending') {
+      return { user, message: 'Registration pending admin approval.' };
     }
 
     const accessToken = generateAccessToken(user.id);
