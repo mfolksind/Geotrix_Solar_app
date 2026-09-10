@@ -61,7 +61,8 @@ export class PaymentService {
             };
 
             const payment = await this.repo.create(paymentPayload as any);
-            await this.orderRepo.updateStatus(orderId, "PAID");
+            await this.orderRepo.updatePaymentStatus(orderId, "PAID");
+            await this.orderRepo.updateStatus(orderId, "CONFIRMED");
 
             return payment;
         } catch (err) {

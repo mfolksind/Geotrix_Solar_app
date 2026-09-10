@@ -9,9 +9,13 @@ function validate(schema: AnyZodObject | ZodTypeAny, location: SchemaLocation = 
     const result = schema.safeParse(target);
 
     if (!result.success) {
+      const passwordIssue = result.error.issues.find((issue) => issue.path.includes('password'));
+      const firstIssue = passwordIssue || result.error.issues[0];
+      const errorMessage = firstIssue ? firstIssue.message : 'Validation failed';
+
       res.status(400).json({
         success: false,
-        message: 'Validation failed',
+        message: errorMessage,
         errors: result.error.format(),
       });
       return;

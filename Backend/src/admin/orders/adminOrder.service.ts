@@ -19,7 +19,7 @@ export class AdminOrderService {
     const page = Number(query.page ?? 1);
     const limit = Number(query.limit ?? 20);
     const skip = (page - 1) * limit;
-    const items = await OrderModel.find(q).skip(skip).limit(limit).exec();
+    const items = await OrderModel.find(q).populate('user', 'name firstName lastName email').skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
     const total = await OrderModel.countDocuments(q).exec();
     return { items, total, page, limit };
   }

@@ -9,7 +9,7 @@ export class OrderRepository {
 
   public async findById(id: string) {
     if (!Types.ObjectId.isValid(id)) return null;
-    return OrderModel.findById(id).populate('address').exec();
+    return OrderModel.findById(id).populate('address').populate('user', 'name firstName lastName email phone').exec();
   }
 
   public async findByOrderNumber(orderNumber: string) {

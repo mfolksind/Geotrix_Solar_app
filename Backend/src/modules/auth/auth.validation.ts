@@ -2,16 +2,24 @@ import { z } from 'zod';
 
 export const registerSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
-  email: z.string().trim().email('Valid email is required'),
-  password: z.string().trim().min(8, 'Password must be at least 8 characters'),
+  email: z.string().trim().email('Please enter a valid email address'),
+  password: z
+    .string({ required_error: 'Password is required' })
+    .trim()
+    .min(1, 'Password is required')
+    .min(8, 'Password must be at least 8 characters long'),
   phone: z.string().trim().optional(),
   family: z.string().trim().optional(),
 });
 
 export const registerAdminSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
-  email: z.string().trim().email('Valid email is required'),
-  password: z.string().trim().min(8, 'Password must be at least 8 characters'),
+  email: z.string().trim().email('Please enter a valid email address'),
+  password: z
+    .string({ required_error: 'Password is required' })
+    .trim()
+    .min(1, 'Password is required')
+    .min(8, 'Password must be at least 8 characters long'),
   phone: z.string().trim().optional(),
   adminKey: z.string().trim().min(1, 'Admin key is required'),
 });
@@ -19,6 +27,7 @@ export const registerAdminSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().trim().email('Valid email is required'),
   password: z.string().trim().min(8, 'Password must be at least 8 characters'),
+  adminOnly: z.boolean().optional(),
 });
 
 export const googleLoginSchema = z.object({

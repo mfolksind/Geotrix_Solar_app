@@ -6,6 +6,7 @@ import { generateAccessToken, generateRefreshToken, hashToken, verifyGoogleIdTok
 import { sendEmail } from '../../common/services/email/email.service';
 import UserModel from '../users/user.model';
 import FamilyModel from '../families/family.model';
+import { ApiError } from '../../common/errors/ApiError';
 
 const REFRESH_TOKEN_EXPIRES_IN_MS = Number(process.env.JWT_REFRESH_COOKIE_MAX_AGE ?? 7 * 24 * 60 * 60 * 1000);
 const PASSWORD_RESET_TOKEN_EXPIRES_IN_MS = Number(process.env.PASSWORD_RESET_TOKEN_EXPIRES_IN_MS ?? 60 * 60 * 1000);
@@ -121,16 +122,23 @@ export class AuthService {
   public async login(payload: LoginPayload): Promise<{ user: unknown; tokens: AuthTokens }> {
     const user = await this.authRepository.findByEmail(payload.email);
     if (!user || !user.password) {
-      throw new Error('Invalid email or password');
+      throw new ApiError(401, 'Invalid email or password');
     }
 
     const passwordMatches = await bcrypt.compare(payload.password, user.password);
     if (!passwordMatches) {
-      throw new Error('Invalid email or password');
+      throw new ApiError(401, 'Invalid email or password');
     }
 
     if (user.status !== 'active') {
-      throw new Error('Account is not active');
+      throw new ApiError(403, 'Account is not active');
+    }
+
+    if (payload.adminOnly) {
+      const adminRoles = ['admin', 'super_admin', 'manager'];
+      if (!adminRoles.includes((user.role || '').toLowerCase())) {
+        throw new ApiError(403, 'Access denied: Administrator privileges required.');
+      }
     }
 
     const accessToken = generateAccessToken(user.id);
@@ -140,6 +148,10 @@ export class AuthService {
     await this.authRepository.saveRefreshToken(user.id, refreshTokenHash, new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN_MS));
 
     return { user, tokens: { accessToken, refreshToken } };
+  }
+
+  public async adminLogin(payload: LoginPayload): Promise<{ user: unknown; tokens: AuthTokens }> {
+    return this.login({ ...payload, adminOnly: true });
   }
 
   public async googleLogin(payload: GoogleLoginPayload): Promise<{ user: unknown; tokens?: AuthTokens; message?: string }> {

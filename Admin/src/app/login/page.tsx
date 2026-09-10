@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Input } from '../../components/Input/Input';
 import { Button } from '../../components/Button/Button';
 import { Card } from '../../components/Card/Card';
-import { fetchApi, setAuthToken } from '../../utils/api';
+import { fetchApi, setAuthToken, clearAuthToken } from '../../utils/api';
 import styles from './login.module.css';
 
 export default function LoginPage() {
@@ -21,22 +21,34 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetchApi('/auth/login', {
+      const response = await fetchApi('/auth/admin/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
 
-      // Handle the actual backend response structure: { success, message, data: { tokens: { accessToken } } }
+      // Handle the backend response structure: { success, message, data: { user, tokens: { accessToken } } }
       const token = response.token || response.data?.tokens?.accessToken;
+      const user = response.data?.user || response.user;
+      const role = (user?.role || '').toLowerCase();
+      const adminRoles = ['admin', 'super_admin', 'manager'];
 
       if (response.success && token) {
+        if (!adminRoles.includes(role)) {
+          clearAuthToken();
+          setError('Access denied: Only administrators can sign in to this portal.');
+          return;
+        }
+
         setAuthToken(token);
+        if (typeof window !== 'undefined' && user) {
+          localStorage.setItem('adminUser', JSON.stringify(user));
+        }
         router.push('/dashboard');
       } else {
         setError(response.message || 'Login failed. Invalid token received.');
       }
     } catch (err: any) {
-      setError(err?.data?.message || 'Network error or invalid credentials');
+      setError(err?.data?.message || err?.message || 'Network error or invalid credentials');
     } finally {
       setLoading(false);
     }

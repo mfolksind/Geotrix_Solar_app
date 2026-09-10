@@ -13,6 +13,8 @@ const authController = new AuthController(authService);
 router.post('/register', validate(registerSchema), authController.register);
 router.post('/register_admin', validate(registerAdminSchema), authController.registerAdmin);
 router.post('/login', validate(loginSchema), authController.login);
+router.post('/admin/login', validate(loginSchema), authController.adminLogin);
+router.post('/admin-login', validate(loginSchema), authController.adminLogin);
 router.post('/google', validate(googleLoginSchema), authController.googleLogin);
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', authController.logout);

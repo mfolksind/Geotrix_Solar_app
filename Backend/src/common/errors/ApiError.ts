@@ -19,10 +19,18 @@ export class ApiError extends Error {
     // ApiError passthrough
     if (err instanceof ApiError) return err;
 
+    const anyErr = err as any;
+    if (anyErr && typeof anyErr.statusCode === 'number') {
+      return new ApiError(anyErr.statusCode, anyErr.message || 'Error', anyErr.errors || []);
+    }
+
     // Zod validation
     if (err instanceof ZodError) {
       const errors = err.errors.map((e) => ({ path: e.path, message: e.message }));
-      return new ApiError(400, 'Validation error', errors);
+      const passwordIssue = err.errors.find((e) => e.path.includes('password'));
+      const firstIssue = passwordIssue || err.errors[0];
+      const message = firstIssue ? firstIssue.message : 'Validation error';
+      return new ApiError(400, message, errors);
     }
 
     // JWT errors
@@ -35,7 +43,6 @@ export class ApiError extends Error {
 
     // Mongoose / Mongo errors
     // Duplicate key (MongoServerError with code 11000)
-    const anyErr = err as any;
     if (anyErr && anyErr.name === 'MongoServerError' && anyErr.code === 11000) {
       const keys = anyErr.keyValue ? Object.keys(anyErr.keyValue) : [];
       const message = `Duplicate key error: ${keys.join(', ')}`;

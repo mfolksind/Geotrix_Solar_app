@@ -33,7 +33,8 @@ export class AuthController {
 
   public login = asyncHandler(async (req: Request, res: Response) => {
     const payload = req.body as LoginPayload;
-    const result = await this.authService.login(payload);
+    const isAdminOnly = payload.adminOnly === true || req.query.admin === 'true' || req.headers['x-admin-portal'] === 'true';
+    const result = await this.authService.login({ ...payload, adminOnly: isAdminOnly });
 
     res.cookie('refreshToken', result.tokens.refreshToken, {
       httpOnly: true,
@@ -45,6 +46,24 @@ export class AuthController {
     res.status(200).json({
       success: true,
       message: 'Login successful',
+      data: result,
+    });
+  });
+
+  public adminLogin = asyncHandler(async (req: Request, res: Response) => {
+    const payload = req.body as LoginPayload;
+    const result = await this.authService.adminLogin(payload);
+
+    res.cookie('refreshToken', result.tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/auth',
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Admin login successful',
       data: result,
     });
   });

@@ -17,6 +17,7 @@ export interface RegisterAdminPayload extends RegisterPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+  adminOnly?: boolean;
 }
 
 export interface GoogleLoginPayload {

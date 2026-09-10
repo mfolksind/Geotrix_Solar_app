@@ -8,9 +8,28 @@ import styles from './Header.module.css';
 
 export const Header = () => {
   const router = useRouter();
+  const [userName, setUserName] = React.useState('Admin');
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('adminUser');
+        if (stored) {
+          const user = JSON.parse(stored);
+          const name = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+          if (name) setUserName(name);
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+  }, []);
 
   const handleLogout = () => {
     clearAuthToken();
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('adminUser');
+    }
     router.push('/login');
   };
 
@@ -22,7 +41,7 @@ export const Header = () => {
           <div className={styles.avatar}>
             <User size={18} />
           </div>
-          <span className={styles.name}>Admin User</span>
+          <span className={styles.name}>{userName}</span>
         </div>
         <button onClick={handleLogout} className={styles.logoutBtn} title="Logout">
           <LogOut size={18} />
