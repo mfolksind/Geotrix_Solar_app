@@ -1,7 +1,18 @@
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { AuthRepository } from './auth.repository';
-import { AuthTokens, CreateUserPayload, ForgotPasswordPayload, GoogleLoginPayload, LoginPayload, RegisterPayload, RegisterAdminPayload, ResetPasswordPayload, VerifyEmailPayload } from './auth.types';
+import {
+  AuthTokens,
+  CreateUserPayload,
+  ForgotPasswordPayload,
+  VerifyOtpPayload,
+  GoogleLoginPayload,
+  LoginPayload,
+  RegisterPayload,
+  RegisterAdminPayload,
+  ResetPasswordPayload,
+  VerifyEmailPayload,
+} from './auth.types';
 import { generateAccessToken, generateRefreshToken, hashToken, verifyGoogleIdToken } from './auth.utils';
 import { sendEmail } from '../../common/services/email/email.service';
 import UserModel from '../users/user.model';
@@ -9,7 +20,7 @@ import FamilyModel from '../families/family.model';
 import { ApiError } from '../../common/errors/ApiError';
 
 const REFRESH_TOKEN_EXPIRES_IN_MS = Number(process.env.JWT_REFRESH_COOKIE_MAX_AGE ?? 7 * 24 * 60 * 60 * 1000);
-const PASSWORD_RESET_TOKEN_EXPIRES_IN_MS = Number(process.env.PASSWORD_RESET_TOKEN_EXPIRES_IN_MS ?? 60 * 60 * 1000);
+const OTP_EXPIRES_IN_MS = 10 * 60 * 1000; // 10 minutes
 const EMAIL_VERIFY_TOKEN_EXPIRES_IN_MS = Number(process.env.EMAIL_VERIFY_TOKEN_EXPIRES_IN_MS ?? 24 * 60 * 60 * 1000);
 
 export class AuthService {
@@ -18,7 +29,7 @@ export class AuthService {
   public async register(payload: RegisterPayload, origin: string): Promise<{ user: unknown; tokens?: AuthTokens; message?: string }> {
     const existingUser = await this.authRepository.findByEmail(payload.email);
     if (existingUser) {
-      throw new Error('Email is already registered');
+      throw new ApiError(400, 'Email is already registered');
     }
 
     let familyApprovalStatus: 'pending' | 'approved' | 'rejected' | null = null;
@@ -85,16 +96,16 @@ export class AuthService {
   public async registerAdmin(payload: RegisterAdminPayload, origin: string): Promise<{ user: unknown; tokens: AuthTokens }> {
     const adminKey = process.env.ADMIN_REGISTRATION_KEY;
     if (!adminKey) {
-      throw new Error('Admin registration is not configured');
+      throw new ApiError(500, 'Admin registration is not configured');
     }
 
     if (payload.adminKey !== adminKey) {
-      throw new Error('Invalid admin registration key');
+      throw new ApiError(403, 'Invalid admin registration key');
     }
 
     const existingUser = await this.authRepository.findByEmail(payload.email);
     if (existingUser) {
-      throw new Error('Email is already registered');
+      throw new ApiError(400, 'Email is already registered');
     }
 
     const passwordHash = await bcrypt.hash(payload.password, 12);
@@ -161,7 +172,7 @@ export class AuthService {
     const name = decoded.name ?? email?.split('@')[0] ?? 'Google User';
 
     if (!email || !googleId) {
-      throw new Error('Invalid Google token');
+      throw new ApiError(400, 'Invalid Google token');
     }
 
     let user = await this.authRepository.findByEmail(email);
@@ -169,7 +180,7 @@ export class AuthService {
       let familyId: string | undefined = payload.family;
       let familyApprovalStatus: 'pending' | 'approved' | 'rejected' | null = null;
       let initialStatus: 'active' | 'inactive' | 'blocked' = 'active';
-      
+
       if (!familyId && payload.familySlug) {
         const familyBySlug = await FamilyModel.findOne({ slug: payload.familySlug });
         if (familyBySlug) {
@@ -229,7 +240,7 @@ export class AuthService {
     const tokenHash = hashToken(token);
     const existingToken = await this.authRepository.findRefreshToken(tokenHash);
     if (!existingToken || existingToken.expiresAt < new Date()) {
-      throw new Error('Refresh token is invalid or expired');
+      throw new ApiError(401, 'Refresh token is invalid or expired');
     }
 
     const accessToken = generateAccessToken(existingToken.user.toString());
@@ -247,68 +258,175 @@ export class AuthService {
     await this.authRepository.deleteRefreshToken(tokenHash);
   }
 
-  public async forgotPassword(payload: ForgotPasswordPayload, origin: string): Promise<void> {
+  // =========================================================================
+  // EMAIL OTP FORGOT PASSWORD FLOW
+  // =========================================================================
+
+  public async forgotPassword(payload: ForgotPasswordPayload, origin?: string): Promise<{ success: boolean; message: string; email: string }> {
     const user = await this.authRepository.findByEmail(payload.email);
     if (!user) {
-      return;
+      throw new ApiError(404, 'No account registered with this email address');
     }
 
-    const resetToken = crypto.randomUUID();
-    const resetTokenHash = hashToken(resetToken);
-    const expiresAt = new Date(Date.now() + PASSWORD_RESET_TOKEN_EXPIRES_IN_MS);
+    // Generate secure 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const token = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + OTP_EXPIRES_IN_MS);
 
-    await this.authRepository.savePasswordResetToken(user.id, resetTokenHash, expiresAt);
-    await sendEmail({
-      to: user.email,
-      subject: 'Reset your password',
-      text: `Use this link to reset your password: ${origin}/reset-password?token=${resetToken}`,
-      html: `<p>Use this link to reset your password: <a href="${origin}/reset-password?token=${resetToken}">${origin}/reset-password</a></p>`,
-    });
+    // Save OTP to DB
+    await this.authRepository.savePasswordResetOtp(user.id, user.email, token, otp, expiresAt);
+
+    // Send email with OTP code
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Mfolks - Password Reset Verification Code',
+        text: `Your password reset verification code is: ${otp}. This code is valid for 10 minutes.`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <h2 style="color: #0f172a; margin: 0 0 8px 0; font-size: 22px; font-weight: 700;">Password Reset Request</h2>
+              <p style="color: #64748b; font-size: 14px; margin: 0;">Use the 6-digit verification code below to securely reset your password.</p>
+            </div>
+            <div style="background: #f8fafc; border: 1px dashed #57c5cc; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0;">
+              <p style="color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0; font-weight: 600;">Your Verification OTP</p>
+              <div style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #57c5cc; font-family: monospace;">${otp}</div>
+              <p style="color: #94a3b8; font-size: 12px; margin: 12px 0 0 0;">⏱ Valid for the next <b>10 minutes</b>.</p>
+            </div>
+            <p style="color: #64748b; font-size: 13px; line-height: 1.6; margin: 0 0 16px 0;">
+              If you didn't request this code, you can safely ignore this email. Someone may have typed your email address by mistake.
+            </p>
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 16px; font-size: 12px; color: #94a3b8; text-align: center;">
+              &copy; ${new Date().getFullYear()} Mfolks Platform. All rights reserved.
+            </div>
+          </div>
+        `,
+      });
+    } catch (mailError) {
+      console.error('Failed to send password reset OTP email:', mailError);
+      throw new ApiError(500, 'Failed to send OTP email. Please verify email service configuration.');
+    }
+
+    return {
+      success: true,
+      message: 'A 6-digit verification code has been sent to your email.',
+      email: user.email,
+    };
   }
 
-  public async resetPassword(payload: ResetPasswordPayload): Promise<void> {
-    const tokenHash = hashToken(payload.token);
-    const resetRecord = await this.authRepository.findPasswordResetToken(tokenHash);
-    if (!resetRecord || resetRecord.expiresAt < new Date()) {
-      throw new Error('Reset token is invalid or expired');
+  public async verifyOtp(payload: VerifyOtpPayload): Promise<{ success: boolean; message: string; token: string; email: string }> {
+    const record = await this.authRepository.findPasswordResetByEmail(payload.email);
+    if (!record) {
+      throw new ApiError(400, 'No active password reset request found for this email');
+    }
+
+    if (new Date() > record.expiresAt) {
+      throw new ApiError(400, 'Verification code has expired. Please request a new OTP.');
+    }
+
+    if (record.otp !== payload.otp.trim()) {
+      throw new ApiError(400, 'Invalid verification code. Please check and try again.');
+    }
+
+    // Mark as verified
+    await this.authRepository.markResetVerified(record.id);
+
+    return {
+      success: true,
+      message: 'OTP verified successfully.',
+      token: record.token,
+      email: payload.email,
+    };
+  }
+
+  public async resetPassword(payload: ResetPasswordPayload): Promise<{ success: boolean; message: string }> {
+    let resetRecord = null;
+
+    if (payload.token) {
+      resetRecord = await this.authRepository.findPasswordResetToken(payload.token);
+    } else if (payload.email && payload.otp) {
+      const record = await this.authRepository.findPasswordResetByEmail(payload.email);
+      if (record && record.otp === payload.otp.trim()) {
+        resetRecord = record;
+      }
+    } else if (payload.email) {
+      const record = await this.authRepository.findPasswordResetByEmail(payload.email);
+      if (record && record.isVerified) {
+        resetRecord = record;
+      }
+    }
+
+    if (!resetRecord || new Date() > resetRecord.expiresAt) {
+      throw new ApiError(400, 'Password reset session is invalid or expired. Please request a new code.');
     }
 
     const passwordHash = await bcrypt.hash(payload.password, 12);
     await UserModel.findByIdAndUpdate(resetRecord.user, { password: passwordHash }).exec();
-    await this.authRepository.deletePasswordResetToken(tokenHash);
+
+    // Clean up reset records for this user
+    await this.authRepository.deletePasswordResetByUser(resetRecord.user.toString());
+
+    // Send confirmation email
+    const user = await UserModel.findById(resetRecord.user).exec();
+    if (user) {
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: 'Mfolks - Password Successfully Updated',
+          text: 'Your account password has been successfully reset. You can now log in with your new password.',
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;">
+              <h3 style="color: #0f172a; margin: 0 0 12px 0;">Password Successfully Reset</h3>
+              <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0 0 16px 0;">
+                Your Mfolks account password was successfully updated. You can now log in using your new password.
+              </p>
+              <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                If you did not perform this change, please contact our support team immediately.
+              </p>
+            </div>
+          `,
+        });
+      } catch (e) {
+        console.error('Confirmation email send failed:', e);
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Password reset successfully. You can now log in with your new credentials.',
+    };
   }
 
   public async verifyEmail(payload: VerifyEmailPayload): Promise<void> {
-    const tokenHash = hashToken(payload.token);
-    const verificationRecord = await this.authRepository.findVerificationToken(tokenHash);
+    const verificationRecord = await this.authRepository.findVerificationToken(payload.token);
     if (!verificationRecord || verificationRecord.expiresAt < new Date()) {
-      throw new Error('Verification token is invalid or expired');
+      throw new ApiError(400, 'Verification token is invalid or expired');
     }
 
     await UserModel.findByIdAndUpdate(verificationRecord.user, { isVerified: true }).exec();
-    await this.authRepository.deleteEmailVerificationToken(tokenHash);
+    await this.authRepository.deleteEmailVerificationToken(payload.token);
   }
 
   public async resendVerificationEmail(email: string, origin: string): Promise<void> {
     const user = await this.authRepository.findByEmail(email);
     if (!user) {
-      throw new Error('User not found');
+      throw new ApiError(404, 'User not found');
     }
 
     if (user.isVerified) {
       return;
     }
 
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationToken = crypto.randomUUID();
-    const tokenHash = hashToken(verificationToken);
     const expiresAt = new Date(Date.now() + EMAIL_VERIFY_TOKEN_EXPIRES_IN_MS);
 
-    await this.authRepository.saveEmailVerificationToken(user.id, tokenHash, expiresAt);
+    await this.authRepository.saveEmailVerificationToken(user.id, verificationToken, expiresAt, otp);
     await sendEmail({
       to: user.email,
-      subject: 'Verify your email',
-      text: `Verify your account by visiting ${origin}/verify-email?token=${verificationToken}`,
-      html: `<p>Verify your account by visiting <a href="${origin}/verify-email?token=${verificationToken}">${origin}/verify-email</a></p>`,
+      subject: 'Verify your email - Mfolks',
+      text: `Your verification code is: ${otp}. Or verify at: ${origin}/verify-email?token=${verificationToken}`,
+      html: `<p>Your verification code is: <b>${otp}</b></p><p>Or click to verify: <a href="${origin}/verify-email?token=${verificationToken}">${origin}/verify-email</a></p>`,
     });
   }
 }

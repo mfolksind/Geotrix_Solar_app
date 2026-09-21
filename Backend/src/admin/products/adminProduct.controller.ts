@@ -11,6 +11,20 @@ export class AdminProductController {
     res.status(200).json({ success: true, data: products });
   });
 
+  public getStats = asyncHandler(async (req: Request, res: Response) => {
+    const stats = await service.getStats();
+    res.status(200).json({ success: true, data: stats });
+  });
+
+  public getSingle = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    const product = await service.getProduct(id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    res.status(200).json({ success: true, data: product });
+  });
+
   public create = asyncHandler(async (req: Request, res: Response) => {
     const created = await service.create(req.body);
     res.status(201).json({ success: true, data: created });
@@ -36,9 +50,20 @@ export class AdminProductController {
   });
 
   public uploadImage = asyncHandler(async (req: Request, res: Response) => {
-    const payload = req.body;
+    const { id } = req.params as { id: string };
+    const payload = {
+      ...req.body,
+      variantId: req.body.variantId || id
+    };
     const uploaded = await service.uploadImage(payload);
     res.status(201).json({ success: true, data: uploaded });
+  });
+
+  public setPrimaryImage = asyncHandler(async (req: Request, res: Response) => {
+    const { id: imageId } = req.params as { id: string };
+    const { variantId } = req.body as { variantId: string };
+    const result = await service.setPrimaryImage(variantId, imageId);
+    res.status(200).json({ success: true, data: result });
   });
 
   public deleteImage = asyncHandler(async (req: Request, res: Response) => {
@@ -62,6 +87,13 @@ export class AdminProductController {
   public updateVariant = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
     const updated = await service.updateVariant(id, req.body);
+    res.status(200).json({ success: true, data: updated });
+  });
+
+  public setDefaultVariant = asyncHandler(async (req: Request, res: Response) => {
+    const { id: variantId } = req.params as { id: string };
+    const { productId } = req.body as { productId: string };
+    const updated = await service.setDefaultVariant(productId, variantId);
     res.status(200).json({ success: true, data: updated });
   });
 

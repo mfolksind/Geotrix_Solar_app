@@ -6,9 +6,13 @@ import { createCategorySchema, updateCategorySchema } from '../../modules/catego
 
 const router = Router();
 
-router.get('/', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.getAll);
-router.post('/', authenticate, authorize('SUPER_ADMIN','ADMIN'), validate(createCategorySchema), controller.create);
-router.patch('/:id', authenticate, authorize('SUPER_ADMIN','ADMIN'), validate(updateCategorySchema), controller.update);
-router.delete('/:id', authenticate, authorize('SUPER_ADMIN','ADMIN'), controller.delete);
+router.get('/stats', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.getStats);
+router.get('/', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.getAll);
+router.get('/:id/linked', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.getLinked);
+router.get('/:id', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.getById);
+router.post('/', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), validate(createCategorySchema), controller.create);
+router.patch('/:id', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), validate(updateCategorySchema), controller.update);
+router.delete('/:id', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.delete);
 
 export default router;
+

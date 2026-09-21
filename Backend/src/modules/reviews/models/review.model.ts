@@ -18,7 +18,5 @@ const reviewSchema = new Schema<IReviewDocument>(
 
 // compound unique: one review per user per product
 reviewSchema.index({ user: 1, product: 1 }, { unique: true });
-reviewSchema.index({ product: 1 });
-reviewSchema.index({ user: 1 });
 
 export default model<IReviewDocument>('Review', reviewSchema);

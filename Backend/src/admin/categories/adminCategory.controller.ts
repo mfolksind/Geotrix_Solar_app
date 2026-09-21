@@ -5,9 +5,34 @@ import { AdminCategoryService } from './adminCategory.service';
 const service = new AdminCategoryService();
 
 export class AdminCategoryController {
-  public getAll = asyncHandler(async (_req: Request, res: Response) => {
-    const categories = await service.getAll();
-    res.status(200).json({ success: true, data: categories });
+  public getStats = asyncHandler(async (_req: Request, res: Response) => {
+    const stats = await service.getStats();
+    res.status(200).json({ success: true, data: stats });
+  });
+
+  public getAll = asyncHandler(async (req: Request, res: Response) => {
+    const result = await service.getAll(req.query);
+    res.status(200).json({
+      success: true,
+      data: result.categories,
+      pagination: result.pagination
+    });
+  });
+
+  public getById = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    const category = await service.getById(id);
+    if (!category) {
+      res.status(404).json({ success: false, message: 'Category not found' });
+      return;
+    }
+    res.status(200).json({ success: true, data: category });
+  });
+
+  public getLinked = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    const linked = await service.getLinked(id);
+    res.status(200).json({ success: true, data: linked });
   });
 
   public create = asyncHandler(async (req: Request, res: Response) => {
@@ -29,3 +54,4 @@ export class AdminCategoryController {
 }
 
 export default new AdminCategoryController();
+

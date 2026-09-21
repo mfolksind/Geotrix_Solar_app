@@ -13,7 +13,11 @@ const controller = new LeadController(service);
 router.post('/', validate(createLeadSchema), controller.createLead);
 
 // Protected admin routes
-router.get('/', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), validate(listLeadsSchema, 'query'), controller.getLeads);
+router.get('/stats', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.getStats);
+router.get('/', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.getLeads);
+router.get('/:id', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.getLeadById);
 router.patch('/:id/status', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), validate(updateLeadSchema), controller.updateLeadStatus);
+router.delete('/:id', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.deleteLead);
 
 export default router;
+

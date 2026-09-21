@@ -5,14 +5,32 @@ import { AdminOrderService } from './adminOrder.service';
 const service = new AdminOrderService();
 
 export class AdminOrderController {
+  public getStats = asyncHandler(async (_req: Request, res: Response) => {
+    const stats = await service.getStats();
+    res.status(200).json({ success: true, data: stats });
+  });
+
   public list = asyncHandler(async (req: Request, res: Response) => {
-    const result = await service.list(req.query as Record<string, unknown>);
-    res.status(200).json({ success: true, data: result });
+    const result = await service.list(req.query as any);
+    res.status(200).json({
+      success: true,
+      data: result.items,
+      pagination: {
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
+      }
+    });
   });
 
   public get = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
     const order = await service.get(id);
+    if (!order) {
+      res.status(404).json({ success: false, message: 'Order not found' });
+      return;
+    }
     res.status(200).json({ success: true, data: order });
   });
 
@@ -25,7 +43,7 @@ export class AdminOrderController {
 
   public updatePaymentStatus = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
-    const { status } = req.body as { status: string };
+    const status = (req.body as any)?.status || (req.body as any)?.paymentStatus;
     const updated = await service.updatePaymentStatus(id, status);
     res.status(200).json({ success: true, data: updated });
   });
@@ -44,3 +62,4 @@ export class AdminOrderController {
 }
 
 export default new AdminOrderController();
+

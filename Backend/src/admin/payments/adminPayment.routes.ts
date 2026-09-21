@@ -1,16 +1,12 @@
 import { Router } from 'express';
 import { authenticate, authorize } from '../../modules/auth/auth.middleware';
-import controller from './adminSupport.controller';
+import controller from './adminPayment.controller';
 
 const router = Router();
 
 router.get('/stats', authenticate, authorize('SUPER_ADMIN', 'ADMIN', 'manager'), controller.getStats);
 router.get('/', authenticate, authorize('SUPER_ADMIN', 'ADMIN', 'manager'), controller.list);
 router.get('/:id', authenticate, authorize('SUPER_ADMIN', 'ADMIN', 'manager'), controller.get);
-router.post('/:id/reply', authenticate, authorize('SUPER_ADMIN', 'ADMIN', 'manager'), controller.reply);
 router.patch('/:id/status', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.updateStatus);
-router.patch('/:id/priority', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.updatePriority);
-router.patch('/:id/assign', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.assign);
-router.delete('/:id', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.delete);
 
 export default router;

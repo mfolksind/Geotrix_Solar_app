@@ -6,14 +6,21 @@ const service = new AnalyticsService();
 
 export class AnalyticsController {
   public sales = asyncHandler(async (req: Request, res: Response) => {
-    const { from, to } = req.query as any;
-    const data = await service.sales({ from: from ? new Date(from) : undefined, to: to ? new Date(to) : undefined });
+    const { from, to, range } = req.query as any;
+    const data = await service.sales({
+      from: from ? new Date(from) : undefined,
+      to: to ? new Date(to) : undefined,
+      range: typeof range === 'string' ? range : undefined,
+    });
     res.status(200).json({ success: true, data });
   });
 
   public orders = asyncHandler(async (req: Request, res: Response) => {
     const { from, to } = req.query as any;
-    const data = await service.orders({ from: from ? new Date(from) : undefined, to: to ? new Date(to) : undefined });
+    const data = await service.orders({
+      from: from ? new Date(from) : undefined,
+      to: to ? new Date(to) : undefined,
+    });
     res.status(200).json({ success: true, data });
   });
 
@@ -28,8 +35,12 @@ export class AnalyticsController {
   });
 
   public revenue = asyncHandler(async (req: Request, res: Response) => {
-    const { from, to } = req.query as any;
-    const data = await service.revenue({ from: from ? new Date(from) : undefined, to: to ? new Date(to) : undefined });
+    const { from, to, range } = req.query as any;
+    const data = await service.revenue({
+      from: from ? new Date(from) : undefined,
+      to: to ? new Date(to) : undefined,
+      range: typeof range === 'string' ? range : undefined,
+    });
     res.status(200).json({ success: true, data });
   });
 }

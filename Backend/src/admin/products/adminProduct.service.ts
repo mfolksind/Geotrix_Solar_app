@@ -52,4 +52,42 @@ export class AdminProductService {
   public async deleteVariant(id: string) {
     return this.service.deleteVariant(id);
   }
+
+  public async getProduct(id: string) {
+    const product = await this.repo.findById(id);
+    if (!product) return null;
+    const variants = await this.service.getVariants(id);
+    return {
+      ...(product.toObject ? product.toObject() : product),
+      variants
+    };
+  }
+
+  public async setDefaultVariant(productId: string, variantId: string) {
+    return this.service.setDefaultVariant(productId, variantId);
+  }
+
+  public async setPrimaryImage(variantId: string, imageId: string) {
+    return this.service.setPrimaryImage(variantId, imageId);
+  }
+
+  public async getStats() {
+    const ProductModel = (await import('../../modules/products/product.model')).default;
+    const ProductVariantModel = (await import('../../modules/products/productVariant.model')).default;
+    const [totalProducts, activeProducts, totalVariants, outOfStockCount, lowStockCount] = await Promise.all([
+      ProductModel.countDocuments({ isDeleted: false }),
+      ProductModel.countDocuments({ isDeleted: false, status: 'ACTIVE' }),
+      ProductVariantModel.countDocuments({ isDeleted: false }),
+      ProductVariantModel.countDocuments({ isDeleted: false, stock: { $lte: 0 } }),
+      ProductVariantModel.countDocuments({ isDeleted: false, stock: { $gt: 0, $lte: 5 } }),
+    ]);
+
+    return {
+      totalProducts,
+      activeProducts,
+      totalVariants,
+      outOfStockCount,
+      lowStockCount
+    };
+  }
 }

@@ -16,6 +16,11 @@ export class ProductImageRepository {
     return ProductImageModel.find({ variant: variantId }).sort({ sortOrder: 1 }).exec();
   }
 
+  public async setPrimaryImage(variantId: string, imageId: string) {
+    await ProductImageModel.updateMany({ variant: variantId, _id: { $ne: imageId } }, { $set: { isPrimary: false } }).exec();
+    return ProductImageModel.findByIdAndUpdate(imageId, { $set: { isPrimary: true } }, { new: true }).exec();
+  }
+
   public async delete(id: string) {
     return ProductImageModel.findByIdAndDelete(id).exec();
   }

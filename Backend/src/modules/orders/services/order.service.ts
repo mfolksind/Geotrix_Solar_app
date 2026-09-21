@@ -6,8 +6,8 @@ import { CartItemRepository } from '../../carts/repositories/cartItem.repository
 import AddressModel from '../../addresses/models/address.model';
 import ProductModel from '../../products/product.model';
 import ProductVariantModel from '../../products/productVariant.model';
-import { OrderRepository as OR } from '../repositories/order.repository';
 import { ApiError } from '../../../common/errors/ApiError';
+import { IOrderBillingBreakup } from '../interfaces/order.interface';
 
 function generateOrderNumber(): string {
   const ts = Date.now().toString(36).toUpperCase();
@@ -23,7 +23,12 @@ export class OrderService {
     private readonly cartItemRepo: CartItemRepository
   ) {}
 
-  public async createOrder(userId: string, addressId: string, clientItems: { variantId: string, quantity: number }[], notes?: string) {
+  public async createOrder(
+    userId: string,
+    addressId: string,
+    clientItems: { variantId: string; quantity: number }[],
+    notes?: string
+  ) {
     if (!clientItems || clientItems.length === 0) throw new ApiError(400, 'Cart is empty');
 
     // validate address
@@ -34,20 +39,22 @@ export class OrderService {
     let subtotal = 0;
     const itemsData = [];
 
-    // validate product/variant availability and calculate total
+    // validate product/variant availability and calculate subtotal
     for (const item of clientItems) {
       const variant = await ProductVariantModel.findById(item.variantId).exec();
       if (!variant) throw new ApiError(400, 'Product variant not found');
-      
+
       const product = await ProductModel.findById(variant.product).exec();
-      if (!product || (product as any).isDeleted || (product as any).status !== 'ACTIVE') throw new ApiError(400, 'Product is not available');
-      
-      if ((variant.stock ?? 0) < item.quantity) throw new ApiError(400, `Insufficient stock for variant ${variant.id}`);
-      
+      if (!product || (product as any).isDeleted || (product as any).status !== 'ACTIVE')
+        throw new ApiError(400, 'Product is not available');
+
+      if ((variant.stock ?? 0) < item.quantity)
+        throw new ApiError(400, `Insufficient stock for variant ${variant.id}`);
+
       const unitPrice = variant.discountPrice || variant.price;
       const itemSubtotal = unitPrice * item.quantity;
       subtotal += itemSubtotal;
-      
+
       itemsData.push({
         product: product.id,
         variant: variant.id,
@@ -55,17 +62,19 @@ export class OrderService {
         variantName: variant.variantName,
         quantity: item.quantity,
         unitPrice,
-        subtotal: itemSubtotal
+        subtotal: itemSubtotal,
       });
     }
 
     try {
-
-      const discount = 0; // Or calculate if client provides discount codes
-      const taxRate = Number(process.env.ORDER_TAX_RATE ?? 0.0);
-      const tax = subtotal * taxRate;
+      const discount = 0; // Or calculate if coupon is applied
+      const taxableAmount = Math.max(0, subtotal - discount);
+      const taxRate = 18; // 18% standard GST
+      const tax = Math.round(taxableAmount * 0.18 * 100) / 100;
+      const cgst = Math.round((tax / 2) * 100) / 100; // 9%
+      const sgst = Math.round((tax / 2) * 100) / 100; // 9%
       const shippingCharge = Number(process.env.SHIPPING_CHARGE ?? 0);
-      const totalAmount = subtotal + tax + shippingCharge - discount;
+      const totalAmount = Math.round((taxableAmount + tax + shippingCharge) * 100) / 100;
 
       const orderPayload = {
         orderNumber: generateOrderNumber(),
@@ -76,7 +85,10 @@ export class OrderService {
         subtotal,
         shippingCharge,
         discount,
+        taxRate,
         tax,
+        cgst,
+        sgst,
         totalAmount,
         notes,
       } as const;
@@ -106,13 +118,25 @@ export class OrderService {
         await ProductVariantModel.findByIdAndUpdate(variant.id, { stock: newStock }).exec();
       }
 
-
-
-      // return populated order
+      // return populated order with billing breakup
       const populated = await this.orderRepo.findById(order.id);
-      return populated;
-    } catch (err) {
+      const billingBreakup: IOrderBillingBreakup = {
+        subtotal,
+        discount,
+        taxableAmount,
+        taxRate,
+        taxAmount: tax,
+        cgst,
+        sgst,
+        shippingCharge,
+        totalAmount,
+      };
 
+      return {
+        ...(populated ? populated.toObject() : order.toObject()),
+        billingBreakup,
+      };
+    } catch (err) {
       throw ApiError.fromUnknown(err);
     }
   }
@@ -121,11 +145,33 @@ export class OrderService {
     const order = await this.orderRepo.findById(id);
     if (!order) throw new ApiError(404, 'Order not found');
     const items = await this.orderItemRepo.findByOrder(id);
-    
-    // Return order with items array included
+
+    const subtotal = order.subtotal || 0;
+    const discount = order.discount || 0;
+    const taxableAmount = Math.max(0, subtotal - discount);
+    const taxRate = order.taxRate || 18;
+    const taxAmount = order.tax || Math.round(taxableAmount * 0.18 * 100) / 100;
+    const cgst = order.cgst || Math.round((taxAmount / 2) * 100) / 100;
+    const sgst = order.sgst || Math.round((taxAmount / 2) * 100) / 100;
+    const shippingCharge = order.shippingCharge || 0;
+    const totalAmount = order.totalAmount || (taxableAmount + taxAmount + shippingCharge);
+
+    const billingBreakup: IOrderBillingBreakup = {
+      subtotal,
+      discount,
+      taxableAmount,
+      taxRate,
+      taxAmount,
+      cgst,
+      sgst,
+      shippingCharge,
+      totalAmount,
+    };
+
     return {
       ...order.toObject(),
-      items
+      items,
+      billingBreakup,
     };
   }
 
@@ -141,8 +187,7 @@ export class OrderService {
     if (!order) throw new ApiError(404, 'Order not found');
     if (order.user.toString() !== userId) throw new ApiError(403, 'Cannot cancel order');
     if (order.status === 'CANCELLED') return order;
-    
-    // Also mark paymentStatus as FAILED if it was pending
+
     if (order.paymentStatus === 'PENDING') {
       await this.orderRepo.updatePaymentStatus(id, 'FAILED');
     }

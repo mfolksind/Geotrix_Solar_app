@@ -20,7 +20,4 @@ const addressSchema = new Schema<IAddressDocument>(
   { timestamps: true }
 );
 
-addressSchema.index({ user: 1 });
-addressSchema.index({ postalCode: 1 });
-
 export default model<IAddressDocument>('Address', addressSchema);

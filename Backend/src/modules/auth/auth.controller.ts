@@ -1,7 +1,16 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import { AuthService } from './auth.service';
-import { RegisterPayload, RegisterAdminPayload, LoginPayload, GoogleLoginPayload, ForgotPasswordPayload, ResetPasswordPayload, VerifyEmailPayload } from './auth.types';
+import {
+  RegisterPayload,
+  RegisterAdminPayload,
+  LoginPayload,
+  GoogleLoginPayload,
+  ForgotPasswordPayload,
+  VerifyOtpPayload,
+  ResetPasswordPayload,
+  VerifyEmailPayload,
+} from './auth.types';
 import { env } from '../../config/env';
 
 export class AuthController {
@@ -121,22 +130,33 @@ export class AuthController {
   public forgotPassword = asyncHandler(async (req: Request, res: Response) => {
     const payload = req.body as ForgotPasswordPayload;
     const origin = req.headers.origin || env.CLIENT_URLS[0] || 'http://localhost:3000';
-    await this.authService.forgotPassword(payload, origin);
+    const result = await this.authService.forgotPassword(payload, origin);
 
     res.status(200).json({
       success: true,
-      message: 'Password reset email sent',
-      data: {},
+      message: result.message,
+      data: { email: result.email },
+    });
+  });
+
+  public verifyOtp = asyncHandler(async (req: Request, res: Response) => {
+    const payload = req.body as VerifyOtpPayload;
+    const result = await this.authService.verifyOtp(payload);
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      data: { token: result.token, email: result.email },
     });
   });
 
   public resetPassword = asyncHandler(async (req: Request, res: Response) => {
     const payload = req.body as ResetPasswordPayload;
-    await this.authService.resetPassword(payload);
+    const result = await this.authService.resetPassword(payload);
 
     res.status(200).json({
       success: true,
-      message: 'Password reset successful',
+      message: result.message,
       data: {},
     });
   });

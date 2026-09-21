@@ -5,10 +5,11 @@ export interface IFamilyDocument extends Document {
   slug: string;
   description?: string;
   requiresAdminApproval: boolean;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   createdBy?: Types.ObjectId | string;
   updatedBy?: Types.ObjectId | string;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
+

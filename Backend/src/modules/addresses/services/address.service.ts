@@ -1,11 +1,10 @@
-import { AddressRepository } from '../repositories/address.repository';
+import { AddressRepository, AddressQueryOptions } from '../repositories/address.repository';
 import { CreateAddressPayload, UpdateAddressPayload } from '../types/address.types';
 
 export class AddressService {
   constructor(private readonly repo: AddressRepository) {}
 
   public async createAddress(payload: CreateAddressPayload) {
-    // If new address is default, unset previous defaults
     if (payload.isDefault) {
       await this.repo.unsetDefaultForUser(payload.user);
     }
@@ -15,13 +14,10 @@ export class AddressService {
   }
 
   public async updateAddress(id: string, payload: UpdateAddressPayload, userId?: string) {
-    // if setting default, unset others
     if (payload.isDefault && (payload as any).user) {
-      // prefer explicit user in payload if passed
       await this.repo.unsetDefaultForUser((payload as any).user);
     }
 
-    // If isDefault true but user not included, fetch existing address to determine user
     if (payload.isDefault && !(payload as any).user) {
       const existing = await this.repo.findById(id);
       if (existing) await this.repo.unsetDefaultForUser(existing.user.toString());
@@ -41,11 +37,18 @@ export class AddressService {
     return this.repo.findById(id);
   }
 
-  public async getAddresses(userId: string, isAdmin: boolean = false) {
+  public async getAddresses(userId?: string, isAdmin: boolean = false, options: AddressQueryOptions = {}) {
     if (isAdmin) {
-      return this.repo.findAll();
+      return this.repo.findAll(options);
+    }
+    if (!userId) {
+      return [];
     }
     return this.repo.findByUser(userId);
+  }
+
+  public async getStats() {
+    return this.repo.getStats();
   }
 
   public async deleteAddress(id: string, userId?: string) {

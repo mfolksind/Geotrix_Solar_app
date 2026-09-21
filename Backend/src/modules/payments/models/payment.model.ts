@@ -9,19 +9,25 @@ const paymentSchema = new Schema<IPaymentDocument>(
     paymentProvider: { type: String, trim: true },
     transactionId: { type: String, trim: true, index: true },
     providerOrderId: { type: String, trim: true },
+    subtotal: { type: Number, default: 0 },
+    taxAmount: { type: Number, default: 0 },
+    cgst: { type: Number, default: 0 },
+    sgst: { type: Number, default: 0 },
+    discount: { type: Number, default: 0 },
+    shippingFee: { type: Number, default: 0 },
     amount: { type: Number, required: true },
     currency: { type: String, required: true, default: 'INR' },
-    status: { type: String, enum: ['PENDING', 'SUCCESS', 'FAILED', 'REFUNDED'], default: 'PENDING', index: true },
+    status: {
+      type: String,
+      enum: ['PENDING', 'SUCCESS', 'FAILED', 'REFUNDED'],
+      default: 'PENDING',
+      index: true,
+    },
     paidAt: { type: Date },
     failureReason: { type: String, trim: true },
     metadata: { type: Schema.Types.Mixed },
   },
   { timestamps: true }
 );
-
-paymentSchema.index({ order: 1 });
-paymentSchema.index({ user: 1 });
-paymentSchema.index({ transactionId: 1 });
-paymentSchema.index({ status: 1 });
 
 export default model<IPaymentDocument>('Payment', paymentSchema);

@@ -35,13 +35,21 @@ export interface ForgotPasswordPayload {
   email: string;
 }
 
+export interface VerifyOtpPayload {
+  email: string;
+  otp: string;
+}
+
 export interface ResetPasswordPayload {
-  token: string;
+  email?: string;
+  otp?: string;
+  token?: string;
   password: string;
 }
 
 export interface VerifyEmailPayload {
   token: string;
+  otp?: string;
 }
 
 export interface ResendVerificationPayload {

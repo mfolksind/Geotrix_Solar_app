@@ -10,6 +10,14 @@ export class LeadController {
     this.service = service;
   }
 
+  getStats = asyncHandler(async (_req: Request, res: Response) => {
+    const stats = await this.service.getStats();
+    return res.status(200).json({
+      success: true,
+      data: stats,
+    });
+  });
+
   createLead = asyncHandler(async (req: Request, res: Response) => {
     const lead = await this.service.createLead(req.body);
     return res.status(201).json({
@@ -27,8 +35,21 @@ export class LeadController {
       pagination: {
         total: result.total,
         page: result.page,
+        limit: result.limit,
         totalPages: result.totalPages,
       }
+    });
+  });
+
+  getLeadById = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const lead = await this.service.getLeadById(id);
+    if (!lead) {
+      throw new ApiError(404, 'Lead not found');
+    }
+    return res.status(200).json({
+      success: true,
+      data: lead,
     });
   });
 
@@ -47,4 +68,18 @@ export class LeadController {
       data: lead,
     });
   });
+
+  deleteLead = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const deleted = await this.service.deleteLead(id);
+    if (!deleted) {
+      throw new ApiError(404, 'Lead not found');
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Lead deleted successfully',
+    });
+  });
 }
+

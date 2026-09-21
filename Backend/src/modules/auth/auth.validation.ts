@@ -26,7 +26,7 @@ export const registerAdminSchema = z.object({
 
 export const loginSchema = z.object({
   email: z.string().trim().email('Valid email is required'),
-  password: z.string().trim().min(8, 'Password must be at least 8 characters'),
+  password: z.string().trim().min(6, 'Password must be at least 6 characters'),
   adminOnly: z.boolean().optional(),
 });
 
@@ -42,13 +42,20 @@ export const forgotPasswordSchema = z.object({
   email: z.string().trim().email('Valid email is required'),
 });
 
+export const verifyOtpSchema = z.object({
+  email: z.string().trim().email('Valid email is required'),
+  otp: z.string().trim().min(4, 'OTP code is required'),
+});
+
 export const resetPasswordSchema = z.object({
-  token: z.string().trim().min(1, 'Reset token is required'),
-  password: z.string().trim().min(8, 'Password must be at least 8 characters'),
+  email: z.string().trim().email().optional(),
+  otp: z.string().trim().optional(),
+  token: z.string().trim().optional(),
+  password: z.string().trim().min(6, 'Password must be at least 6 characters'),
 });
 
 export const verifyEmailSchema = z.object({
-  token: z.string().trim().min(1, 'Verification token is required'),
+  token: z.string().trim().min(1, 'Verification token or OTP is required'),
 });
 
 export const resendVerificationSchema = z.object({

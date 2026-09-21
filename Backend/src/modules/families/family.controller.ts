@@ -9,6 +9,14 @@ export class FamilyController {
         this.familyService = new FamilyService();
     }
 
+    public getStats = asyncHandler(async (_req: Request, res: Response) => {
+        const stats = await this.familyService.getStats();
+        res.status(200).json({
+            success: true,
+            data: stats
+        });
+    });
+
     public createFamily = asyncHandler(async (req: Request, res: Response) => {
         const family = await this.familyService.createFamily(req.body);
         res.status(201).json({
@@ -19,11 +27,12 @@ export class FamilyController {
     });
 
     public getAllFamilies = asyncHandler(async (req: Request, res: Response) => {
-        const families = await this.familyService.getAllFamilies();
+        const result = await this.familyService.getAllFamilies(req.query);
         res.status(200).json({
             success: true,
             message: 'Families retrieved successfully',
-            data: families
+            data: result.families,
+            pagination: result.pagination
         });
     });
 
@@ -36,6 +45,14 @@ export class FamilyController {
             success: true,
             message: 'Family retrieved successfully',
             data: family
+        });
+    });
+
+    public getLinkedItems = asyncHandler(async (req: Request, res: Response) => {
+        const linked = await this.familyService.getFamilyLinkedItems(req.params.id);
+        res.status(200).json({
+            success: true,
+            data: linked
         });
     });
 
@@ -62,3 +79,4 @@ export class FamilyController {
         });
     });
 }
+

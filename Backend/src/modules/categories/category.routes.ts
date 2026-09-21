@@ -11,11 +11,14 @@ const repo = new CategoryRepository();
 const service = new CategoryService(repo);
 const controller = new CategoryController(service);
 
-router.post('/', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), validate(createCategorySchema), controller.createCategory);
+router.get('/stats', controller.getStats);
 router.get('/', controller.getCategories);
+router.get('/:id/linked', controller.getLinkedItems);
 router.get('/:id', controller.getCategory);
+router.post('/', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), validate(createCategorySchema), controller.createCategory);
 router.patch('/:id', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), validate(updateCategorySchema), controller.updateCategory);
 router.patch('/:id/status', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), validate(changeStatusSchema), controller.changeStatus);
 router.delete('/:id', authenticate, authorize('SUPER_ADMIN', 'ADMIN'), controller.deleteCategory);
 
 export default router;
+

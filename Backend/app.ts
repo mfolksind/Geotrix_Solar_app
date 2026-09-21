@@ -13,7 +13,6 @@ import { categoryRoutes } from "./src/modules/categories";
 import { productRoutes } from "./src/modules/products";
 import { orderRoutes } from "./src/modules/orders";
 import { cartRoutes } from "./src/modules/carts";
-import { geotrixBillRoutes } from "./src/modules/geotrixBills";
 import uploadRoutes from "./src/modules/uploads/routes/upload.routes";
 import { leadRoutes } from "./src/modules/leads";
 import { paymentRoutes } from "./src/modules/payments";
@@ -40,13 +39,14 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/carts", cartRoutes);
-app.use("/api/geotrixbills", geotrixBillRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/families", familyRoutes);
 app.use("/admin", adminRouter);
+app.use("/api/admin", adminRouter);
+
 
 app.use("/api", (req, res) => {
     const trimmedPath = req.path.replace(/\s+$/g, "");

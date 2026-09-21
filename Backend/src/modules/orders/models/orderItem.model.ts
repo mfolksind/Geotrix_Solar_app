@@ -15,6 +15,5 @@ const orderItemSchema = new Schema<IOrderItemDocument>(
   { timestamps: true }
 );
 
-orderItemSchema.index({ order: 1 });
-
 export default model<IOrderItemDocument>('OrderItem', orderItemSchema);
+

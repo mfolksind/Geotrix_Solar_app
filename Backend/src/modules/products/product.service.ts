@@ -179,6 +179,18 @@ export class ProductService {
     return image;
   }
 
+  public async setDefaultVariant(productId: string, variantId: string) {
+    return this.variantRepo.setDefaultVariant(productId, variantId);
+  }
+
+  public async setPrimaryImage(variantId: string, imageId: string) {
+    const img = await this.imageRepo.setPrimaryImage(variantId, imageId);
+    if (img && img.url) {
+      await this.variantRepo.update(variantId, { thumbnail: img.url } as any);
+    }
+    return img;
+  }
+
   public async deleteImage(id: string) {
     return this.imageRepo.delete(id);
   }

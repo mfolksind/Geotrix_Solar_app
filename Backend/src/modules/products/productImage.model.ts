@@ -3,7 +3,7 @@ import { IProductImageDocument } from './product.interface';
 
 const imageSchema = new Schema<IProductImageDocument>(
   {
-    variant: { type: Schema.Types.ObjectId, ref: 'ProductVariant', required: true, index: true },
+    variant: { type: Schema.Types.ObjectId, ref: 'ProductVariant', required: true },
     url: { type: String, required: true },
     publicId: { type: String, trim: true },
     isPrimary: { type: Boolean, default: false },

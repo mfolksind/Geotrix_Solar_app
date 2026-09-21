@@ -2,6 +2,7 @@ import { CartRepository } from '../repositories/cart.repository';
 import { CartItemRepository } from '../repositories/cartItem.repository';
 import ProductVariantModel from '../../products/productVariant.model';
 import ProductModel from '../../products/product.model';
+import { ICartBillingBreakup } from '../interfaces/cart.interface';
 
 export class CartService {
   constructor(private readonly cartRepo: CartRepository, private readonly itemRepo: CartItemRepository) {}
@@ -11,15 +12,21 @@ export class CartService {
     if (!cart) cart = await this.cartRepo.create(userId);
 
     const items = await this.itemRepo.findByCart(cart.id);
-    return { cart, items };
+
+    // Build standard 18% GST billing breakdown
+    const billing = this.calculateBilling(items, cart.discountAmount || 0, cart.shippingFee || 0);
+
+    return {
+      cart,
+      items,
+      billing,
+    };
   }
 
   public async addToCart(userId: string, productId: string, quantity: number, variantId?: string) {
-    // ensure cart exists
     let cart = await this.cartRepo.findByUser(userId);
     if (!cart) cart = await this.cartRepo.create(userId);
 
-    // resolve variant: prefer explicit variantId, otherwise find an ACTIVE variant
     let variant;
     if (variantId) {
       variant = await ProductVariantModel.findById(variantId).exec();
@@ -31,7 +38,6 @@ export class CartService {
     }
     if (!variant) throw new Error('Product variant not found');
 
-    // check if item exists
     const existing = await this.itemRepo.findByVariant(cart.id, variant.id);
     if (existing) {
       const newQty = existing.quantity + quantity;
@@ -42,8 +48,20 @@ export class CartService {
     }
 
     const unitPrice = variant.discountPrice ?? variant.price;
-    const productIdValue = (variant.product as unknown) && typeof (variant.product as any)._id !== 'undefined' ? (variant.product as any)._id : (variant.product as unknown as string);
-    const item = await this.itemRepo.create({ cart: cart.id, product: productIdValue, variant: variant.id, quantity, unitPrice, subtotal: unitPrice * quantity });
+    const productIdValue =
+      (variant.product as unknown) && typeof (variant.product as any)._id !== 'undefined'
+        ? (variant.product as any)._id
+        : (variant.product as unknown as string);
+
+    const item = await this.itemRepo.create({
+      cart: cart.id,
+      product: productIdValue,
+      variant: variant.id,
+      quantity,
+      unitPrice,
+      subtotal: unitPrice * quantity,
+    });
+
     await this.recalculateTotals(cart.id);
     return item;
   }
@@ -53,7 +71,6 @@ export class CartService {
     const item = await this.itemRepo.findById(itemId);
     if (!item) throw new Error('Cart item not found');
 
-    // resolve variant
     const variant = await ProductVariantModel.findById(item.variant).exec();
     if (!variant) throw new Error('Product variant not found');
 
@@ -74,18 +91,56 @@ export class CartService {
   public async clearCart(userId: string) {
     const cart = await this.cartRepo.findByUser(userId);
     if (!cart) return null;
-    // remove items
     const items = await this.itemRepo.findByCart(cart.id);
     await Promise.all(items.map((i) => this.itemRepo.delete(i.id)));
     await this.cartRepo.clearCart(cart.id);
     return cart;
   }
 
+  public calculateBilling(items: any[], discountAmount: number = 0, shippingFee: number = 0): ICartBillingBreakup {
+    const subtotal = items.reduce((sum, item) => sum + (Number(item.subtotal) || 0), 0);
+    const taxableAmount = Math.max(0, subtotal - discountAmount);
+    const taxRate = 18; // 18% Standard GST
+    const taxAmount = Math.round(taxableAmount * 0.18 * 100) / 100;
+    const cgst = Math.round((taxAmount / 2) * 100) / 100; // 9% Central GST
+    const sgst = Math.round((taxAmount / 2) * 100) / 100; // 9% State GST
+    const totalAmount = Math.round((taxableAmount + taxAmount + shippingFee) * 100) / 100;
+
+    return {
+      subtotal,
+      discountAmount,
+      taxableAmount,
+      taxRate,
+      taxAmount,
+      cgst,
+      sgst,
+      shippingFee,
+      totalAmount,
+    };
+  }
+
   private async recalculateTotals(cartId: string) {
     const items = await this.itemRepo.findByCart(cartId);
+    const cart = await this.cartRepo.findById(cartId);
+
     const totalItems = items.length;
     const totalQuantity = items.reduce((s, it) => s + it.quantity, 0);
-    const totalAmount = items.reduce((s, it) => s + it.subtotal, 0);
-    await this.cartRepo.updateTotals(cartId, { totalItems, totalQuantity, totalAmount });
+    const discountAmount = cart?.discountAmount || 0;
+    const shippingFee = cart?.shippingFee || 0;
+
+    const billing = this.calculateBilling(items, discountAmount, shippingFee);
+
+    await this.cartRepo.updateTotals(cartId, {
+      totalItems,
+      totalQuantity,
+      subtotal: billing.subtotal,
+      taxRate: billing.taxRate,
+      taxAmount: billing.taxAmount,
+      cgst: billing.cgst,
+      sgst: billing.sgst,
+      shippingFee: billing.shippingFee,
+      discountAmount: billing.discountAmount,
+      totalAmount: billing.totalAmount,
+    });
   }
 }

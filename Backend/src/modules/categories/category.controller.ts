@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import asyncHandler from 'express-async-handler';
+import asyncHandler from '../../common/utils/asyncHandler';
 import { CategoryService } from './category.service';
 import { CreateCategoryPayload, UpdateCategoryPayload } from './category.types';
 
@@ -7,6 +7,11 @@ type AuthRequest = Request & { user?: { id: string } };
 
 export class CategoryController {
   constructor(private readonly service: CategoryService) {}
+
+  public getStats = asyncHandler(async (_req: Request, res: Response) => {
+    const stats = await this.service.getStats();
+    res.status(200).json({ success: true, data: stats });
+  });
 
   public createCategory = asyncHandler(async (req: AuthRequest, res: Response) => {
     const payload = req.body as CreateCategoryPayload;
@@ -16,26 +21,28 @@ export class CategoryController {
   });
 
   public getCategories = asyncHandler(async (req: Request, res: Response) => {
-    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
-    const familySlug = typeof req.query.familySlug === 'string' ? req.query.familySlug : undefined;
-    
-    let familyId: string | undefined = undefined;
-    if (familySlug) {
-      const FamilyModel = (await import('../families/family.model')).default;
-      const family = await FamilyModel.findOne({ slug: familySlug });
-      if (family) {
-        familyId = family._id.toString();
-      }
-    }
-
-    const categories = await this.service.getCategories({ status, family: familyId });
-    res.status(200).json({ success: true, data: categories });
+    const result = await this.service.getCategories(req.query);
+    res.status(200).json({
+      success: true,
+      data: result.categories,
+      pagination: result.pagination
+    });
   });
 
   public getCategory = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const category = await this.service.getCategory(id);
+    if (!category) {
+      res.status(404).json({ success: false, message: 'Category not found' });
+      return;
+    }
     res.status(200).json({ success: true, data: category });
+  });
+
+  public getLinkedItems = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const linked = await this.service.getCategoryLinkedItems(id);
+    res.status(200).json({ success: true, data: linked });
   });
 
   public updateCategory = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -59,3 +66,5 @@ export class CategoryController {
     res.status(200).json({ success: true, data: deleted });
   });
 }
+
+

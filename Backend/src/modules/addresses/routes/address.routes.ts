@@ -11,6 +11,7 @@ const repo = new AddressRepository();
 const service = new AddressService(repo);
 const controller = new AddressController(service);
 
+router.get('/stats', authenticate, controller.getStats);
 router.post('/', authenticate, validate(createAddressSchema), controller.createAddress);
 router.get('/', authenticate, controller.getAddresses);
 router.get('/:id', authenticate, validate(idParamSchema, 'params'), controller.getAddress);

@@ -1,6 +1,18 @@
 import { Document, Types } from 'mongoose';
 import { OrderStatus, PaymentStatus } from '../types/order.types';
 
+export interface IOrderBillingBreakup {
+  subtotal: number;
+  discount: number;
+  taxableAmount: number;
+  taxRate: number;
+  taxAmount: number;
+  cgst: number;
+  sgst: number;
+  shippingCharge: number;
+  totalAmount: number;
+}
+
 export interface IOrderDocument extends Document {
   orderNumber: string;
   user: Types.ObjectId | string;
@@ -10,7 +22,10 @@ export interface IOrderDocument extends Document {
   subtotal: number;
   shippingCharge: number;
   discount: number;
+  taxRate: number;
   tax: number;
+  cgst: number;
+  sgst: number;
   totalAmount: number;
   notes?: string;
   createdAt: Date;

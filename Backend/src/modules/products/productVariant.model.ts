@@ -3,14 +3,14 @@ import { IProductVariantDocument } from './product.interface';
 
 const variantSchema = new Schema<IProductVariantDocument>(
   {
-    product: { type: Schema.Types.ObjectId, ref: 'Product', required: true, index: true },
+    product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
     variantName: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, trim: true, unique: true, index: true },
+    slug: { type: String, required: true, trim: true, unique: true },
     description: { type: String, trim: true },
     shortDescription: { type: String, trim: true },
     thumbnail: { type: String, trim: true },
-    isDefault: { type: Boolean, default: false, index: true },
-    sku: { type: String, trim: true, index: true },
+    isDefault: { type: Boolean, default: false },
+    sku: { type: String, trim: true },
     price: { type: Number, required: true },
     discountPrice: { type: Number },
     stock: { type: Number, default: 0 },
@@ -21,14 +21,16 @@ const variantSchema = new Schema<IProductVariantDocument>(
     compatibleProducts: [{ type: Schema.Types.ObjectId, ref: 'ProductVariant' }],
     recommendedProducts: [{ type: Schema.Types.ObjectId, ref: 'ProductVariant' }],
     status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
-    isDeleted: { type: Boolean, default: false, index: true },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-variantSchema.index({ product: 1 });
-variantSchema.index({ slug: 1 });
+variantSchema.index({ product: 1, isDeleted: 1, isDefault: 1 });
 variantSchema.index({ sku: 1 });
+variantSchema.index({ status: 1 });
+variantSchema.index({ price: 1 });
+variantSchema.index({ stock: 1 });
 
 // Ensure only one variant per product is the default
 variantSchema.pre('save', async function (next) {
