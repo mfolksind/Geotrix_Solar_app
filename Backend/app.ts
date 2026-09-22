@@ -21,6 +21,7 @@ import { familyRoutes } from "./src/modules/families";
 import adminRouter from "./src/admin";
 import errorHandler from "./src/common/errors/errorHandler";
 import notFound from "./src/common/errors/notFound";
+import { supportRoutes } from "./src/modules/support";
 
 const app = express();
 
@@ -44,9 +45,9 @@ app.use("/api/leads", leadRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/families", familyRoutes);
+app.use("/api/support", supportRoutes);
 app.use("/admin", adminRouter);
 app.use("/api/admin", adminRouter);
-
 
 app.use("/api", (req, res) => {
     const trimmedPath = req.path.replace(/\s+$/g, "");
