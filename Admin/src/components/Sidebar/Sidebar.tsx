@@ -15,6 +15,7 @@ import {
     LifeBuoy,
     Star,
     Layers,
+    Bell,
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 
@@ -29,6 +30,7 @@ const navItems = [
     { href: "/dashboard/queries", label: "Leads", icon: MessageSquare },
     { href: "/dashboard/reviews", label: "Reviews", icon: Star },
     { href: "/dashboard/tickets", label: "Support Tickets", icon: LifeBuoy },
+    { href: "/dashboard/notifications", label: "Notifications & Broadcast", icon: Bell },
     { href: "/dashboard/payments", label: "Payments & GST", icon: IndianRupee },
 ];
 

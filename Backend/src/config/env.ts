@@ -30,6 +30,10 @@ const raw = {
     CLOUDINARY_CLOUD_NAME: getEnv(process.env.CLOUDINARY_CLOUD_NAME),
     CLOUDINARY_API_KEY: getEnv(process.env.CLOUDINARY_API_KEY),
     CLOUDINARY_API_SECRET: getEnv(process.env.CLOUDINARY_API_SECRET),
+    FIREBASE_SERVICE_ACCOUNT: getEnv(process.env.FIREBASE_SERVICE_ACCOUNT),
+    FIREBASE_PROJECT_ID: getEnv(process.env.FIREBASE_PROJECT_ID),
+    FIREBASE_CLIENT_EMAIL: getEnv(process.env.FIREBASE_CLIENT_EMAIL),
+    FIREBASE_PRIVATE_KEY: getEnv(process.env.FIREBASE_PRIVATE_KEY),
 };
 
 const envSchema = z.object({
@@ -49,6 +53,10 @@ const envSchema = z.object({
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
     CLOUDINARY_API_KEY: z.string().optional(),
     CLOUDINARY_API_SECRET: z.string().optional(),
+    FIREBASE_SERVICE_ACCOUNT: z.string().optional(),
+    FIREBASE_PROJECT_ID: z.string().optional(),
+    FIREBASE_CLIENT_EMAIL: z.string().optional(),
+    FIREBASE_PRIVATE_KEY: z.string().optional(),
 });
 
 export const env = envSchema.parse(raw);

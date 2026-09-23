@@ -17,6 +17,7 @@ const userSchema = new Schema<IUserDocument>(
     approvedFamilies: [{ type: Schema.Types.ObjectId, ref: 'Family' }],
     isVerified: { type: Boolean, default: false },
     status: { type: String, enum: ['active', 'inactive', 'blocked'], default: 'active' },
+    fcmTokens: [{ type: String, trim: true }],
   },
   {
     timestamps: true,

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { fetchApi } from '../../../utils/api';
+import { getAdminSocket } from '../../../utils/socket';
 import {
   LifeBuoy,
   MessageSquare,
@@ -201,7 +202,58 @@ export default function SupportTicketsPage() {
   useEffect(() => {
     loadStats();
     loadStaffUsers();
+
+    // Connect to admin socket and listen for real-time ticket events
+    const socket = getAdminSocket();
+    if (socket) {
+      const handleNewTicket = () => {
+        loadStats();
+        loadTickets();
+      };
+      const handleTicketUpdated = () => {
+        loadStats();
+        loadTickets();
+      };
+
+      socket.on('ticket:created', handleNewTicket);
+      socket.on('ticket:status_changed', handleTicketUpdated);
+      socket.on('ticket:assigned', handleTicketUpdated);
+
+      return () => {
+        socket.off('ticket:created', handleNewTicket);
+        socket.off('ticket:status_changed', handleTicketUpdated);
+        socket.off('ticket:assigned', handleTicketUpdated);
+      };
+    }
   }, []);
+
+  // Listen for live messages when a specific ticket conversation is open
+  useEffect(() => {
+    if (!selectedTicket) return;
+
+    const socket = getAdminSocket();
+    if (!socket) return;
+
+    const ticketId = selectedTicket._id;
+    socket.emit('ticket:join', { ticketId });
+
+    const handleIncomingMessage = (data: { ticketId: string; message: TicketMessage }) => {
+      if (data?.ticketId === ticketId && data?.message) {
+        setMessages((prev) => {
+          // Avoid duplicate messages if already appended locally
+          if (prev.some((m) => m._id === data.message._id)) return prev;
+          return [...prev, data.message];
+        });
+      }
+    };
+
+    socket.on('ticket:message', handleIncomingMessage);
+
+    return () => {
+      socket.emit('ticket:leave', { ticketId });
+      socket.off('ticket:message', handleIncomingMessage);
+    };
+  }, [selectedTicket?._id]);
 
   useEffect(() => {
     loadTickets();

@@ -8,6 +8,8 @@ import ProductModel from '../../products/product.model';
 import ProductVariantModel from '../../products/productVariant.model';
 import { ApiError } from '../../../common/errors/ApiError';
 import { IOrderBillingBreakup } from '../interfaces/order.interface';
+import { emitToUser, emitToAdmins } from '../../../socket/socket.server';
+import { notificationService } from '../../notifications/notification.service';
 
 function generateOrderNumber(): string {
   const ts = Date.now().toString(36).toUpperCase();
@@ -132,8 +134,43 @@ export class OrderService {
         totalAmount,
       };
 
+      // 1. Emit live socket events
+      const orderData = populated ? populated.toObject() : order.toObject();
+      emitToUser(userId, 'order:created', { order: orderData, billingBreakup });
+      emitToAdmins('order:new', { order: orderData, billingBreakup });
+
+      // 2. Dispatch multi-channel notifications
+      try {
+        // Customer notification
+        await notificationService.sendNotification({
+          recipient: userId,
+          title: `Order Placed Successfully! (#${order.orderNumber})`,
+          message: `Your order for ₹${totalAmount.toLocaleString()} has been placed. We'll notify you once it ships!`,
+          type: 'ORDER_CREATED',
+          data: {
+            orderId: String(order._id),
+            orderNumber: order.orderNumber,
+            totalAmount,
+          },
+        });
+
+        // Admin team notification
+        await notificationService.sendToRole('admin', {
+          title: `New Order Received (#${order.orderNumber})`,
+          message: `New order placed for ₹${totalAmount.toLocaleString()} with ${orderItems.length} item(s).`,
+          type: 'ORDER_CREATED',
+          data: {
+            orderId: String(order._id),
+            orderNumber: order.orderNumber,
+            totalAmount,
+          },
+        });
+      } catch (notifErr) {
+        console.warn('[OrderService] Failed to dispatch order notifications:', notifErr);
+      }
+
       return {
-        ...(populated ? populated.toObject() : order.toObject()),
+        ...orderData,
         billingBreakup,
       };
     } catch (err) {
@@ -191,10 +228,55 @@ export class OrderService {
     if (order.paymentStatus === 'PENDING') {
       await this.orderRepo.updatePaymentStatus(id, 'FAILED');
     }
-    return this.orderRepo.updateStatus(id, 'CANCELLED');
+    const cancelled = await this.orderRepo.updateStatus(id, 'CANCELLED');
+
+    emitToUser(userId, 'order:cancelled', { orderId: id, orderNumber: order.orderNumber });
+    emitToAdmins('order:cancelled', { orderId: id, orderNumber: order.orderNumber });
+
+    try {
+      await notificationService.sendNotification({
+        recipient: userId,
+        title: `Order Cancelled (#${order.orderNumber})`,
+        message: `Your order #${order.orderNumber} has been successfully cancelled.`,
+        type: 'ORDER_STATUS',
+        data: { orderId: id, orderNumber: order.orderNumber, status: 'CANCELLED' },
+      });
+    } catch (notifErr) {
+      console.warn('[OrderService] Failed to notify on order cancellation:', notifErr);
+    }
+
+    return cancelled;
   }
 
   public async updateOrderStatus(id: string, status: string) {
-    return this.orderRepo.updateStatus(id, status);
+    const order = await this.orderRepo.findById(id);
+    if (!order) throw new ApiError(404, 'Order not found');
+
+    const updated = await this.orderRepo.updateStatus(id, status);
+
+    const customerId =
+      order.user && typeof order.user === 'object' && (order.user as any)._id
+        ? String((order.user as any)._id)
+        : String(order.user);
+
+    emitToUser(customerId, 'order:status_updated', {
+      orderId: id,
+      orderNumber: order.orderNumber,
+      status,
+    });
+
+    try {
+      await notificationService.sendNotification({
+        recipient: customerId,
+        title: `Order Update: #${order.orderNumber}`,
+        message: `Your order status is now "${status}".`,
+        type: 'ORDER_STATUS',
+        data: { orderId: id, orderNumber: order.orderNumber, status },
+      });
+    } catch (notifErr) {
+      console.warn('[OrderService] Failed to notify on order status update:', notifErr);
+    }
+
+    return updated;
   }
 }

@@ -61,6 +61,7 @@ export class AuthService {
           initialStatus = 'inactive';
         } else {
           familyApprovalStatus = 'approved';
+          initialStatus = 'active';
         }
       }
     }

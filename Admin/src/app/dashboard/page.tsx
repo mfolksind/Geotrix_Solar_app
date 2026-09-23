@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Card } from '../../components/Card/Card';
 import { Table } from '../../components/Table/Table';
 import { fetchApi } from '../../utils/api';
+import { getAdminSocket } from '../../utils/socket';
 import {
   DollarSign,
   ShoppingBag,
@@ -175,6 +176,30 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboard(range);
+  }, [range, loadDashboard]);
+
+  // Real-time Socket Event Subscription for Dashboard Metrics
+  useEffect(() => {
+    const socket = getAdminSocket();
+    if (!socket) return;
+
+    const handleDataChange = () => {
+      loadDashboard(range, true);
+    };
+
+    socket.on('order:new', handleDataChange);
+    socket.on('order:status_updated', handleDataChange);
+    socket.on('order:cancelled', handleDataChange);
+    socket.on('ticket:created', handleDataChange);
+    socket.on('ticket:status_changed', handleDataChange);
+
+    return () => {
+      socket.off('order:new', handleDataChange);
+      socket.off('order:status_updated', handleDataChange);
+      socket.off('order:cancelled', handleDataChange);
+      socket.off('ticket:created', handleDataChange);
+      socket.off('ticket:status_changed', handleDataChange);
+    };
   }, [range, loadDashboard]);
 
   const formatINR = (value: number) => {

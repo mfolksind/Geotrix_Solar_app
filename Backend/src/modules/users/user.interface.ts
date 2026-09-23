@@ -15,6 +15,7 @@ export interface IUser {
   approvedFamilies: Types.ObjectId[] | string[];
   isVerified: boolean;
   status: UserStatus;
+  fcmTokens?: string[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,18 +1,23 @@
+import http from 'http';
 import app from './app';
 import { connectMongoDB, disconnectMongoDB } from './src/database/mongodb/connection';
 import logger from './src/common/logger/logger';
 import { env } from './src/config/env';
+import { initSocketServer } from './src/socket/socket.server';
 
 const PORT = env.PORT;
 
-let server: ReturnType<typeof app.listen> | null = null;
+let httpServer: http.Server | null = null;
 
 async function startServer(): Promise<void> {
   try {
     // Connect to DB first
     await connectMongoDB();
 
-    server = app.listen(PORT || 4000, () => {
+    httpServer = http.createServer(app);
+    initSocketServer(httpServer);
+
+    httpServer.listen(PORT || 4000, () => {
       logger.info(`Server running on port ${PORT}`);
     });
 
@@ -41,8 +46,8 @@ async function startServer(): Promise<void> {
 async function shutdown(reason = 'shutdown', exitCode = 0): Promise<void> {
   try {
     logger.info(`Shutting down server due to ${reason}`);
-    if (server) {
-      server.close(() => {
+    if (httpServer) {
+      httpServer.close(() => {
         logger.info('HTTP server closed');
       });
     }

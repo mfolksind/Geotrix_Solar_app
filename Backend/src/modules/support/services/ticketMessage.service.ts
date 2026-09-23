@@ -3,6 +3,9 @@ import { TicketMessageRepository } from '../repositories/ticketMessage.repositor
 import { ApiError } from '../../../common/errors/ApiError';
 import { Attachment } from '../types/support.types';
 import * as cloudinary from '../../../common/services/cloudinary/cloudinary.service';
+import { emitToTicket, isUserInTicketRoom } from '../../../socket/socket.server';
+import { notificationService } from '../../notifications/notification.service';
+import UserModel from '../../users/user.model';
 
 export class TicketMessageService {
   constructor(private readonly repo: TicketMessageRepository, private readonly ticketRepo: TicketRepository) {}
@@ -32,6 +35,75 @@ export class TicketMessageService {
 
     // update ticket lastMessageAt
     await this.ticketRepo.updateStatus(ticketId, ticket.status, { lastMessageAt: new Date(), updatedBy: senderId });
+
+    // 1. Emit live chat event to everyone currently in the ticket room
+    emitToTicket(ticketId, 'ticket:message', {
+      ticketId,
+      message: messageDoc,
+    });
+
+    // 2. Smart Notification Dispatch: If recipient is NOT currently in the ticket room, notify them
+    try {
+      const sender = await UserModel.findById(senderId).select('name role').lean();
+      const isStaffSender = ['admin', 'super_admin', 'manager', 'seller'].includes(sender?.role?.toLowerCase() || '');
+      const isInternalNote = !!payload.isInternalNote;
+
+      if (!isInternalNote) {
+        if (isStaffSender) {
+          // Staff sent reply -> target is customer
+          const customerId = String(ticket.user);
+          const isCustomerInRoom = isUserInTicketRoom(ticketId, customerId);
+
+          if (!isCustomerInRoom) {
+            await notificationService.sendNotification({
+              recipient: customerId,
+              sender: senderId,
+              title: `Reply on Ticket #${ticket.ticketNumber}`,
+              message: payload.message.slice(0, 180),
+              type: 'TICKET_REPLY',
+              data: {
+                ticketId: String(ticket._id),
+                ticketNumber: ticket.ticketNumber,
+                senderName: sender?.name || 'Support Agent',
+              },
+            });
+          }
+        } else {
+          // Customer sent reply -> target is assigned agent or admins
+          const assignedAgentId = ticket.assignedTo ? String(ticket.assignedTo) : null;
+          const isAssignedAgentInRoom = assignedAgentId ? isUserInTicketRoom(ticketId, assignedAgentId) : false;
+
+          if (assignedAgentId && !isAssignedAgentInRoom) {
+            await notificationService.sendNotification({
+              recipient: assignedAgentId,
+              sender: senderId,
+              title: `New Reply on Ticket #${ticket.ticketNumber}`,
+              message: payload.message.slice(0, 180),
+              type: 'TICKET_REPLY',
+              data: {
+                ticketId: String(ticket._id),
+                ticketNumber: ticket.ticketNumber,
+                customerName: sender?.name || 'Customer',
+              },
+            });
+          } else if (!assignedAgentId) {
+            // Unassigned -> notify admin team
+            await notificationService.sendToRole('admin', {
+              sender: senderId,
+              title: `New Reply on Ticket #${ticket.ticketNumber}`,
+              message: `${sender?.name || 'Customer'}: ${payload.message.slice(0, 150)}`,
+              type: 'TICKET_REPLY',
+              data: {
+                ticketId: String(ticket._id),
+                ticketNumber: ticket.ticketNumber,
+              },
+            });
+          }
+        }
+      }
+    } catch (notifErr) {
+      console.warn('[TicketMessageService] Failed to dispatch smart notification:', notifErr);
+    }
 
     return messageDoc;
   }

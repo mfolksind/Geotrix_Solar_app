@@ -22,6 +22,7 @@ import adminRouter from "./src/admin";
 import errorHandler from "./src/common/errors/errorHandler";
 import notFound from "./src/common/errors/notFound";
 import { supportRoutes } from "./src/modules/support";
+import { notificationRoutes } from "./src/modules/notifications";
 
 const app = express();
 
@@ -46,6 +47,8 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/families", familyRoutes);
 app.use("/api/support", supportRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/notifications", notificationRoutes);
 app.use("/admin", adminRouter);
 app.use("/api/admin", adminRouter);
 

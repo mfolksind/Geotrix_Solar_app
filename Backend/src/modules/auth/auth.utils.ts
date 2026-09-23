@@ -16,7 +16,7 @@ const jwtVerify = (token: string, secret: Secret): JwtPayload =>
   jwt.verify(token, secret) as JwtPayload;
 
 const getJwtToken = (userId: string, secret: Secret, expiresIn: string | number): string =>
-  jwtSign({ sub: userId }, secret, expiresIn);
+  jwtSign({ sub: userId, jti: crypto.randomUUID() }, secret, expiresIn);
 
 export function generateAccessToken(userId: string): string {
   return getJwtToken(userId, ACCESS_SECRET, ACCESS_EXPIRES_IN);

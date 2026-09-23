@@ -3,6 +3,7 @@ import { CartItemRepository } from '../repositories/cartItem.repository';
 import ProductVariantModel from '../../products/productVariant.model';
 import ProductModel from '../../products/product.model';
 import { ICartBillingBreakup } from '../interfaces/cart.interface';
+import { emitToUser } from '../../../socket/socket.server';
 
 export class CartService {
   constructor(private readonly cartRepo: CartRepository, private readonly itemRepo: CartItemRepository) {}
@@ -39,30 +40,32 @@ export class CartService {
     if (!variant) throw new Error('Product variant not found');
 
     const existing = await this.itemRepo.findByVariant(cart.id, variant.id);
+    let item;
     if (existing) {
       const newQty = existing.quantity + quantity;
       const unitPrice = variant.discountPrice ?? variant.price;
-      const updated = await this.itemRepo.update(existing.id, { quantity: newQty, subtotal: unitPrice * newQty });
+      item = await this.itemRepo.update(existing.id, { quantity: newQty, subtotal: unitPrice * newQty });
       await this.recalculateTotals(cart.id);
-      return updated;
+    } else {
+      const unitPrice = variant.discountPrice ?? variant.price;
+      const productIdValue =
+        (variant.product as unknown) && typeof (variant.product as any)._id !== 'undefined'
+          ? (variant.product as any)._id
+          : (variant.product as unknown as string);
+
+      item = await this.itemRepo.create({
+        cart: cart.id,
+        product: productIdValue,
+        variant: variant.id,
+        quantity,
+        unitPrice,
+        subtotal: unitPrice * quantity,
+      });
+
+      await this.recalculateTotals(cart.id);
     }
 
-    const unitPrice = variant.discountPrice ?? variant.price;
-    const productIdValue =
-      (variant.product as unknown) && typeof (variant.product as any)._id !== 'undefined'
-        ? (variant.product as any)._id
-        : (variant.product as unknown as string);
-
-    const item = await this.itemRepo.create({
-      cart: cart.id,
-      product: productIdValue,
-      variant: variant.id,
-      quantity,
-      unitPrice,
-      subtotal: unitPrice * quantity,
-    });
-
-    await this.recalculateTotals(cart.id);
+    emitToUser(userId, 'cart:updated', { action: 'ADD', item });
     return item;
   }
 
@@ -76,15 +79,25 @@ export class CartService {
 
     const unitPrice = variant.discountPrice ?? variant.price;
     const updated = await this.itemRepo.update(itemId, { quantity, subtotal: unitPrice * quantity });
+    const cart = await this.cartRepo.findById(item.cart.toString());
     await this.recalculateTotals(item.cart.toString());
+
+    if (cart?.user) {
+      emitToUser(cart.user.toString(), 'cart:updated', { action: 'UPDATE', item: updated });
+    }
     return updated;
   }
 
   public async removeCartItem(itemId: string) {
     const item = await this.itemRepo.findById(itemId);
     if (!item) return null;
+    const cart = await this.cartRepo.findById(item.cart.toString());
     await this.itemRepo.delete(itemId);
     await this.recalculateTotals(item.cart.toString());
+
+    if (cart?.user) {
+      emitToUser(cart.user.toString(), 'cart:updated', { action: 'REMOVE', itemId });
+    }
     return item;
   }
 
@@ -94,6 +107,8 @@ export class CartService {
     const items = await this.itemRepo.findByCart(cart.id);
     await Promise.all(items.map((i) => this.itemRepo.delete(i.id)));
     await this.cartRepo.clearCart(cart.id);
+
+    emitToUser(userId, 'cart:updated', { action: 'CLEAR' });
     return cart;
   }
 

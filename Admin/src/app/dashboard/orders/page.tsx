@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchApi } from '../../../utils/api';
+import { getAdminSocket } from '../../../utils/socket';
 import {
   ShoppingCart,
   Search,
@@ -203,7 +204,26 @@ export default function OrdersPage() {
 
   useEffect(() => {
     loadGlobalStats();
-  }, [loadGlobalStats]);
+
+    // Listen for live order socket events from backend
+    const socket = getAdminSocket();
+    if (socket) {
+      const handleOrderUpdate = () => {
+        loadGlobalStats();
+        loadOrders();
+      };
+
+      socket.on('order:new', handleOrderUpdate);
+      socket.on('order:status_updated', handleOrderUpdate);
+      socket.on('order:cancelled', handleOrderUpdate);
+
+      return () => {
+        socket.off('order:new', handleOrderUpdate);
+        socket.off('order:status_updated', handleOrderUpdate);
+        socket.off('order:cancelled', handleOrderUpdate);
+      };
+    }
+  }, [loadGlobalStats, loadOrders]);
 
   useEffect(() => {
     loadOrders();
