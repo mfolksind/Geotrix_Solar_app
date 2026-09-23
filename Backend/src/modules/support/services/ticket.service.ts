@@ -1,9 +1,7 @@
-import mongoose from 'mongoose';
 import { TicketRepository } from '../repositories/ticket.repository';
 import { TicketMessageRepository } from '../repositories/ticketMessage.repository';
 import { ApiError } from '../../../common/errors/ApiError';
 import TicketModel from '../models/ticket.model';
-import TicketMessageModel from '../models/ticketMessage.model';
 import { ITicketDocument } from '../interfaces/support.interface';
 import { Attachment } from '../types/support.types';
 
@@ -21,40 +19,41 @@ export class TicketService {
 
   public async createTicket(userId: string, payload: { subject: string; category?: string; priority?: string; message: string; attachments?: Attachment[] }) {
     const ticketNumber = generateTicketNumber();
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
 
-      const ticket = await this.repo.create({
-        ticketNumber,
-        user: userId,
-        subject: payload.subject,
-        category: payload.category,
-        priority: (payload.priority as any) || 'LOW',
-        status: 'OPEN',
-        createdBy: userId,
-        updatedBy: userId,
-        lastMessageAt: new Date(),
-      } as Partial<ITicketDocument>, session);
+    const ticket = await this.repo.create({
+      ticketNumber,
+      user: userId as any,
+      subject: payload.subject,
+      category: payload.category || 'GENERAL',
+      priority: (payload.priority as any) || 'LOW',
+      status: 'OPEN',
+      createdBy: userId as any,
+      updatedBy: userId as any,
+      lastMessageAt: new Date(),
+    } as Partial<ITicketDocument>);
 
-      // create initial message
-      await this.messageRepo.create({ ticket: ticket._id, sender: userId, message: payload.message, attachments: payload.attachments || [] } as any, session);
+    // create initial message
+    await this.messageRepo.create({
+      ticket: ticket._id,
+      sender: userId,
+      message: payload.message,
+      attachments: payload.attachments || [],
+      isInternalNote: false,
+    } as any);
 
-      await session.commitTransaction();
-      session.endSession();
-      return ticket;
-    } catch (err) {
-      await session.abortTransaction();
-      session.endSession();
-      throw ApiError.fromUnknown(err);
-    }
+    return ticket;
   }
 
   public async getTicket(id: string, userId: string | null, isAdmin = false) {
     const ticket = await this.repo.findById(id);
     if (!ticket || ticket.isDeleted) throw new ApiError(404, 'Ticket not found');
     if (!isAdmin && ticket.user.toString() !== userId) throw new ApiError(403, 'Forbidden');
-    return TicketModel.findById(id).populate('user', 'name email profilePicture').populate('assignedTo', 'name email').exec();
+    const populated = await TicketModel.findById(id).populate('user', 'name email profilePicture').populate('assignedTo', 'name email').exec();
+    const messages = await this.messageRepo.findByTicket(id);
+    return {
+      ticket: populated,
+      messages,
+    };
   }
 
   public async getTickets(query: { page?: number; limit?: number; ticketNumber?: string; status?: string; priority?: string; search?: string }, userId: string | null, isAdmin = false) {

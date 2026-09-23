@@ -23,7 +23,8 @@ const messageController = new TicketMessageController(messageService);
 router.post('/tickets', authenticate, validate(createTicketSchema), ticketController.createTicket);
 router.get('/tickets', authenticate, ticketController.getTickets);
 router.get('/tickets/:id', authenticate, validate(idParamSchema, 'params'), ticketController.getTicket);
-router.post('/tickets/:id/reply', authenticate, validate(replySchema), upload.array('attachments'), messageController.replyToTicket);
+router.get('/tickets/:id/messages', authenticate, validate(idParamSchema, 'params'), messageController.getConversation);
+router.post('/tickets/:id/reply', authenticate, upload.array('attachments'), validate(replySchema), messageController.replyToTicket);
 router.patch('/tickets/:id/status', authenticate, validate(idParamSchema, 'params'), validate(updateStatusSchema), ticketController.updateStatus);
 router.patch('/tickets/:id/assign', authenticate, validate(idParamSchema, 'params'), validate(assignSchema), ticketController.assignTicket);
 

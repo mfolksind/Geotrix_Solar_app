@@ -16,7 +16,8 @@ export class TicketController {
 
   public getTickets = asyncHandler(async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id ?? null;
-    const isAdmin = req.user?.role === 'admin';
+    const role = (req.user?.role || '').toLowerCase();
+    const isAdmin = ['admin', 'super_admin', 'manager'].includes(role);
     const { page, limit, ticketNumber, status, priority, search } = req.query as any;
     const result = await this.service.getTickets({ page: Number(page), limit: Number(limit), ticketNumber, status, priority, search }, userId, isAdmin);
     res.status(200).json({ success: true, data: result.items, meta: result.meta });
@@ -25,7 +26,8 @@ export class TicketController {
   public getTicket = asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params as { id: string };
     const userId = req.user?.id ?? null;
-    const isAdmin = req.user?.role === 'admin';
+    const role = (req.user?.role || '').toLowerCase();
+    const isAdmin = ['admin', 'super_admin', 'manager'].includes(role);
     const ticket = await this.service.getTicket(id, userId, isAdmin);
     res.status(200).json({ success: true, data: ticket });
   });

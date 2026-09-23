@@ -29,7 +29,9 @@ import {
   Tag,
   Calendar,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Lock,
+  UserCheck
 } from 'lucide-react';
 
 interface UserInfo {
@@ -87,6 +89,7 @@ export default function SupportTicketsPage() {
 
   // Data
   const [tickets, setTickets] = useState<TicketItem[]>([]);
+  const [staffUsers, setStaffUsers] = useState<UserInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -107,6 +110,7 @@ export default function SupportTicketsPage() {
   const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [replyText, setReplyText] = useState('');
+  const [isInternalNote, setIsInternalNote] = useState(false);
   const [sendingReply, setSendingReply] = useState(false);
   const [ticketToDelete, setTicketToDelete] = useState<TicketItem | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -131,6 +135,19 @@ export default function SupportTicketsPage() {
       scrollToBottom();
     }
   }, [messages]);
+
+  // Load Staff Members for Agent Assignment
+  const loadStaffUsers = async () => {
+    try {
+      const res = await fetchApi('/admin/users?role=admin&limit=100');
+      if (res.success) {
+        const list = Array.isArray(res.data) ? res.data : res.data?.items || [];
+        setStaffUsers(list);
+      }
+    } catch (err) {
+      console.error('Failed to load staff users', err);
+    }
+  };
 
   // Load stats
   const loadStats = async () => {
@@ -183,6 +200,7 @@ export default function SupportTicketsPage() {
 
   useEffect(() => {
     loadStats();
+    loadStaffUsers();
   }, []);
 
   useEffect(() => {
@@ -194,6 +212,7 @@ export default function SupportTicketsPage() {
     setSelectedTicket(ticket);
     setMessagesLoading(true);
     setReplyText('');
+    setIsInternalNote(false);
     try {
       const res = await fetchApi(`/admin/support/${ticket._id}`);
       if (res.success && res.data) {
@@ -211,7 +230,7 @@ export default function SupportTicketsPage() {
     }
   };
 
-  // Send Reply
+  // Send Reply / Internal Note
   const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTicket || !replyText.trim() || sendingReply) return;
@@ -220,7 +239,10 @@ export default function SupportTicketsPage() {
     try {
       const res = await fetchApi(`/admin/support/${selectedTicket._id}/reply`, {
         method: 'POST',
-        body: JSON.stringify({ message: replyText.trim() }),
+        body: JSON.stringify({
+          message: replyText.trim(),
+          isInternalNote: isInternalNote,
+        }),
       });
 
       if (res.success && res.data) {
@@ -278,6 +300,29 @@ export default function SupportTicketsPage() {
       }
     } catch (err) {
       console.error('Priority update failed', err);
+    }
+  };
+
+  // Assign Agent
+  const handleAssignAgent = async (ticketId: string, agentId: string) => {
+    try {
+      const res = await fetchApi(`/admin/support/${ticketId}/assign`, {
+        method: 'PATCH',
+        body: JSON.stringify({ agentId }),
+      });
+      if (res.success) {
+        loadTickets();
+        if (selectedTicket && selectedTicket._id === ticketId) {
+          setSelectedTicket({
+            ...selectedTicket,
+            assignedTo: staffUsers.find((u) => u._id === agentId) || agentId,
+          });
+        }
+      } else {
+        alert(res.message || 'Failed to assign agent');
+      }
+    } catch (err) {
+      console.error('Agent assignment failed', err);
     }
   };
 
@@ -369,16 +414,16 @@ export default function SupportTicketsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 space-y-6">
+    <div className="min-h-screen bg-background text-foreground p-6 space-y-6 max-w-7xl mx-auto w-full">
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            <LifeBuoy className="w-7 h-7 text-[#57c5cc]" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+            <LifeBuoy className="w-8 h-8 text-[#57c5cc]" />
             Support Tickets & Helpdesk
           </h1>
           <p className="text-sm text-foreground/60 mt-1">
-            Resolve customer support tickets, answer product inquiries, and manage technical service issues.
+            Resolve customer inquiries, communicate via chat threads, delegate tickets to agents, and manage resolution statuses.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -386,11 +431,13 @@ export default function SupportTicketsPage() {
             onClick={() => {
               loadStats();
               loadTickets();
+              loadStaffUsers();
             }}
-            className="p-2.5 rounded-xl border border-border bg-surface hover:bg-foreground/5 text-foreground/70 transition"
+            className="p-2.5 rounded-xl border border-border bg-surface hover:bg-foreground/5 text-foreground/70 transition cursor-pointer flex items-center gap-2 text-xs font-semibold"
             title="Refresh Tickets"
           >
             <RefreshCw className={`w-4 h-4 ${loading || statsLoading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
@@ -473,7 +520,7 @@ export default function SupportTicketsPage() {
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -489,7 +536,7 @@ export default function SupportTicketsPage() {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition"
+              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition cursor-pointer"
             >
               <option value="ALL">All Status</option>
               <option value="OPEN">Open</option>
@@ -505,7 +552,7 @@ export default function SupportTicketsPage() {
                 setPriorityFilter(e.target.value);
                 setPage(1);
               }}
-              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition"
+              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition cursor-pointer"
             >
               <option value="ALL">All Priorities</option>
               <option value="URGENT">Urgent</option>
@@ -521,7 +568,7 @@ export default function SupportTicketsPage() {
                 setCategoryFilter(e.target.value);
                 setPage(1);
               }}
-              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition"
+              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition cursor-pointer"
             >
               <option value="ALL">All Categories</option>
               <option value="GENERAL">General</option>
@@ -538,7 +585,7 @@ export default function SupportTicketsPage() {
                 setSortBy(e.target.value);
                 setPage(1);
               }}
-              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition"
+              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition cursor-pointer"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -553,7 +600,7 @@ export default function SupportTicketsPage() {
                 setLimit(Number(e.target.value));
                 setPage(1);
               }}
-              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition"
+              className="px-3 py-2 rounded-xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition cursor-pointer"
             >
               <option value={10}>10 rows</option>
               <option value={20}>20 rows</option>
@@ -565,7 +612,7 @@ export default function SupportTicketsPage() {
             <div className="flex items-center border border-border rounded-xl p-0.5 bg-background">
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg text-xs transition ${
+                className={`p-1.5 rounded-lg text-xs transition cursor-pointer ${
                   viewMode === 'table' ? 'bg-[#57c5cc] text-white shadow-sm' : 'text-foreground/60 hover:text-foreground'
                 }`}
                 title="Table View"
@@ -574,7 +621,7 @@ export default function SupportTicketsPage() {
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg text-xs transition ${
+                className={`p-1.5 rounded-lg text-xs transition cursor-pointer ${
                   viewMode === 'grid' ? 'bg-[#57c5cc] text-white shadow-sm' : 'text-foreground/60 hover:text-foreground'
                 }`}
                 title="Grid View"
@@ -608,7 +655,7 @@ export default function SupportTicketsPage() {
               setPriorityFilter('ALL');
               setCategoryFilter('ALL');
             }}
-            className="px-4 py-2 rounded-xl border border-border bg-background hover:bg-foreground/5 text-xs font-medium transition"
+            className="px-4 py-2 rounded-xl border border-border bg-background hover:bg-foreground/5 text-xs font-medium transition cursor-pointer"
           >
             Reset Filters
           </button>
@@ -623,6 +670,7 @@ export default function SupportTicketsPage() {
                   <th className="px-6 py-4">Ticket</th>
                   <th className="px-6 py-4">Customer</th>
                   <th className="px-6 py-4">Subject & Category</th>
+                  <th className="px-6 py-4">Assigned Agent</th>
                   <th className="px-6 py-4">Priority</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Last Activity</th>
@@ -632,6 +680,7 @@ export default function SupportTicketsPage() {
               <tbody className="divide-y divide-border">
                 {tickets.map((t) => {
                   const userObj = typeof t.user === 'object' && t.user !== null ? (t.user as UserInfo) : null;
+                  const assignedObj = typeof t.assignedTo === 'object' && t.assignedTo !== null ? (t.assignedTo as UserInfo) : null;
 
                   return (
                     <tr
@@ -642,13 +691,13 @@ export default function SupportTicketsPage() {
                       {/* Ticket Number */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1 font-mono text-xs font-bold text-foreground">
-                          <span>{t.ticketNumber}</span>
+                          <span className="text-[#57c5cc]">{t.ticketNumber}</span>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleCopy(t.ticketNumber, t._id);
                             }}
-                            className="text-foreground/40 hover:text-foreground"
+                            className="text-foreground/40 hover:text-foreground p-0.5"
                             title="Copy Ticket ID"
                           >
                             {copiedId === t._id ? (
@@ -685,8 +734,35 @@ export default function SupportTicketsPage() {
                         </span>
                       </td>
 
+                      {/* Assigned Agent */}
+                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                        <select
+                          value={assignedObj?._id || (typeof t.assignedTo === 'string' ? t.assignedTo : '')}
+                          onChange={(e) => handleAssignAgent(t._id, e.target.value)}
+                          className="px-2 py-1 rounded-lg text-xs font-medium border border-border bg-background text-foreground focus:outline-none focus:border-[#57c5cc] cursor-pointer max-w-[130px] truncate"
+                        >
+                          <option value="">Unassigned</option>
+                          {staffUsers.map((u) => (
+                            <option key={u._id} value={u._id}>
+                              {u.name}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+
                       {/* Priority */}
-                      <td className="px-6 py-4">{getPriorityBadge(t.priority)}</td>
+                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                        <select
+                          value={t.priority}
+                          onChange={(e) => handlePriorityChange(t._id, e.target.value)}
+                          className="px-2 py-1 rounded-lg text-xs font-semibold border border-border bg-background text-foreground focus:outline-none focus:border-[#57c5cc] cursor-pointer"
+                        >
+                          <option value="LOW">Low</option>
+                          <option value="MEDIUM">Medium</option>
+                          <option value="HIGH">High</option>
+                          <option value="URGENT">Urgent</option>
+                        </select>
+                      </td>
 
                       {/* Status */}
                       <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
@@ -717,14 +793,14 @@ export default function SupportTicketsPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => openConversation(t)}
-                            className="p-1.5 rounded-lg border border-border bg-background hover:bg-[#57c5cc]/10 hover:text-[#57c5cc] text-foreground/70 transition"
+                            className="p-1.5 rounded-lg border border-border bg-background hover:bg-[#57c5cc]/10 hover:text-[#57c5cc] text-foreground/70 transition cursor-pointer"
                             title="Open Conversation & Reply"
                           >
                             <MessageSquare className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setTicketToDelete(t)}
-                            className="p-1.5 rounded-lg border border-border bg-background hover:bg-red-500/10 hover:text-red-600 text-foreground/70 transition"
+                            className="p-1.5 rounded-lg border border-border bg-background hover:bg-red-500/10 hover:text-red-600 text-foreground/70 transition cursor-pointer"
                             title="Delete Ticket"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -743,6 +819,7 @@ export default function SupportTicketsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {tickets.map((t) => {
             const userObj = typeof t.user === 'object' && t.user !== null ? (t.user as UserInfo) : null;
+            const assignedObj = typeof t.assignedTo === 'object' && t.assignedTo !== null ? (t.assignedTo as UserInfo) : null;
 
             return (
               <div
@@ -754,7 +831,7 @@ export default function SupportTicketsPage() {
                   {/* Top Bar */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-foreground">{t.ticketNumber}</span>
+                      <span className="font-mono text-xs font-bold text-[#57c5cc]">{t.ticketNumber}</span>
                       {getPriorityBadge(t.priority)}
                     </div>
                     {getStatusBadge(t.status)}
@@ -768,13 +845,19 @@ export default function SupportTicketsPage() {
                     </span>
                   </div>
 
-                  {/* Customer Info */}
-                  <div className="mt-3 pt-3 border-t border-border space-y-0.5 text-xs">
-                    <p className="font-semibold text-foreground flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-[#57c5cc]" />
-                      {userObj?.name || 'Customer'}
-                    </p>
-                    <p className="text-2xs text-foreground/50">{userObj?.email || '—'}</p>
+                  {/* Customer & Agent Info */}
+                  <div className="mt-3 pt-3 border-t border-border space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-foreground flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-[#57c5cc]" />
+                        {userObj?.name || 'Customer'}
+                      </p>
+                      <span className="text-2xs text-foreground/50">{userObj?.email || '—'}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-2xs text-foreground/60" onClick={(e) => e.stopPropagation()}>
+                      <UserCheck className="w-3 h-3 text-indigo-500" />
+                      <span>Agent: <b>{assignedObj?.name || 'Unassigned'}</b></span>
+                    </div>
                   </div>
                 </div>
 
@@ -789,14 +872,14 @@ export default function SupportTicketsPage() {
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => openConversation(t)}
-                      className="px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-[#57c5cc]/10 hover:text-[#57c5cc] font-semibold text-2xs transition flex items-center gap-1"
+                      className="px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-[#57c5cc]/10 hover:text-[#57c5cc] font-semibold text-2xs transition flex items-center gap-1 cursor-pointer"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
                       Chat / Reply
                     </button>
                     <button
                       onClick={() => setTicketToDelete(t)}
-                      className="p-1.5 rounded-lg border border-border bg-background hover:bg-red-500/10 hover:text-red-600 text-foreground/70 transition"
+                      className="p-1.5 rounded-lg border border-border bg-background hover:bg-red-500/10 hover:text-red-600 text-foreground/70 transition cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -821,7 +904,7 @@ export default function SupportTicketsPage() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="px-3 py-1.5 rounded-xl border border-border bg-background hover:bg-foreground/5 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1"
+              className="px-3 py-1.5 rounded-xl border border-border bg-background hover:bg-foreground/5 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               Previous
@@ -832,7 +915,7 @@ export default function SupportTicketsPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="px-3 py-1.5 rounded-xl border border-border bg-background hover:bg-foreground/5 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1"
+              className="px-3 py-1.5 rounded-xl border border-border bg-background hover:bg-foreground/5 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 cursor-pointer"
             >
               Next
               <ChevronRight className="w-3.5 h-3.5" />
@@ -848,9 +931,9 @@ export default function SupportTicketsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
           <div className="w-full max-w-4xl h-[85vh] bg-surface border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col">
             {/* Header */}
-            <div className="p-5 border-b border-border flex items-start justify-between bg-foreground/2">
+            <div className="p-5 border-b border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-foreground/2">
               <div>
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="font-mono text-sm font-bold text-[#57c5cc]">{selectedTicket.ticketNumber}</span>
                   <h3 className="text-base font-bold text-foreground truncate max-w-md">{selectedTicket.subject}</h3>
                   {getPriorityBadge(selectedTicket.priority)}
@@ -859,22 +942,42 @@ export default function SupportTicketsPage() {
                   <span>Category: <b>{selectedTicket.category || 'General'}</b></span>
                   <span>·</span>
                   <span>Created: {new Date(selectedTicket.createdAt).toLocaleDateString()}</span>
+                  <span>·</span>
+                  <span>
+                    Assigned: <b>{(selectedTicket.assignedTo as any)?.name || 'Unassigned'}</b>
+                  </span>
                 </div>
               </div>
+
+              {/* Status & Priority Quick Switches in Modal Header */}
               <div className="flex items-center gap-2">
+                <select
+                  value={selectedTicket.priority}
+                  onChange={(e) => handlePriorityChange(selectedTicket._id, e.target.value)}
+                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold border border-border bg-background text-foreground focus:outline-none focus:border-[#57c5cc] transition cursor-pointer"
+                  title="Change Priority"
+                >
+                  <option value="LOW">Priority: Low</option>
+                  <option value="MEDIUM">Priority: Medium</option>
+                  <option value="HIGH">Priority: High</option>
+                  <option value="URGENT">Priority: Urgent</option>
+                </select>
+
                 <select
                   value={selectedTicket.status}
                   onChange={(e) => handleStatusChange(selectedTicket._id, e.target.value)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-border bg-background focus:outline-none focus:border-[#57c5cc] transition"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-border bg-background text-foreground focus:outline-none focus:border-[#57c5cc] transition cursor-pointer"
+                  title="Change Status"
                 >
                   <option value="OPEN">Status: Open</option>
                   <option value="IN_PROGRESS">Status: In Progress</option>
                   <option value="RESOLVED">Status: Resolved</option>
                   <option value="CLOSED">Status: Closed</option>
                 </select>
+
                 <button
                   onClick={() => setSelectedTicket(null)}
-                  className="p-1.5 rounded-lg text-foreground/40 hover:text-foreground hover:bg-foreground/5 transition"
+                  className="p-1.5 rounded-lg text-foreground/40 hover:text-foreground hover:bg-foreground/5 transition cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -898,21 +1001,26 @@ export default function SupportTicketsPage() {
                 messages.map((msg, idx) => {
                   const senderObj = typeof msg.sender === 'object' && msg.sender !== null ? (msg.sender as UserInfo) : null;
                   const isStaff = senderObj?.role === 'admin' || senderObj?.role === 'super_admin' || senderObj?.role === 'manager';
+                  const isNote = !!msg.isInternalNote;
 
                   return (
                     <div
                       key={msg._id || idx}
-                      className={`flex flex-col ${isStaff ? 'items-end' : 'items-start'}`}
+                      className={`flex flex-col ${isNote ? 'items-center' : isStaff ? 'items-end' : 'items-start'}`}
                     >
                       <div className="flex items-center gap-2 mb-1 px-1">
                         <span className="text-2xs font-semibold text-foreground/70">
                           {senderObj?.name || (isStaff ? 'Staff Support' : 'Customer')}
                         </span>
-                        {isStaff && (
+                        {isNote ? (
+                          <span className="px-1.5 py-0.2 rounded text-3xs font-bold uppercase bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
+                            <Lock className="w-2.5 h-2.5" /> Internal Staff Note
+                          </span>
+                        ) : isStaff ? (
                           <span className="px-1.5 py-0.2 rounded text-3xs font-bold uppercase bg-[#57c5cc]/20 text-[#57c5cc]">
                             Support Agent
                           </span>
-                        )}
+                        ) : null}
                         <span className="text-3xs text-foreground/40">
                           {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
@@ -920,7 +1028,9 @@ export default function SupportTicketsPage() {
 
                       <div
                         className={`p-4 rounded-2xl max-w-xl text-xs leading-relaxed whitespace-pre-wrap shadow-xs ${
-                          isStaff
+                          isNote
+                            ? 'bg-amber-50 dark:bg-amber-950/40 border border-amber-500/30 text-amber-900 dark:text-amber-200'
+                            : isStaff
                             ? 'bg-[#57c5cc] text-white rounded-tr-xs'
                             : 'bg-surface border border-border text-foreground rounded-tl-xs'
                         }`}
@@ -934,24 +1044,68 @@ export default function SupportTicketsPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Reply Form Footer */}
-            <form onSubmit={handleSendReply} className="p-4 border-t border-border bg-surface flex items-center gap-3">
-              <input
-                type="text"
-                placeholder="Type your reply to the customer..."
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                disabled={sendingReply}
-                className="flex-1 px-4 py-3 rounded-2xl border border-border bg-background text-foreground text-xs focus:outline-none focus:border-[#57c5cc] transition"
-              />
-              <button
-                type="submit"
-                disabled={!replyText.trim() || sendingReply}
-                className="px-5 py-3 rounded-2xl bg-[#57c5cc] hover:bg-[#46b3ba] text-white font-semibold text-xs shadow-sm transition flex items-center gap-1.5 disabled:opacity-50"
-              >
-                {sendingReply ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                Send Reply
-              </button>
+            {/* Quick Reply Form Footer with Internal Note Toggle */}
+            <form onSubmit={handleSendReply} className="p-4 border-t border-border bg-surface flex flex-col gap-2.5">
+              <div className="flex items-center justify-between text-xs px-1">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsInternalNote(false)}
+                    className={`px-3 py-1 rounded-lg font-semibold text-xs transition cursor-pointer ${
+                      !isInternalNote
+                        ? 'bg-[#57c5cc] text-white'
+                        : 'bg-background border border-border text-foreground/60 hover:text-foreground'
+                    }`}
+                  >
+                    Public Reply to Customer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsInternalNote(true)}
+                    className={`px-3 py-1 rounded-lg font-semibold text-xs transition cursor-pointer flex items-center gap-1 ${
+                      isInternalNote
+                        ? 'bg-amber-500 text-white'
+                        : 'bg-background border border-border text-foreground/60 hover:text-foreground'
+                    }`}
+                  >
+                    <Lock className="w-3 h-3" /> Internal Staff Note
+                  </button>
+                </div>
+                <span className="text-2xs text-foreground/40">
+                  {isInternalNote ? 'Visible only to staff & admins' : 'Customer will see this reply'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  placeholder={isInternalNote ? "Write an internal note for staff members..." : "Type your reply to the customer..."}
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  disabled={sendingReply}
+                  className={`flex-1 px-4 py-3 rounded-2xl border text-xs focus:outline-none transition ${
+                    isInternalNote
+                      ? 'border-amber-500/40 bg-amber-50/20 text-foreground focus:border-amber-500'
+                      : 'border-border bg-background text-foreground focus:border-[#57c5cc]'
+                  }`}
+                />
+                <button
+                  type="submit"
+                  disabled={!replyText.trim() || sendingReply}
+                  className={`px-5 py-3 rounded-2xl text-white font-semibold text-xs shadow-sm transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer ${
+                    isInternalNote ? 'bg-amber-500 hover:bg-amber-600' : 'bg-[#57c5cc] hover:bg-[#46b3ba]'
+                  }`}
+                >
+                  {sendingReply ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : isInternalNote ? (
+                    <Lock className="w-4 h-4" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  {isInternalNote ? 'Add Note' : 'Send Reply'}
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -975,14 +1129,14 @@ export default function SupportTicketsPage() {
             <div className="pt-2 flex items-center gap-3">
               <button
                 onClick={() => setTicketToDelete(null)}
-                className="flex-1 py-2.5 rounded-xl border border-border bg-background hover:bg-foreground/5 text-xs font-semibold text-foreground/70 transition"
+                className="flex-1 py-2.5 rounded-xl border border-border bg-background hover:bg-foreground/5 text-xs font-semibold text-foreground/70 transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteSubmit}
                 disabled={actionLoading}
-                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-sm transition disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-sm transition disabled:opacity-50 cursor-pointer"
               >
                 {actionLoading ? 'Deleting...' : 'Confirm Delete'}
               </button>

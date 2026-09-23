@@ -13,7 +13,11 @@ export class ProductImageRepository {
   }
 
   public async findByVariant(variantId: string) {
-    return ProductImageModel.find({ variant: variantId }).sort({ sortOrder: 1 }).exec();
+    return ProductImageModel.find({ variant: variantId }).sort({ isPrimary: -1, sortOrder: 1 }).exec();
+  }
+
+  public async findByVariantIds(variantIds: string[]) {
+    return ProductImageModel.find({ variant: { $in: variantIds } }).sort({ isPrimary: -1, sortOrder: 1 }).exec();
   }
 
   public async setPrimaryImage(variantId: string, imageId: string) {
