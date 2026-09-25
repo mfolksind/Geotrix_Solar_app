@@ -15,7 +15,7 @@ export const getAdminSocket = (): Socket | null => {
     return null;
   }
 
-  if (!adminSocket || !adminSocket.connected) {
+  if (!adminSocket) {
     adminSocket = io(API_URL, {
       auth: { token },
       transports: ['websocket', 'polling'],
@@ -36,6 +36,14 @@ export const getAdminSocket = (): Socket | null => {
     adminSocket.on('disconnect', (reason) => {
       console.log('[Admin Socket] Disconnected:', reason);
     });
+  } else {
+    // Update auth token in case of refresh
+    if ((adminSocket.auth as any)?.token !== token) {
+      adminSocket.auth = { token };
+      if (adminSocket.connected) {
+        adminSocket.disconnect().connect();
+      }
+    }
   }
 
   return adminSocket;

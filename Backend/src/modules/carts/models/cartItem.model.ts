@@ -7,6 +7,7 @@ const cartItemSchema = new Schema<ICartItemDocument>(
     product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
     variant: { type: Schema.Types.ObjectId, ref: 'ProductVariant', required: true, index: true },
     quantity: { type: Number, required: true },
+    unit: { type: String, trim: true, default: 'pcs' },
     unitPrice: { type: Number, required: true },
     subtotal: { type: Number, required: true },
   },

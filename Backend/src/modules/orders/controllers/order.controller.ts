@@ -11,7 +11,7 @@ export class OrderController {
   public createOrder = asyncHandler(async (req: AuthRequest, res: Response) => {
     const payload = req.body as any;
     const userId = req.user?.id as string;
-    const order = await this.service.createOrder(userId, payload.addressId, payload.items, payload.notes);
+    const order = await this.service.createOrder(userId, payload.addressId, payload.items, payload.notes, payload.paymentMethod);
     res.status(201).json({ success: true, data: order });
   });
 

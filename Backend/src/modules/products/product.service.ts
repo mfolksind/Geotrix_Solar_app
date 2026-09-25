@@ -266,6 +266,10 @@ export class ProductService {
         discountPrice: defaultVariant?.discountPrice,
         stock: defaultVariant?.stock ?? totalStock,
         unit: defaultVariant?.unit || 'pcs',
+        availableUnits: defaultVariant?.availableUnits?.length
+          ? defaultVariant.availableUnits
+          : [defaultVariant?.unit || 'pcs'],
+        unitPrices: defaultVariant?.unitPrices || [],
         thumbnail,
         images: vImages.map((img: any) => ({
           _id: img._id,

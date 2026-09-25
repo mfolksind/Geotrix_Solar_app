@@ -14,7 +14,16 @@ const variantSchema = new Schema<IProductVariantDocument>(
     price: { type: Number, required: true },
     discountPrice: { type: Number },
     stock: { type: Number, default: 0 },
-    unit: { type: String, trim: true },
+    unit: { type: String, trim: true, default: 'pcs' },
+    availableUnits: [{ type: String, trim: true }],
+    unitPrices: [
+      {
+        unit: { type: String, required: true, trim: true },
+        price: { type: Number, required: true },
+        discountPrice: { type: Number },
+        isDefault: { type: Boolean, default: false },
+      },
+    ],
     weight: { type: Number },
     dimensions: { type: String },
     relatedSystems: [{ type: Schema.Types.ObjectId, ref: 'ProductVariant' }],

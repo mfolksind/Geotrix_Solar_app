@@ -26,14 +26,16 @@ export class AdminSupportController {
   public updateStatus = asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params as { id: string };
     const { status } = req.body as { status: string };
-    const updated = await service.updateStatus(id, status);
+    const userId = req.user?.id as string;
+    const updated = await service.updateStatus(id, status, userId);
     res.status(200).json({ success: true, data: updated });
   });
 
   public updatePriority = asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params as { id: string };
     const { priority } = req.body as { priority: string };
-    const updated = await service.updatePriority(id, priority);
+    const userId = req.user?.id as string;
+    const updated = await service.updatePriority(id, priority, userId);
     res.status(200).json({ success: true, data: updated });
   });
 
@@ -48,7 +50,8 @@ export class AdminSupportController {
   public assign = asyncHandler(async (req: AuthRequest, res: Response) => {
     const { id } = req.params as { id: string };
     const { agentId } = req.body as { agentId: string };
-    const assigned = await service.assign(id, agentId);
+    const userId = req.user?.id as string;
+    const assigned = await service.assign(id, agentId, userId);
     res.status(200).json({ success: true, data: assigned });
   });
 

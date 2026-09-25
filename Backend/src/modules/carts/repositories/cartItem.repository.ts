@@ -19,8 +19,10 @@ export class CartItemRepository {
     return CartItemModel.find({ cart: cartId }).populate('product').populate('variant').exec();
   }
 
-  public async findByVariant(cartId: string, variantId: string) {
-    return CartItemModel.findOne({ cart: cartId, variant: variantId }).exec();
+  public async findByVariant(cartId: string, variantId: string, unit?: string) {
+    const filter: Record<string, any> = { cart: cartId, variant: variantId };
+    if (unit) filter.unit = unit;
+    return CartItemModel.findOne(filter).exec();
   }
 
   public async findById(id: string) {

@@ -2,6 +2,9 @@ import TicketModel from '../../modules/support/models/ticket.model';
 import TicketMessageModel from '../../modules/support/models/ticketMessage.model';
 import UserModel from '../../modules/users/user.model';
 import { Types } from 'mongoose';
+import { emitToTicket, emitToAdmins, emitToUser, isUserInTicketRoom } from '../../socket/socket.server';
+import { notificationService } from '../../modules/notifications/notification.service';
+import logger from '../../common/logger/logger';
 
 export interface AdminSupportQuery {
   page?: number | string;
@@ -154,28 +157,106 @@ export class AdminSupportService {
       .populate('sender', 'name email role profilePicture')
       .exec();
 
+    // 1. Emit live chat event to everyone currently in the ticket room
+    emitToTicket(id, 'ticket:message', {
+      ticketId: id,
+      message: populatedMsg || message,
+    });
+
+    // 2. If status was automatically updated to IN_PROGRESS, emit status update
+    if (nextStatus !== ticket.status) {
+      emitToTicket(id, 'ticket:status_changed', { ticketId: id, status: nextStatus, updatedBy: userId });
+      emitToAdmins('ticket:status_changed', { ticketId: id, status: nextStatus, updatedBy: userId });
+      emitToUser(String(ticket.user), 'ticket:updated', { ticketId: id, status: nextStatus });
+    }
+
+    // 3. Smart Notification Dispatch: If recipient is NOT in room, notify them
+    try {
+      const sender = await UserModel.findById(userId).select('name role').lean();
+      const isInternalNote = !!payload.isInternalNote;
+
+      if (!isInternalNote) {
+        const customerId = String(ticket.user);
+        const isCustomerInRoom = isUserInTicketRoom(id, customerId);
+
+        if (!isCustomerInRoom) {
+          await notificationService.sendNotification({
+            recipient: customerId,
+            sender: userId,
+            title: `Reply on Ticket #${ticket.ticketNumber}`,
+            message: payload.message.slice(0, 180),
+            type: 'TICKET_REPLY',
+            data: {
+              ticketId: String(ticket._id),
+              ticketNumber: ticket.ticketNumber,
+              senderName: sender?.name || 'Support Agent',
+            },
+          });
+        }
+      }
+    } catch (notifErr) {
+      logger.warn('[AdminSupportService] Failed to dispatch reply notification:', notifErr);
+    }
+
     return populatedMsg;
   }
 
-  public async updateStatus(id: string, status: string) {
+  public async updateStatus(id: string, status: string, userId?: string) {
     if (!Types.ObjectId.isValid(id)) throw new Error('Invalid ticket ID');
-    return TicketModel.findByIdAndUpdate(id, { status: status.toUpperCase() }, { new: true })
+    const updatedStatus = status.toUpperCase();
+    const updated = await TicketModel.findByIdAndUpdate(id, { status: updatedStatus }, { new: true })
       .populate('user', 'name email phone')
       .populate('assignedTo', 'name email')
       .exec();
+
+    if (!updated) throw new Error('Ticket not found');
+
+    // Emit live socket updates
+    emitToTicket(id, 'ticket:status_changed', { ticketId: id, status: updatedStatus, updatedBy: userId });
+    emitToAdmins('ticket:status_changed', { ticketId: id, status: updatedStatus, updatedBy: userId });
+    if (updated.user) {
+      const customerId = String((updated.user as any)._id || updated.user);
+      emitToUser(customerId, 'ticket:updated', { ticketId: id, status: updatedStatus });
+
+      if (customerId !== userId) {
+        try {
+          await notificationService.sendNotification({
+            recipient: customerId,
+            sender: userId,
+            title: `Ticket #${updated.ticketNumber} Status: ${updatedStatus}`,
+            message: `Your support ticket status has been updated to "${updatedStatus}".`,
+            type: 'TICKET_STATUS',
+            data: { ticketId: id, ticketNumber: updated.ticketNumber, status: updatedStatus },
+          });
+        } catch (err) {
+          logger.warn('[AdminSupportService] Failed to notify customer on status update:', err);
+        }
+      }
+    }
+
+    return updated;
   }
 
-  public async updatePriority(id: string, priority: string) {
+  public async updatePriority(id: string, priority: string, userId?: string) {
     if (!Types.ObjectId.isValid(id)) throw new Error('Invalid ticket ID');
-    return TicketModel.findByIdAndUpdate(id, { priority: priority.toUpperCase() }, { new: true })
+    const updatedPriority = priority.toUpperCase();
+    const updated = await TicketModel.findByIdAndUpdate(id, { priority: updatedPriority }, { new: true })
       .populate('user', 'name email phone')
       .populate('assignedTo', 'name email')
       .exec();
+
+    if (!updated) throw new Error('Ticket not found');
+
+    // Emit live socket updates
+    emitToTicket(id, 'ticket:priority_changed', { ticketId: id, priority: updatedPriority, updatedBy: userId });
+    emitToAdmins('ticket:priority_changed', { ticketId: id, priority: updatedPriority, updatedBy: userId });
+
+    return updated;
   }
 
-  public async assign(id: string, agentId: string) {
+  public async assign(id: string, agentId: string, userId?: string) {
     if (!Types.ObjectId.isValid(id)) throw new Error('Invalid ticket ID');
-    return TicketModel.findByIdAndUpdate(
+    const updated = await TicketModel.findByIdAndUpdate(
       id,
       { assignedTo: agentId ? new Types.ObjectId(agentId) : null },
       { new: true }
@@ -183,6 +264,29 @@ export class AdminSupportService {
       .populate('user', 'name email phone')
       .populate('assignedTo', 'name email')
       .exec();
+
+    if (!updated) throw new Error('Ticket not found');
+
+    // Emit live socket updates
+    emitToTicket(id, 'ticket:assigned', { ticketId: id, agentId, updatedBy: userId });
+    emitToAdmins('ticket:assigned', { ticketId: id, agentId, updatedBy: userId });
+
+    if (agentId && agentId !== userId) {
+      try {
+        await notificationService.sendNotification({
+          recipient: agentId,
+          sender: userId,
+          title: `Assigned to Ticket #${updated.ticketNumber}`,
+          message: `You have been assigned to handle support ticket: "${updated.subject}"`,
+          type: 'TICKET_STATUS',
+          data: { ticketId: id, ticketNumber: updated.ticketNumber },
+        });
+      } catch (err) {
+        logger.warn('[AdminSupportService] Failed to notify assigned agent:', err);
+      }
+    }
+
+    return updated;
   }
 
   public async delete(id: string) {

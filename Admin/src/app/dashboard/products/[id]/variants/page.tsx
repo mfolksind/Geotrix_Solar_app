@@ -43,6 +43,13 @@ interface VariantImage {
   isPrimary?: boolean;
 }
 
+export interface UnitPriceItem {
+  unit: string;
+  price: number;
+  discountPrice?: number;
+  isDefault?: boolean;
+}
+
 interface Variant {
   _id: string;
   product?: any;
@@ -53,6 +60,8 @@ interface Variant {
   discountPrice?: number;
   stock: number;
   unit?: string;
+  availableUnits?: string[];
+  unitPrices?: UnitPriceItem[];
   weight?: number;
   dimensions?: string;
   status: 'ACTIVE' | 'INACTIVE';
@@ -67,6 +76,58 @@ interface Variant {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface UnitDefinition {
+  value: string; // unit key
+  name: string;  // actual full name
+  label: string; // display label
+  symbol: string;
+}
+
+export const UNIT_MAP: Record<string, UnitDefinition> = {
+  kg: {
+    value: 'kg',
+    name: 'Kilogram',
+    label: 'Kilogram (kg)',
+    symbol: 'kg',
+  },
+  meter: {
+    value: 'meter',
+    name: 'Meter',
+    label: 'Meter (meter)',
+    symbol: 'meter',
+  },
+  piece: {
+    value: 'piece',
+    name: 'Piece',
+    label: 'Piece (piece)',
+    symbol: 'piece',
+  },
+};
+
+export const STANDARD_UNITS: UnitDefinition[] = [
+  UNIT_MAP.kg,
+  UNIT_MAP.meter,
+  UNIT_MAP.piece,
+];
+
+export const getUnitDisplayName = (unitKey?: string): string => {
+  if (!unitKey) return 'Piece (piece)';
+  const key = unitKey.toLowerCase().trim();
+  if (key === 'kg' || key === 'kilogram' || key === 'kilograms') return UNIT_MAP.kg.label;
+  if (key === 'meter' || key === 'mtr' || key === 'metres' || key === 'meters') return UNIT_MAP.meter.label;
+  if (key === 'piece' || key === 'pcs' || key === 'pieces') return UNIT_MAP.piece.label;
+  return unitKey;
+};
+
+export const getUnitActualName = (unitKey?: string): string => {
+  if (!unitKey) return 'Piece';
+  const key = unitKey.toLowerCase().trim();
+  if (key === 'kg' || key === 'kilogram' || key === 'kilograms') return UNIT_MAP.kg.name;
+  if (key === 'meter' || key === 'mtr' || key === 'metres' || key === 'meters') return UNIT_MAP.meter.name;
+  if (key === 'piece' || key === 'pcs' || key === 'pieces') return UNIT_MAP.piece.name;
+  return unitKey;
+};
 
 export default function VariantsPage() {
   const router = useRouter();
@@ -108,7 +169,10 @@ export default function VariantsPage() {
   const [sku, setSku] = useState('');
   const [slug, setSlug] = useState('');
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
-  const [unit, setUnit] = useState('pcs');
+  const [unit, setUnit] = useState('piece');
+  const [availableUnits, setAvailableUnits] = useState<string[]>(['piece']);
+  const [unitPrices, setUnitPrices] = useState<UnitPriceItem[]>([]);
+  const [enableMultiUnits, setEnableMultiUnits] = useState(false);
   const [price, setPrice] = useState('');
   const [discountPrice, setDiscountPrice] = useState('');
   const [stock, setStock] = useState('0');
@@ -169,7 +233,10 @@ export default function VariantsPage() {
     setSku('');
     setSlug('');
     setIsSlugManuallyEdited(false);
-    setUnit('pcs');
+    setUnit('piece');
+    setAvailableUnits(['piece']);
+    setUnitPrices([]);
+    setEnableMultiUnits(false);
     setPrice('');
     setDiscountPrice('');
     setStock('0');
@@ -210,7 +277,20 @@ export default function VariantsPage() {
     setSku(v.sku || '');
     setSlug(v.slug || '');
     setIsSlugManuallyEdited(true);
-    setUnit(v.unit || 'pcs');
+    const rawUnit = (v.unit || 'piece').toLowerCase().trim();
+    const normalizedUnit = (rawUnit === 'pcs' || rawUnit === 'pieces') ? 'piece' : (rawUnit === 'mtr' || rawUnit === 'metres' || rawUnit === 'meters' ? 'meter' : (rawUnit === 'kg' || rawUnit === 'kilogram' || rawUnit === 'kilograms' ? 'kg' : rawUnit));
+    const rawUnits = (v.availableUnits && v.availableUnits.length > 0) ? v.availableUnits : [normalizedUnit];
+    const normalizedUnits = rawUnits.map(u => {
+      const lower = u.toLowerCase().trim();
+      if (lower === 'pcs' || lower === 'pieces') return 'piece';
+      if (lower === 'mtr' || lower === 'metres' || lower === 'meters') return 'meter';
+      if (lower === 'kg' || lower === 'kilogram' || lower === 'kilograms') return 'kg';
+      return lower;
+    });
+    setUnit(normalizedUnit);
+    setAvailableUnits(normalizedUnits);
+    setUnitPrices(v.unitPrices || []);
+    setEnableMultiUnits(normalizedUnits.length > 1 || !!(v.unitPrices && v.unitPrices.length > 0));
     setPrice(v.price != null ? String(v.price) : '');
     setDiscountPrice(v.discountPrice != null ? String(v.discountPrice) : '');
     setStock(v.stock != null ? String(v.stock) : '0');
@@ -235,6 +315,41 @@ export default function VariantsPage() {
     setLinkSearchTerm('');
     setLinkCategoryFilter('');
     setIsFormModalOpen(true);
+  };
+
+  // Multi-unit toggle / add helpers
+  const handleToggleAvailableUnit = (u: string) => {
+    setAvailableUnits(prev => {
+      const exists = prev.includes(u);
+      const next = exists ? prev.filter(x => x !== u) : [...prev, u];
+      if (next.length === 0) return [u];
+      return next;
+    });
+  };
+
+  const handleUnitPriceChange = (unitName: string, field: 'price' | 'discountPrice', value: string) => {
+    const numVal = parseFloat(value);
+    setUnitPrices(prev => {
+      const existing = prev.find(p => p.unit === unitName);
+      if (existing) {
+        return prev.map(p => {
+          if (p.unit === unitName) {
+            return {
+              ...p,
+              [field]: isNaN(numVal) ? (field === 'discountPrice' ? undefined : 0) : numVal
+            };
+          }
+          return p;
+        });
+      } else {
+        const newItem: UnitPriceItem = {
+          unit: unitName,
+          price: field === 'price' ? (isNaN(numVal) ? 0 : numVal) : parseFloat(price) || 0,
+          discountPrice: field === 'discountPrice' ? (isNaN(numVal) ? undefined : numVal) : undefined,
+        };
+        return [...prev, newItem];
+      }
+    });
   };
 
   // Auto-slugify
@@ -285,6 +400,11 @@ export default function VariantsPage() {
         sku: sku.trim() || undefined,
         slug: slug.trim() || undefined,
         unit: unit.trim() || 'pcs',
+        availableUnits: enableMultiUnits && availableUnits.length > 0 ? availableUnits : [unit.trim() || 'pcs'],
+        unitPrices:
+          enableMultiUnits && unitPrices.length > 0
+            ? unitPrices.filter((up) => up.unit && up.price > 0)
+            : undefined,
         price: parseFloat(price),
         discountPrice: discountPrice ? parseFloat(discountPrice) : undefined,
         stock: parseInt(stock) || 0,
@@ -879,9 +999,17 @@ export default function VariantsPage() {
                           </div>
                         )}
                       </div>
-                      <span className="text-xs px-2 py-0.5 rounded-md bg-background border border-border font-medium text-foreground/70">
-                        {variant.unit || 'pcs'}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {variant.availableUnits && variant.availableUnits.length > 1 ? (
+                          <span className="text-[11px] px-2 py-0.5 rounded-md bg-[#57c5cc]/15 border border-[#57c5cc]/30 font-semibold text-[#57c5cc]" title={`Multi-units: ${variant.availableUnits.map(u => getUnitActualName(u)).join(', ')}`}>
+                            Multi-Unit ({variant.availableUnits.length}): {variant.availableUnits.map(u => getUnitActualName(u)).join(', ')}
+                          </span>
+                        ) : (
+                          <span className="text-xs px-2 py-0.5 rounded-md bg-background border border-border font-medium text-foreground/70">
+                            {getUnitDisplayName(variant.unit)}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Linked Products Count Pill */}
@@ -1130,22 +1258,118 @@ export default function VariantsPage() {
 
                     <div>
                       <label className="block text-xs font-semibold text-foreground/90 mb-1.5">
-                        Unit of Measurement
+                        Primary / Default Unit
                       </label>
                       <select
                         value={unit}
-                        onChange={e => setUnit(e.target.value)}
+                        onChange={e => {
+                          const newUnit = e.target.value;
+                          setUnit(newUnit);
+                          if (!availableUnits.includes(newUnit)) {
+                            setAvailableUnits(prev => [newUnit, ...prev]);
+                          }
+                        }}
                         className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc]"
                       >
-                        <option value="pcs">Pieces (pcs)</option>
-                        <option value="mtr">Metres (mtr)</option>
-                        <option value="kg">Kilograms (kg)</option>
-                        <option value="set">Set</option>
-                        <option value="roll">Roll</option>
-                        <option value="box">Box</option>
-                        <option value="pkt">Packet (pkt)</option>
+                        {STANDARD_UNITS.map(u => (
+                          <option key={u.value} value={u.value}>
+                            {u.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
+                  </div>
+
+                  {/* Multi-Unit Configuration Card */}
+                  <div className="p-4 rounded-xl bg-surface border border-border space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          <Layers size={14} className="text-[#57c5cc]" /> Multi-Unit Selection (kg, meter, piece)
+                        </h4>
+                        <p className="text-[11px] text-foreground/60">
+                          Allow customers to purchase this item in multiple selectable units (e.g. wire sold in kg or meter)
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={enableMultiUnits}
+                          onChange={e => {
+                            const checked = e.target.checked;
+                            setEnableMultiUnits(checked);
+                            if (checked && availableUnits.length === 0) {
+                              setAvailableUnits([unit || 'piece']);
+                            }
+                          }}
+                          className="sr-only peer"
+                        />
+                        <div className="w-9 h-5 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#57c5cc]"></div>
+                      </label>
+                    </div>
+
+                    {enableMultiUnits && (
+                      <div className="space-y-3 pt-2 border-t border-border/50">
+                        <div>
+                          <span className="block text-[11px] font-semibold text-foreground/70 mb-1.5">
+                            Select Units to Enable:
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {STANDARD_UNITS.map(u => {
+                              const isSelected = availableUnits.includes(u.value);
+                              return (
+                                <button
+                                  type="button"
+                                  key={u.value}
+                                  onClick={() => handleToggleAvailableUnit(u.value)}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                                    isSelected
+                                      ? 'bg-[#57c5cc] text-white shadow-sm font-semibold'
+                                      : 'bg-background border border-border text-foreground/70 hover:border-[#57c5cc]/50'
+                                  }`}
+                                >
+                                  {isSelected ? `✓ ${u.label}` : `+ ${u.label}`}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Currently Selected Units */}
+                        <div className="pt-1">
+                          <span className="block text-[11px] font-semibold text-foreground/70 mb-1">
+                            Active Units for Customers ({availableUnits.length}):
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {availableUnits.map(u => {
+                              const isPrimary = u === unit;
+                              return (
+                                <span
+                                  key={u}
+                                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold ${
+                                    isPrimary
+                                      ? 'bg-[#57c5cc]/20 border border-[#57c5cc] text-[#57c5cc]'
+                                      : 'bg-background border border-border text-foreground'
+                                  }`}
+                                >
+                                  {getUnitDisplayName(u)} {isPrimary && <span className="text-[10px] font-bold">(Primary)</span>}
+                                  {!isPrimary && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleAvailableUnit(u)}
+                                      className="text-foreground/40 hover:text-rose-500 text-xs ml-1"
+                                      title="Remove unit"
+                                    >
+                                      ×
+                                    </button>
+                                  )}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -1200,7 +1424,8 @@ export default function VariantsPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-foreground/90 mb-1.5">
-                        Regular Price (₹) <span className="text-rose-500">*</span>
+                        Base Regular Price (₹) <span className="text-rose-500">*</span>{' '}
+                        <span className="text-[#57c5cc] font-medium">(per {unit || 'pcs'})</span>
                       </label>
                       <input
                         type="number"
@@ -1216,7 +1441,7 @@ export default function VariantsPage() {
 
                     <div>
                       <label className="block text-xs font-semibold text-foreground/90 mb-1.5">
-                        Discounted Offer Price (₹){' '}
+                        Base Discounted Price (₹){' '}
                         <span className="text-foreground/50 font-normal">(Optional)</span>
                       </label>
                       <input
@@ -1230,6 +1455,92 @@ export default function VariantsPage() {
                       />
                     </div>
                   </div>
+
+                  {/* Multi-Unit Pricing Matrix Table */}
+                  {enableMultiUnits && availableUnits.length > 1 && (
+                    <div className="p-4 rounded-xl bg-surface border border-border space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                            <Tag size={14} className="text-[#57c5cc]" /> Multi-Unit Price Matrix
+                          </h4>
+                          <p className="text-[11px] text-foreground/60">
+                            Specify individual prices per unit. If left blank, the base price (₹{price || '0'}) will apply.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto rounded-lg border border-border">
+                        <table className="w-full text-xs text-left">
+                          <thead className="bg-background/80 text-foreground/70 uppercase font-semibold text-[10px] border-b border-border">
+                            <tr>
+                              <th className="px-3 py-2">Unit</th>
+                              <th className="px-3 py-2">Regular Price (₹)</th>
+                              <th className="px-3 py-2">Discount Price (₹)</th>
+                              <th className="px-3 py-2 text-right">Default / Fallback</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border">
+                            {availableUnits.map(u => {
+                              const isPrimary = u === unit;
+                              const currentUP = unitPrices.find(p => p.unit === u);
+                              return (
+                                <tr key={u} className="bg-surface hover:bg-background/50">
+                                  <td className="px-3 py-2.5 font-bold text-foreground">
+                                    <span className="inline-flex items-center gap-1.5">
+                                      {getUnitDisplayName(u)}
+                                      {isPrimary && (
+                                        <span className="px-1.5 py-0.5 rounded text-[9px] bg-[#57c5cc]/20 text-[#57c5cc] font-bold">
+                                          Primary
+                                        </span>
+                                      )}
+                                    </span>
+                                  </td>
+                                  <td className="px-3 py-2">
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      value={isPrimary ? (price || '') : (currentUP?.price ?? '')}
+                                      onChange={e => {
+                                        if (isPrimary) {
+                                          setPrice(e.target.value);
+                                        } else {
+                                          handleUnitPriceChange(u, 'price', e.target.value);
+                                        }
+                                      }}
+                                      placeholder={isPrimary ? (price || '0') : `Default (${price || '0'})`}
+                                      className="w-28 px-2.5 py-1 rounded-lg border border-border bg-background text-foreground font-semibold text-xs focus:outline-none focus:ring-1 focus:ring-[#57c5cc]"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2">
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      min="0"
+                                      value={isPrimary ? (discountPrice || '') : (currentUP?.discountPrice ?? '')}
+                                      onChange={e => {
+                                        if (isPrimary) {
+                                          setDiscountPrice(e.target.value);
+                                        } else {
+                                          handleUnitPriceChange(u, 'discountPrice', e.target.value);
+                                        }
+                                      }}
+                                      placeholder={isPrimary ? (discountPrice || '-') : (discountPrice || '-')}
+                                      className="w-28 px-2.5 py-1 rounded-lg border border-border bg-background text-foreground font-semibold text-xs focus:outline-none focus:ring-1 focus:ring-[#57c5cc]"
+                                    />
+                                  </td>
+                                  <td className="px-3 py-2 text-right text-[11px] text-foreground/60 font-medium">
+                                    {isPrimary ? 'Base Rate' : (currentUP?.price ? `₹${currentUP.price} / ${getUnitActualName(u)}` : `Inherit ₹${price || '0'} / ${getUnitActualName(u)}`)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-semibold text-foreground/90 mb-1.5">

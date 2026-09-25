@@ -19,6 +19,7 @@ export interface IOrderDocument extends Document {
   address: Types.ObjectId | string;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
+  paymentMethod: 'RAZORPAY' | 'BANK_TRANSFER' | string;
   subtotal: number;
   shippingCharge: number;
   discount: number;
@@ -39,6 +40,7 @@ export interface IOrderItemDocument extends Document {
   productName: string;
   variantName: string;
   quantity: number;
+  unit?: string;
   unitPrice: number;
   subtotal: number;
   createdAt: Date;

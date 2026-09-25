@@ -18,6 +18,12 @@ const orderSchema = new Schema<IOrderDocument>(
       default: 'PENDING',
       index: true,
     },
+    paymentMethod: {
+      type: String,
+      enum: ['RAZORPAY', 'BANK_TRANSFER'],
+      default: 'RAZORPAY',
+      index: true,
+    },
     subtotal: { type: Number, required: true },
     shippingCharge: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },

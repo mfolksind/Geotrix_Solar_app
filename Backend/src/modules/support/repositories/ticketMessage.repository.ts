@@ -8,7 +8,12 @@ export class TicketMessageRepository {
   }
 
   public async findByTicket(ticketId: string, skip = 0, limit = 50) {
-    return TicketMessageModel.find({ ticket: ticketId }).sort({ createdAt: 1 }).skip(skip).limit(limit).exec();
+    return TicketMessageModel.find({ ticket: ticketId })
+      .populate('sender', 'name email role profilePicture')
+      .sort({ createdAt: 1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
   }
 
   public async delete(id: string) {

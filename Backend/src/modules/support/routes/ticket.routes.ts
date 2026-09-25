@@ -25,6 +25,7 @@ router.get('/tickets', authenticate, ticketController.getTickets);
 router.get('/tickets/:id', authenticate, validate(idParamSchema, 'params'), ticketController.getTicket);
 router.get('/tickets/:id/messages', authenticate, validate(idParamSchema, 'params'), messageController.getConversation);
 router.post('/tickets/:id/reply', authenticate, upload.array('attachments'), validate(replySchema), messageController.replyToTicket);
+router.post('/tickets/:id/messages', authenticate, upload.array('attachments'), validate(replySchema), messageController.replyToTicket);
 router.patch('/tickets/:id/status', authenticate, validate(idParamSchema, 'params'), validate(updateStatusSchema), ticketController.updateStatus);
 router.patch('/tickets/:id/assign', authenticate, validate(idParamSchema, 'params'), validate(assignSchema), ticketController.assignTicket);
 

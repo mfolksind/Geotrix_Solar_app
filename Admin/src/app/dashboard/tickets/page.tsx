@@ -117,6 +117,12 @@ export default function SupportTicketsPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Real-time Presence & Typing State
+  const [typingUser, setTypingUser] = useState<{ name: string; role?: string } | null>(null);
+  const [customerInChat, setCustomerInChat] = useState<boolean>(false);
+  const [isSocketConnected, setIsSocketConnected] = useState<boolean>(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Copy helper
@@ -132,10 +138,10 @@ export default function SupportTicketsPage() {
   };
 
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 0 || typingUser) {
       scrollToBottom();
     }
-  }, [messages]);
+  }, [messages, typingUser]);
 
   // Load Staff Members for Agent Assignment
   const loadStaffUsers = async () => {
@@ -206,52 +212,121 @@ export default function SupportTicketsPage() {
     // Connect to admin socket and listen for real-time ticket events
     const socket = getAdminSocket();
     if (socket) {
+      if (socket.connected) setIsSocketConnected(true);
+
+      const handleConnect = () => setIsSocketConnected(true);
+      const handleDisconnect = () => setIsSocketConnected(false);
+
       const handleNewTicket = () => {
         loadStats();
         loadTickets();
       };
-      const handleTicketUpdated = () => {
+      const handleTicketUpdated = (data?: any) => {
         loadStats();
         loadTickets();
+        if (data?.ticketId && selectedTicket && selectedTicket._id === data.ticketId) {
+          if (data.status) setSelectedTicket((prev) => prev ? { ...prev, status: data.status } : null);
+          if (data.priority) setSelectedTicket((prev) => prev ? { ...prev, priority: data.priority } : null);
+        }
       };
 
+      socket.on('connect', handleConnect);
+      socket.on('disconnect', handleDisconnect);
       socket.on('ticket:created', handleNewTicket);
       socket.on('ticket:status_changed', handleTicketUpdated);
+      socket.on('ticket:priority_changed', handleTicketUpdated);
       socket.on('ticket:assigned', handleTicketUpdated);
 
       return () => {
+        socket.off('connect', handleConnect);
+        socket.off('disconnect', handleDisconnect);
         socket.off('ticket:created', handleNewTicket);
         socket.off('ticket:status_changed', handleTicketUpdated);
+        socket.off('ticket:priority_changed', handleTicketUpdated);
         socket.off('ticket:assigned', handleTicketUpdated);
       };
     }
-  }, []);
+  }, [selectedTicket?._id]);
 
-  // Listen for live messages when a specific ticket conversation is open
+  // Listen for live messages and typing when a specific ticket conversation is open
   useEffect(() => {
-    if (!selectedTicket) return;
+    if (!selectedTicket) {
+      setTypingUser(null);
+      setCustomerInChat(false);
+      return;
+    }
 
     const socket = getAdminSocket();
     if (!socket) return;
 
     const ticketId = selectedTicket._id;
+    const customerId = typeof selectedTicket.user === 'object' && selectedTicket.user?._id
+      ? String(selectedTicket.user._id)
+      : typeof selectedTicket.user === 'string'
+      ? selectedTicket.user
+      : null;
+
     socket.emit('ticket:join', { ticketId });
 
     const handleIncomingMessage = (data: { ticketId: string; message: TicketMessage }) => {
       if (data?.ticketId === ticketId && data?.message) {
         setMessages((prev) => {
-          // Avoid duplicate messages if already appended locally
           if (prev.some((m) => m._id === data.message._id)) return prev;
           return [...prev, data.message];
         });
+        setTypingUser(null);
+        // Also update ticket in list's lastMessageAt
+        setTickets((prev) =>
+          prev.map((t) =>
+            t._id === ticketId ? { ...t, lastMessageAt: data.message.createdAt || new Date().toISOString() } : t
+          )
+        );
       }
     };
 
+    const handleTypingEvent = (data: { ticketId: string; userId: string; userName: string; role?: string; isTyping: boolean }) => {
+      if (data?.ticketId === ticketId) {
+        if (data.isTyping) {
+          setTypingUser({ name: data.userName || 'Customer', role: data.role });
+        } else {
+          setTypingUser(null);
+        }
+      }
+    };
+
+    const handleUserJoined = (data: { ticketId: string; userId: string; name?: string; role?: string }) => {
+      if (data?.ticketId === ticketId && customerId && data.userId === customerId) {
+        setCustomerInChat(true);
+      }
+    };
+
+    const handleUserLeft = (data: { ticketId: string; userId: string }) => {
+      if (data?.ticketId === ticketId && customerId && data.userId === customerId) {
+        setCustomerInChat(false);
+      }
+    };
+
+    const handleReconnect = () => {
+      socket.emit('ticket:join', { ticketId });
+    };
+
+    socket.on('connect', handleReconnect);
     socket.on('ticket:message', handleIncomingMessage);
+    socket.on('ticket:typing', handleTypingEvent);
+    socket.on('ticket:user_joined', handleUserJoined);
+    socket.on('ticket:user_left', handleUserLeft);
 
     return () => {
+      socket.emit('ticket:typing', { ticketId, isTyping: false });
       socket.emit('ticket:leave', { ticketId });
+      socket.off('connect', handleReconnect);
       socket.off('ticket:message', handleIncomingMessage);
+      socket.off('ticket:typing', handleTypingEvent);
+      socket.off('ticket:user_joined', handleUserJoined);
+      socket.off('ticket:user_left', handleUserLeft);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
     };
   }, [selectedTicket?._id]);
 
@@ -282,10 +357,45 @@ export default function SupportTicketsPage() {
     }
   };
 
+  // Handle input changes and emit typing indicator
+  const handleReplyInputChange = (text: string) => {
+    setReplyText(text);
+    if (!selectedTicket) return;
+
+    const socket = getAdminSocket();
+    if (socket) {
+      if (text.trim().length > 0) {
+        socket.emit('ticket:typing', { ticketId: selectedTicket._id, isTyping: true });
+
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+
+        typingTimeoutRef.current = setTimeout(() => {
+          socket.emit('ticket:typing', { ticketId: selectedTicket._id, isTyping: false });
+        }, 2000);
+      } else {
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        socket.emit('ticket:typing', { ticketId: selectedTicket._id, isTyping: false });
+      }
+    }
+  };
+
   // Send Reply / Internal Note
   const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTicket || !replyText.trim() || sendingReply) return;
+
+    // Clear typing indicator immediately
+    const socket = getAdminSocket();
+    if (socket) {
+      socket.emit('ticket:typing', { ticketId: selectedTicket._id, isTyping: false });
+    }
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
 
     setSendingReply(true);
     try {
@@ -298,7 +408,10 @@ export default function SupportTicketsPage() {
       });
 
       if (res.success && res.data) {
-        setMessages((prev) => [...prev, res.data]);
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === res.data._id)) return prev;
+          return [...prev, res.data];
+        });
         setReplyText('');
         loadTickets();
         loadStats();
@@ -479,6 +592,21 @@ export default function SupportTicketsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <div
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-2 ${
+              isSocketConnected
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                : 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isSocketConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+              }`}
+            />
+            <span>{isSocketConnected ? 'Live Real-Time Active' : 'Connecting Engine...'}</span>
+          </div>
+
           <button
             onClick={() => {
               loadStats();
@@ -984,13 +1112,13 @@ export default function SupportTicketsPage() {
           <div className="w-full max-w-4xl h-[85vh] bg-surface border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col">
             {/* Header */}
             <div className="p-5 border-b border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-foreground/2">
-              <div>
+              <div className="space-y-1">
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <span className="font-mono text-sm font-bold text-[#57c5cc]">{selectedTicket.ticketNumber}</span>
                   <h3 className="text-base font-bold text-foreground truncate max-w-md">{selectedTicket.subject}</h3>
                   {getPriorityBadge(selectedTicket.priority)}
                 </div>
-                <div className="flex items-center gap-3 text-xs text-foreground/50 mt-1">
+                <div className="flex items-center gap-3 text-xs text-foreground/50 flex-wrap">
                   <span>Category: <b>{selectedTicket.category || 'General'}</b></span>
                   <span>·</span>
                   <span>Created: {new Date(selectedTicket.createdAt).toLocaleDateString()}</span>
@@ -998,6 +1126,22 @@ export default function SupportTicketsPage() {
                   <span>
                     Assigned: <b>{(selectedTicket.assignedTo as any)?.name || 'Unassigned'}</b>
                   </span>
+                  <span>·</span>
+                  {/* Live Room Presence Status Badge */}
+                  {customerInChat ? (
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-3xs font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 animate-pulse">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Customer live in chat
+                    </span>
+                  ) : (
+                    <span
+                      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-3xs font-medium bg-foreground/5 text-foreground/50 border border-border"
+                      title="Customer is offline or in another screen. Replies will trigger FCM Push and In-App notification."
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-foreground/30"></span>
+                      Customer away (Push ready)
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -1052,7 +1196,7 @@ export default function SupportTicketsPage() {
               ) : (
                 messages.map((msg, idx) => {
                   const senderObj = typeof msg.sender === 'object' && msg.sender !== null ? (msg.sender as UserInfo) : null;
-                  const isStaff = senderObj?.role === 'admin' || senderObj?.role === 'super_admin' || senderObj?.role === 'manager';
+                  const isStaff = senderObj?.role === 'admin' || senderObj?.role === 'super_admin' || senderObj?.role === 'manager' || senderObj?.role === 'seller';
                   const isNote = !!msg.isInternalNote;
 
                   return (
@@ -1062,7 +1206,7 @@ export default function SupportTicketsPage() {
                     >
                       <div className="flex items-center gap-2 mb-1 px-1">
                         <span className="text-2xs font-semibold text-foreground/70">
-                          {senderObj?.name || (isStaff ? 'Staff Support' : 'Customer')}
+                          {senderObj?.name || (isStaff ? 'Support Agent' : 'Customer')}
                         </span>
                         {isNote ? (
                           <span className="px-1.5 py-0.2 rounded text-3xs font-bold uppercase bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
@@ -1093,6 +1237,22 @@ export default function SupportTicketsPage() {
                   );
                 })
               )}
+
+              {/* Real-time Typing Indicator Bubble */}
+              {typingUser && (
+                <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-surface border border-border shadow-xs max-w-xs text-xs text-foreground/80 animate-fadeIn">
+                  <div className="w-2 h-2 rounded-full bg-[#57c5cc] animate-ping" />
+                  <span>
+                    <b className="text-[#57c5cc]">{typingUser.name}</b> is typing
+                  </span>
+                  <span className="inline-flex gap-1 items-center ml-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#57c5cc] animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#57c5cc] animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#57c5cc] animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </span>
+                </div>
+              )}
+
               <div ref={messagesEndRef} />
             </div>
 
@@ -1124,7 +1284,7 @@ export default function SupportTicketsPage() {
                   </button>
                 </div>
                 <span className="text-2xs text-foreground/40">
-                  {isInternalNote ? 'Visible only to staff & admins' : 'Customer will see this reply'}
+                  {isInternalNote ? 'Visible only to staff & admins' : 'Customer will see this reply in real-time'}
                 </span>
               </div>
 
@@ -1133,7 +1293,7 @@ export default function SupportTicketsPage() {
                   type="text"
                   placeholder={isInternalNote ? "Write an internal note for staff members..." : "Type your reply to the customer..."}
                   value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
+                  onChange={(e) => handleReplyInputChange(e.target.value)}
                   disabled={sendingReply}
                   className={`flex-1 px-4 py-3 rounded-2xl border text-xs focus:outline-none transition ${
                     isInternalNote

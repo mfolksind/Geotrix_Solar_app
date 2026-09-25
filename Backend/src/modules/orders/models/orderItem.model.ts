@@ -9,6 +9,7 @@ const orderItemSchema = new Schema<IOrderItemDocument>(
     productName: { type: String, required: true },
     variantName: { type: String, required: true },
     quantity: { type: Number, required: true },
+    unit: { type: String, trim: true, default: 'pcs' },
     unitPrice: { type: Number, required: true },
     subtotal: { type: Number, required: true },
   },

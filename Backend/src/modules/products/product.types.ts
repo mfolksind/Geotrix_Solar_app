@@ -16,11 +16,19 @@ export interface UpdateProductPayload {
   updatedBy?: string;
 }
 
+export interface UnitPricePayload {
+  unit: string;
+  price: number;
+  discountPrice?: number;
+  isDefault?: boolean;
+}
+
 export interface CreateVariantPayload {
   product: string;
   variantName: string;
   slug?: string;
   description?: string;
+  shortDescription?: string;
   thumbnail?: string;
   isDefault?: boolean;
   sku?: string;
@@ -28,15 +36,21 @@ export interface CreateVariantPayload {
   discountPrice?: number;
   stock?: number;
   unit?: string;
+  availableUnits?: string[];
+  unitPrices?: UnitPricePayload[];
   weight?: number;
   dimensions?: string;
   status?: ProductStatus;
+  relatedSystems?: string[];
+  compatibleProducts?: string[];
+  recommendedProducts?: string[];
 }
 
 export interface UpdateVariantPayload {
   variantName?: string;
   slug?: string;
   description?: string;
+  shortDescription?: string;
   thumbnail?: string;
   isDefault?: boolean;
   sku?: string;
@@ -44,9 +58,14 @@ export interface UpdateVariantPayload {
   discountPrice?: number;
   stock?: number;
   unit?: string;
+  availableUnits?: string[];
+  unitPrices?: UnitPricePayload[];
   weight?: number;
   dimensions?: string;
   status?: ProductStatus;
+  relatedSystems?: string[];
+  compatibleProducts?: string[];
+  recommendedProducts?: string[];
 }
 
 export interface UploadImagePayload {

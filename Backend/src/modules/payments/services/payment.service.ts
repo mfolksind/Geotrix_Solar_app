@@ -62,7 +62,38 @@ export class PaymentService {
 
             const payment = await this.repo.create(paymentPayload as any);
             await this.orderRepo.updatePaymentStatus(orderId, "PAID");
-            await this.orderRepo.updateStatus(orderId, "CONFIRMED");
+            // Order status stays PENDING (or current status) to be handled and confirmed explicitly by admin
+
+            // Emit live socket event
+            const { emitToUser, emitToAdmins } = await import("../../../socket/socket.server");
+            const { notificationService } = await import("../../notifications/notification.service");
+
+            emitToUser(userId, "order:payment_status_updated", {
+                orderId,
+                orderNumber: order.orderNumber,
+                paymentStatus: "PAID",
+            });
+            emitToAdmins("order:payment_status_updated", {
+                orderId,
+                orderNumber: order.orderNumber,
+                paymentStatus: "PAID",
+            });
+
+            try {
+                await notificationService.sendNotification({
+                    recipient: userId,
+                    title: `Payment Received (#${order.orderNumber})`,
+                    message: `Payment of ₹${order.totalAmount.toLocaleString()} received for order #${order.orderNumber}. Your order is awaiting admin review and confirmation.`,
+                    type: "ORDER_PAYMENT",
+                    data: {
+                        orderId: String(order._id),
+                        orderNumber: order.orderNumber,
+                        paymentStatus: "PAID",
+                    },
+                });
+            } catch (notifErr) {
+                console.warn("[PaymentService] Failed to dispatch payment notification:", notifErr);
+            }
 
             return payment;
         } catch (err) {

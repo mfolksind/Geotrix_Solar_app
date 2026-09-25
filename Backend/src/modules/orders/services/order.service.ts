@@ -28,8 +28,9 @@ export class OrderService {
   public async createOrder(
     userId: string,
     addressId: string,
-    clientItems: { variantId: string; quantity: number }[],
-    notes?: string
+    clientItems: { variantId: string; quantity: number; unit?: string; selectedUnit?: string }[],
+    notes?: string,
+    paymentMethod: 'RAZORPAY' | 'BANK_TRANSFER' | string = 'RAZORPAY'
   ) {
     if (!clientItems || clientItems.length === 0) throw new ApiError(400, 'Cart is empty');
 
@@ -53,7 +54,19 @@ export class OrderService {
       if ((variant.stock ?? 0) < item.quantity)
         throw new ApiError(400, `Insufficient stock for variant ${variant.id}`);
 
-      const unitPrice = variant.discountPrice || variant.price;
+      // Multi-unit determination
+      const chosenUnit = (item.selectedUnit || item.unit || variant.unit || 'pcs').trim();
+      let unitPrice = variant.discountPrice || variant.price;
+
+      if (variant.unitPrices && Array.isArray(variant.unitPrices) && variant.unitPrices.length > 0) {
+        const matchingUnitPrice = variant.unitPrices.find(
+          (up: any) => up.unit?.toLowerCase() === chosenUnit.toLowerCase()
+        );
+        if (matchingUnitPrice) {
+          unitPrice = matchingUnitPrice.discountPrice ?? matchingUnitPrice.price;
+        }
+      }
+
       const itemSubtotal = unitPrice * item.quantity;
       subtotal += itemSubtotal;
 
@@ -63,6 +76,7 @@ export class OrderService {
         productName: product.name,
         variantName: variant.variantName,
         quantity: item.quantity,
+        unit: chosenUnit,
         unitPrice,
         subtotal: itemSubtotal,
       });
@@ -84,6 +98,7 @@ export class OrderService {
         address: addressId,
         status: 'PENDING',
         paymentStatus: 'PENDING',
+        paymentMethod: paymentMethod || 'RAZORPAY',
         subtotal,
         shippingCharge,
         discount,
@@ -105,6 +120,7 @@ export class OrderService {
         productName: it.productName,
         variantName: it.variantName,
         quantity: it.quantity,
+        unit: it.unit,
         unitPrice: it.unitPrice,
         subtotal: it.subtotal,
       }));
@@ -118,6 +134,28 @@ export class OrderService {
         const newStock = (variant.stock ?? 0) - it.quantity;
         if (newStock < 0) throw new ApiError(400, 'Insufficient stock during order creation');
         await ProductVariantModel.findByIdAndUpdate(variant.id, { stock: newStock }).exec();
+      }
+
+      // create initial payment tracking record
+      try {
+        const PaymentModel = (await import('../../payments/models/payment.model')).default;
+        await PaymentModel.create({
+          order: order._id,
+          user: userId,
+          paymentMethod: paymentMethod || 'RAZORPAY',
+          paymentProvider: paymentMethod === 'RAZORPAY' ? 'RAZORPAY' : 'BANK_TRANSFER',
+          amount: totalAmount,
+          subtotal,
+          taxAmount: tax,
+          cgst,
+          sgst,
+          discount,
+          shippingFee: shippingCharge,
+          currency: 'INR',
+          status: 'PENDING',
+        });
+      } catch (payErr) {
+        console.warn('[OrderService] Failed to create pending payment record:', payErr);
       }
 
       // return populated order with billing breakup
@@ -134,35 +172,69 @@ export class OrderService {
         totalAmount,
       };
 
-      // 1. Emit live socket events
+      // 1. Clear user cart upon successful order placement
+      try {
+        const cart = await this.cartRepo.findByUser(userId);
+        if (cart) {
+          const cartItems = await this.cartItemRepo.findByCart(cart.id);
+          await Promise.all(cartItems.map((i) => this.cartItemRepo.delete(i.id)));
+          await this.cartRepo.clearCart(cart.id);
+          emitToUser(userId, 'cart:updated', { action: 'CLEAR' });
+        }
+      } catch (cartErr) {
+        console.warn('[OrderService] Failed to clear user cart on order creation:', cartErr);
+      }
+
+      // 2. Emit live socket events
       const orderData = populated ? populated.toObject() : order.toObject();
       emitToUser(userId, 'order:created', { order: orderData, billingBreakup });
       emitToAdmins('order:new', { order: orderData, billingBreakup });
 
-      // 2. Dispatch multi-channel notifications
+      // 3. Dispatch multi-channel notifications based on paymentMethod
       try {
+        const isBankTransfer = paymentMethod === 'BANK_TRANSFER';
+
+        const customerTitle = isBankTransfer
+          ? `Order Placed - Bank Transfer (#${order.orderNumber})`
+          : `Order Received (#${order.orderNumber})`;
+
+        const customerMsg = isBankTransfer
+          ? `Your order #${order.orderNumber} for ₹${totalAmount.toLocaleString()} has been placed via Bank Transfer. Please complete the transfer and our finance team will verify your payment.`
+          : `Thank you! Your order #${order.orderNumber} for ₹${totalAmount.toLocaleString()} has been placed and is awaiting admin confirmation.`;
+
         // Customer notification
         await notificationService.sendNotification({
           recipient: userId,
-          title: `Order Placed Successfully! (#${order.orderNumber})`,
-          message: `Your order for ₹${totalAmount.toLocaleString()} has been placed. We'll notify you once it ships!`,
+          title: customerTitle,
+          message: customerMsg,
           type: 'ORDER_CREATED',
           data: {
             orderId: String(order._id),
             orderNumber: order.orderNumber,
             totalAmount,
+            status: 'PENDING',
+            paymentMethod: order.paymentMethod,
           },
         });
 
         // Admin team notification
+        const adminTitle = isBankTransfer
+          ? `New Bank Transfer Order (#${order.orderNumber})`
+          : `New Order Received (#${order.orderNumber})`;
+
+        const adminMsg = isBankTransfer
+          ? `New bank transfer order for ₹${totalAmount.toLocaleString()} awaiting manual payment verification.`
+          : `New order placed for ₹${totalAmount.toLocaleString()} with ${orderItems.length} item(s).`;
+
         await notificationService.sendToRole('admin', {
-          title: `New Order Received (#${order.orderNumber})`,
-          message: `New order placed for ₹${totalAmount.toLocaleString()} with ${orderItems.length} item(s).`,
+          title: adminTitle,
+          message: adminMsg,
           type: 'ORDER_CREATED',
           data: {
             orderId: String(order._id),
             orderNumber: order.orderNumber,
             totalAmount,
+            paymentMethod: order.paymentMethod,
           },
         });
       } catch (notifErr) {
@@ -252,7 +324,8 @@ export class OrderService {
     const order = await this.orderRepo.findById(id);
     if (!order) throw new ApiError(404, 'Order not found');
 
-    const updated = await this.orderRepo.updateStatus(id, status);
+    const formattedStatus = status.toUpperCase();
+    const updated = await this.orderRepo.updateStatus(id, formattedStatus);
 
     const customerId =
       order.user && typeof order.user === 'object' && (order.user as any)._id
@@ -262,19 +335,143 @@ export class OrderService {
     emitToUser(customerId, 'order:status_updated', {
       orderId: id,
       orderNumber: order.orderNumber,
-      status,
+      status: formattedStatus,
     });
+    emitToAdmins('order:status_updated', {
+      orderId: id,
+      orderNumber: order.orderNumber,
+      status: formattedStatus,
+    });
+
+    let notifTitle = `Order Update: #${order.orderNumber}`;
+    let notifMessage = `Your order status has been updated to "${formattedStatus}".`;
+
+    switch (formattedStatus) {
+      case 'CONFIRMED':
+        notifTitle = `Order Confirmed! (#${order.orderNumber})`;
+        notifMessage = `Great news! Your order #${order.orderNumber} has been verified and confirmed by our team.`;
+        break;
+      case 'PROCESSING':
+        notifTitle = `Order in Processing (#${order.orderNumber})`;
+        notifMessage = `Your order #${order.orderNumber} is currently being packed and prepared for dispatch.`;
+        break;
+      case 'SHIPPED':
+        notifTitle = `Order Shipped! (#${order.orderNumber})`;
+        notifMessage = `Your order #${order.orderNumber} has been handed over to the courier and is on its way.`;
+        break;
+      case 'DELIVERED':
+        notifTitle = `Order Delivered! (#${order.orderNumber})`;
+        notifMessage = `Your order #${order.orderNumber} has been successfully delivered. Thank you for choosing Geotrix!`;
+        break;
+      case 'CANCELLED':
+        notifTitle = `Order Cancelled (#${order.orderNumber})`;
+        notifMessage = `Your order #${order.orderNumber} has been cancelled.`;
+        break;
+    }
 
     try {
       await notificationService.sendNotification({
         recipient: customerId,
-        title: `Order Update: #${order.orderNumber}`,
-        message: `Your order status is now "${status}".`,
+        title: notifTitle,
+        message: notifMessage,
         type: 'ORDER_STATUS',
-        data: { orderId: id, orderNumber: order.orderNumber, status },
+        data: { orderId: id, orderNumber: order.orderNumber, status: formattedStatus },
       });
     } catch (notifErr) {
       console.warn('[OrderService] Failed to notify on order status update:', notifErr);
+    }
+
+    return updated;
+  }
+
+  public async updatePaymentStatus(id: string, paymentStatus: string) {
+    const order = await this.orderRepo.findById(id);
+    if (!order) throw new ApiError(404, 'Order not found');
+
+    const formattedPaymentStatus = paymentStatus.toUpperCase();
+    const updated = await this.orderRepo.updatePaymentStatus(id, formattedPaymentStatus);
+
+    // Sync Payment record if exists
+    try {
+      const PaymentModel = (await import('../../payments/models/payment.model')).default;
+      const paymentSyncStatus =
+        formattedPaymentStatus === 'PAID'
+          ? 'SUCCESS'
+          : formattedPaymentStatus === 'FAILED'
+          ? 'FAILED'
+          : formattedPaymentStatus === 'REFUNDED'
+          ? 'REFUNDED'
+          : 'PENDING';
+
+      await PaymentModel.findOneAndUpdate(
+        { order: id },
+        {
+          status: paymentSyncStatus,
+          ...(paymentSyncStatus === 'SUCCESS' ? { paidAt: new Date() } : {}),
+        }
+      ).exec();
+    } catch (paySyncErr) {
+      console.warn('[OrderService] Failed to sync payment document on status update:', paySyncErr);
+    }
+
+    const customerId =
+      order.user && typeof order.user === 'object' && (order.user as any)._id
+        ? String((order.user as any)._id)
+        : String(order.user);
+
+    emitToUser(customerId, 'order:payment_status_updated', {
+      orderId: id,
+      orderNumber: order.orderNumber,
+      paymentStatus: formattedPaymentStatus,
+    });
+    emitToAdmins('order:payment_status_updated', {
+      orderId: id,
+      orderNumber: order.orderNumber,
+      paymentStatus: formattedPaymentStatus,
+    });
+
+    const isBankTransfer = order.paymentMethod === 'BANK_TRANSFER';
+    let notifTitle = `Payment Status Update (#${order.orderNumber})`;
+    let notifMessage = `Payment status for order #${order.orderNumber} is now "${formattedPaymentStatus}".`;
+
+    switch (formattedPaymentStatus) {
+      case 'PAID':
+        notifTitle = isBankTransfer
+          ? `Bank Payment Verified! (#${order.orderNumber})`
+          : `Payment Confirmed (#${order.orderNumber})`;
+        notifMessage = isBankTransfer
+          ? `Your bank transfer payment of ₹${(order.totalAmount || 0).toLocaleString()} for order #${order.orderNumber} has been verified and confirmed by our finance team.`
+          : `Payment of ₹${(order.totalAmount || 0).toLocaleString()} has been received for order #${order.orderNumber}.`;
+        break;
+      case 'FAILED':
+        notifTitle = isBankTransfer
+          ? `Bank Payment Verification Failed (#${order.orderNumber})`
+          : `Payment Failed (#${order.orderNumber})`;
+        notifMessage = isBankTransfer
+          ? `We could not verify the bank transfer for order #${order.orderNumber}. Please contact support or retry payment.`
+          : `Payment for order #${order.orderNumber} could not be completed. Please check and retry.`;
+        break;
+      case 'REFUNDED':
+        notifTitle = `Payment Refunded (#${order.orderNumber})`;
+        notifMessage = `A refund of ₹${(order.totalAmount || 0).toLocaleString()} has been processed for order #${order.orderNumber}.`;
+        break;
+    }
+
+    try {
+      await notificationService.sendNotification({
+        recipient: customerId,
+        title: notifTitle,
+        message: notifMessage,
+        type: 'ORDER_PAYMENT',
+        data: {
+          orderId: id,
+          orderNumber: order.orderNumber,
+          paymentStatus: formattedPaymentStatus,
+          paymentMethod: order.paymentMethod,
+        },
+      });
+    } catch (notifErr) {
+      console.warn('[OrderService] Failed to notify on payment status update:', notifErr);
     }
 
     return updated;

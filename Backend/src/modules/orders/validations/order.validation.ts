@@ -2,10 +2,13 @@ import { z } from 'zod';
 
 export const createOrderSchema = z.object({
   addressId: z.string().trim().min(1),
+  paymentMethod: z.enum(['RAZORPAY', 'BANK_TRANSFER']).optional().default('RAZORPAY'),
   notes: z.string().trim().optional(),
   items: z.array(z.object({
     variantId: z.string().trim().min(1),
-    quantity: z.number().int().positive()
+    quantity: z.number().int().positive(),
+    unit: z.string().trim().optional(),
+    selectedUnit: z.string().trim().optional(),
   })).min(1, 'Cart must have at least one item')
 });
 

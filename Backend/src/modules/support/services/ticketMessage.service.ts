@@ -33,13 +33,18 @@ export class TicketMessageService {
       isInternalNote: payload.isInternalNote ?? false
     } as any);
 
+    const populatedMsg = await (await import('../models/ticketMessage.model')).default
+      .findById(messageDoc._id)
+      .populate('sender', 'name email role profilePicture')
+      .exec();
+
     // update ticket lastMessageAt
     await this.ticketRepo.updateStatus(ticketId, ticket.status, { lastMessageAt: new Date(), updatedBy: senderId });
 
     // 1. Emit live chat event to everyone currently in the ticket room
     emitToTicket(ticketId, 'ticket:message', {
       ticketId,
-      message: messageDoc,
+      message: populatedMsg || messageDoc,
     });
 
     // 2. Smart Notification Dispatch: If recipient is NOT currently in the ticket room, notify them
@@ -105,7 +110,7 @@ export class TicketMessageService {
       console.warn('[TicketMessageService] Failed to dispatch smart notification:', notifErr);
     }
 
-    return messageDoc;
+    return populatedMsg || messageDoc;
   }
 
   public async getConversation(ticketId: string, userId: string | null, isAdmin = false, page = 1, limit = 100) {

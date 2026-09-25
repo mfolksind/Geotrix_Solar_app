@@ -33,7 +33,9 @@ import {
   Receipt,
   FileText,
   SlidersHorizontal,
-  IndianRupee
+  IndianRupee,
+  Building,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface OrderItem {
@@ -43,6 +45,7 @@ interface OrderItem {
   quantity: number;
   unitPrice: number;
   subtotal: number;
+  unit?: string;
   product?: {
     _id?: string;
     name?: string;
@@ -79,6 +82,7 @@ interface Order {
   orderNumber: string;
   status: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+  paymentMethod?: 'RAZORPAY' | 'BANK_TRANSFER' | string;
   subtotal?: number;
   shippingCharge?: number;
   discount?: number;
@@ -135,6 +139,7 @@ export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState<string>('ALL');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState('createdAt:desc');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(15);
@@ -147,6 +152,7 @@ export default function OrdersPage() {
   const [editFormData, setEditFormData] = useState({ status: '', paymentStatus: '' });
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState('');
+  const [quickActionLoading, setQuickActionLoading] = useState<string | null>(null);
 
   // Quick Action Feedback
   const [copiedNumber, setCopiedNumber] = useState<string | null>(null);
@@ -180,6 +186,7 @@ export default function OrdersPage() {
       if (searchTerm.trim()) params.append('search', searchTerm.trim());
       if (selectedStatus !== 'ALL') params.append('status', selectedStatus);
       if (selectedPaymentStatus !== 'ALL') params.append('paymentStatus', selectedPaymentStatus);
+      if (selectedPaymentMethod !== 'ALL') params.append('paymentMethod', selectedPaymentMethod);
       if (sortBy) params.append('sort', sortBy);
       params.append('page', page.toString());
       params.append('limit', limit.toString());
@@ -200,7 +207,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, selectedStatus, selectedPaymentStatus, sortBy, page, limit]);
+  }, [searchTerm, selectedStatus, selectedPaymentStatus, selectedPaymentMethod, sortBy, page, limit]);
 
   useEffect(() => {
     loadGlobalStats();
@@ -215,11 +222,13 @@ export default function OrdersPage() {
 
       socket.on('order:new', handleOrderUpdate);
       socket.on('order:status_updated', handleOrderUpdate);
+      socket.on('order:payment_status_updated', handleOrderUpdate);
       socket.on('order:cancelled', handleOrderUpdate);
 
       return () => {
         socket.off('order:new', handleOrderUpdate);
         socket.off('order:status_updated', handleOrderUpdate);
+        socket.off('order:payment_status_updated', handleOrderUpdate);
         socket.off('order:cancelled', handleOrderUpdate);
       };
     }
@@ -245,6 +254,11 @@ export default function OrdersPage() {
     setPage(1);
   };
 
+  const handlePaymentMethodFilter = (val: string) => {
+    setSelectedPaymentMethod(val);
+    setPage(1);
+  };
+
   const handleSortChange = (val: string) => {
     setSortBy(val);
     setPage(1);
@@ -259,6 +273,7 @@ export default function OrdersPage() {
     setSearchTerm('');
     setSelectedStatus('ALL');
     setSelectedPaymentStatus('ALL');
+    setSelectedPaymentMethod('ALL');
     setSortBy('createdAt:desc');
     setPage(1);
   };
@@ -267,6 +282,7 @@ export default function OrdersPage() {
     searchTerm !== '' ||
     selectedStatus !== 'ALL' ||
     selectedPaymentStatus !== 'ALL' ||
+    selectedPaymentMethod !== 'ALL' ||
     sortBy !== 'createdAt:desc';
 
   // Copy Order Number helper
@@ -428,6 +444,76 @@ export default function OrdersPage() {
             PENDING
           </span>
         );
+    }
+  };
+
+  // Payment Method Badge Helper
+  const getPaymentMethodBadge = (paymentMethod?: string) => {
+    if (paymentMethod === 'BANK_TRANSFER') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200 dark:border-purple-800/40">
+          <Building size={11} className="shrink-0" />
+          <span>Bank Transfer</span>
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 border border-sky-200 dark:border-sky-800/40">
+        <CreditCard size={11} className="shrink-0" />
+        <span>Razorpay</span>
+      </span>
+    );
+  };
+
+  // Quick Action: Verify Bank Payment
+  const handleQuickVerifyBankPayment = async (orderId: string, orderNumber: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!window.confirm(`Verify and mark bank transfer payment for order #${orderNumber} as PAID?`)) return;
+    setQuickActionLoading(orderId);
+    try {
+      const res = await fetchApi(`/api/admin/orders/${orderId}/payment-status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ paymentStatus: 'PAID' }),
+      });
+      if (res?.success) {
+        loadOrders();
+        loadGlobalStats();
+        if (viewingOrder && viewingOrder._id === orderId) {
+          setViewingOrder((prev) => (prev ? { ...prev, paymentStatus: 'PAID' } : null));
+        }
+      } else {
+        alert(res?.message || 'Failed to verify payment');
+      }
+    } catch (err: any) {
+      alert(err?.message || 'Error verifying bank payment');
+    } finally {
+      setQuickActionLoading(null);
+    }
+  };
+
+  // Quick Action: Confirm Order
+  const handleQuickConfirmOrder = async (orderId: string, orderNumber: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!window.confirm(`Confirm order #${orderNumber} and notify customer that fulfillment has started?`)) return;
+    setQuickActionLoading(orderId);
+    try {
+      const res = await fetchApi(`/api/admin/orders/${orderId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'CONFIRMED' }),
+      });
+      if (res?.success) {
+        loadOrders();
+        loadGlobalStats();
+        if (viewingOrder && viewingOrder._id === orderId) {
+          setViewingOrder((prev) => (prev ? { ...prev, status: 'CONFIRMED' } : null));
+        }
+      } else {
+        alert(res?.message || 'Failed to confirm order');
+      }
+    } catch (err: any) {
+      alert(err?.message || 'Error confirming order');
+    } finally {
+      setQuickActionLoading(null);
     }
   };
 
@@ -601,7 +687,7 @@ export default function OrdersPage() {
         </div>
 
         {/* Dropdown Filters Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-border">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-border">
           {/* Status Filter */}
           <div>
             <label className="block text-xs font-medium text-foreground/60 mb-1.5">Order Status</label>
@@ -611,7 +697,7 @@ export default function OrdersPage() {
               className="w-full py-2 px-3 text-sm bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] cursor-pointer"
             >
               <option value="ALL">All Order Statuses</option>
-              <option value="PENDING">Pending</option>
+              <option value="PENDING">Pending (Awaiting Admin)</option>
               <option value="CONFIRMED">Confirmed</option>
               <option value="PROCESSING">Processing</option>
               <option value="SHIPPED">Shipped</option>
@@ -633,6 +719,20 @@ export default function OrdersPage() {
               <option value="PAID">Paid</option>
               <option value="FAILED">Failed</option>
               <option value="REFUNDED">Refunded</option>
+            </select>
+          </div>
+
+          {/* Payment Method Filter */}
+          <div>
+            <label className="block text-xs font-medium text-foreground/60 mb-1.5">Payment Method</label>
+            <select
+              value={selectedPaymentMethod}
+              onChange={(e) => handlePaymentMethodFilter(e.target.value)}
+              className="w-full py-2 px-3 text-sm bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] cursor-pointer"
+            >
+              <option value="ALL">All Payment Methods</option>
+              <option value="RAZORPAY">Razorpay (Online Payment)</option>
+              <option value="BANK_TRANSFER">Bank Transfer (Manual Admin)</option>
             </select>
           </div>
 
@@ -685,11 +785,12 @@ export default function OrdersPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-foreground/[0.02] border-b border-border text-foreground/60 text-xs font-semibold uppercase tracking-wider">
+                <tr className="bg-foreground/2 border-b border-border text-foreground/60 text-xs font-semibold uppercase tracking-wider">
                   <th className="py-3.5 px-4 sm:px-6">Order #</th>
                   <th className="py-3.5 px-4">Customer</th>
                   <th className="py-3.5 px-4 text-center">Items</th>
-                  <th className="py-3.5 px-4 text-center">Payment</th>
+                  <th className="py-3.5 px-4 text-center">Payment Method</th>
+                  <th className="py-3.5 px-4 text-center">Payment Status</th>
                   <th className="py-3.5 px-4 text-center">Order Status</th>
                   <th className="py-3.5 px-4 text-right">Total Amount</th>
                   <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
@@ -706,11 +807,15 @@ export default function OrdersPage() {
                       })
                     : 'N/A';
 
+                  const isBankPending =
+                    order.paymentMethod === 'BANK_TRANSFER' && order.paymentStatus === 'PENDING';
+                  const isOrderPending = order.status === 'PENDING';
+
                   return (
                     <tr
                       key={order._id}
                       onClick={() => openViewModal(order)}
-                      className="hover:bg-foreground/[0.02] transition-colors group cursor-pointer"
+                      className="hover:bg-foreground/2 transition-colors group cursor-pointer"
                     >
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-2">
@@ -742,7 +847,7 @@ export default function OrdersPage() {
                           </div>
                           <div>
                             <div className="font-semibold text-foreground text-sm">{customerName}</div>
-                            <div className="text-xs text-foreground/50 truncate max-w-[180px]">
+                            <div className="text-xs text-foreground/50 truncate max-w-45">
                               {order.user?.email || order.user?.phone || 'No email provided'}
                             </div>
                           </div>
@@ -754,6 +859,10 @@ export default function OrdersPage() {
                           <Package size={13} className="text-foreground/50" />
                           <span>{order.itemsCount || order.items?.length || 1} Items</span>
                         </span>
+                      </td>
+
+                      <td className="py-4 px-4 text-center">
+                        {getPaymentMethodBadge(order.paymentMethod)}
                       </td>
 
                       <td className="py-4 px-4 text-center">
@@ -770,6 +879,32 @@ export default function OrdersPage() {
 
                       <td className="py-4 px-4 sm:px-6 text-right">
                         <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          {/* Quick Verify Bank Payment button */}
+                          {isBankPending && (
+                            <button
+                              onClick={(e) => handleQuickVerifyBankPayment(order._id, order.orderNumber, e)}
+                              disabled={quickActionLoading === order._id}
+                              className="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                              title="Verify Bank Transfer payment"
+                            >
+                              <ShieldCheck size={13} />
+                              <span>Verify Paid</span>
+                            </button>
+                          )}
+
+                          {/* Quick Confirm Order button */}
+                          {isOrderPending && (
+                            <button
+                              onClick={(e) => handleQuickConfirmOrder(order._id, order.orderNumber, e)}
+                              disabled={quickActionLoading === order._id}
+                              className="px-2.5 py-1 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 dark:bg-cyan-950/60 dark:hover:bg-cyan-900/60 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                              title="Confirm order fulfillment"
+                            >
+                              <CheckCircle2 size={13} />
+                              <span>Confirm</span>
+                            </button>
+                          )}
+
                           <button
                             onClick={() => openViewModal(order)}
                             className="p-1.5 text-foreground/40 hover:text-[#57c5cc] hover:bg-[#57c5cc]/10 rounded-lg transition-colors cursor-pointer"
@@ -806,6 +941,10 @@ export default function OrdersPage() {
                 })
               : 'N/A';
 
+            const isBankPending =
+              order.paymentMethod === 'BANK_TRANSFER' && order.paymentStatus === 'PENDING';
+            const isOrderPending = order.status === 'PENDING';
+
             return (
               <div
                 key={order._id}
@@ -839,7 +978,10 @@ export default function OrdersPage() {
 
                     <div className="flex flex-col items-end gap-1">
                       {getStatusBadge(order.status)}
-                      {getPaymentBadge(order.paymentStatus)}
+                      <div className="flex items-center gap-1">
+                        {getPaymentMethodBadge(order.paymentMethod)}
+                        {getPaymentBadge(order.paymentStatus)}
+                      </div>
                     </div>
                   </div>
 
@@ -869,6 +1011,30 @@ export default function OrdersPage() {
                   </div>
 
                   <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    {isBankPending && (
+                      <button
+                        onClick={(e) => handleQuickVerifyBankPayment(order._id, order.orderNumber, e)}
+                        disabled={quickActionLoading === order._id}
+                        className="px-2 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                        title="Verify Bank Payment"
+                      >
+                        <ShieldCheck size={12} />
+                        <span>Verify</span>
+                      </button>
+                    )}
+
+                    {isOrderPending && (
+                      <button
+                        onClick={(e) => handleQuickConfirmOrder(order._id, order.orderNumber, e)}
+                        disabled={quickActionLoading === order._id}
+                        className="px-2 py-1 bg-cyan-50 hover:bg-cyan-100 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                        title="Confirm Order"
+                      >
+                        <CheckCircle2 size={12} />
+                        <span>Confirm</span>
+                      </button>
+                    )}
+
                     <button
                       onClick={() => openViewModal(order)}
                       className="p-1.5 text-foreground/40 hover:text-[#57c5cc] hover:bg-[#57c5cc]/10 rounded-lg transition-colors cursor-pointer"
@@ -933,9 +1099,10 @@ export default function OrdersPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-border shrink-0">
               <div>
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 flex-wrap">
                   <h3 className="text-lg font-bold text-foreground">Order #{viewingOrder.orderNumber}</h3>
                   {getStatusBadge(viewingOrder.status)}
+                  {getPaymentMethodBadge(viewingOrder.paymentMethod)}
                   {getPaymentBadge(viewingOrder.paymentStatus)}
                 </div>
                 <p className="text-xs text-foreground/50 mt-1 flex items-center gap-2">
@@ -974,6 +1141,56 @@ export default function OrdersPage() {
                 </div>
               ) : (
                 <>
+                  {/* Action Banner: Bank Transfer Verification */}
+                  {viewingOrder.paymentMethod === 'BANK_TRANSFER' && viewingOrder.paymentStatus === 'PENDING' && (
+                    <div className="p-4 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/40 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-start gap-2.5">
+                        <Building className="text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" size={18} />
+                        <div>
+                          <h5 className="text-sm font-bold text-purple-900 dark:text-purple-200">
+                            Bank Transfer Payment Awaiting Verification
+                          </h5>
+                          <p className="text-xs text-purple-700 dark:text-purple-300/80 mt-0.5">
+                            Customer selected Bank Transfer. Verify the transfer in your bank account, then click to mark payment as PAID.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleQuickVerifyBankPayment(viewingOrder._id, viewingOrder.orderNumber)}
+                        disabled={quickActionLoading === viewingOrder._id}
+                        className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-xl shadow-sm flex items-center gap-1.5 shrink-0 cursor-pointer"
+                      >
+                        <ShieldCheck size={14} />
+                        <span>Verify & Mark PAID</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Action Banner: Admin Order Confirmation */}
+                  {viewingOrder.status === 'PENDING' && (
+                    <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-start gap-2.5">
+                        <Clock className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" size={18} />
+                        <div>
+                          <h5 className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                            Order Awaiting Admin Confirmation
+                          </h5>
+                          <p className="text-xs text-amber-700 dark:text-amber-300/80 mt-0.5">
+                            Orders are not auto-confirmed. Click below to confirm order and dispatch the confirmation notification to customer.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleQuickConfirmOrder(viewingOrder._id, viewingOrder.orderNumber)}
+                        disabled={quickActionLoading === viewingOrder._id}
+                        className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl shadow-sm flex items-center gap-1.5 shrink-0 cursor-pointer"
+                      >
+                        <CheckCircle2 size={14} />
+                        <span>Confirm Order</span>
+                      </button>
+                    </div>
+                  )}
+
                   {/* Order Items Table */}
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-wider text-foreground/60 mb-2.5">
@@ -982,7 +1199,7 @@ export default function OrdersPage() {
                     <div className="bg-background border border-border rounded-2xl overflow-hidden">
                       <table className="w-full text-left text-sm">
                         <thead>
-                          <tr className="bg-foreground/[0.02] border-b border-border text-[11px] font-semibold text-foreground/60 uppercase">
+                          <tr className="bg-foreground/2 border-b border-border text-[11px] font-semibold text-foreground/60 uppercase">
                             <th className="py-2.5 px-4">Item Description</th>
                             <th className="py-2.5 px-4 text-center">Unit Price</th>
                             <th className="py-2.5 px-4 text-center">Qty</th>
@@ -992,7 +1209,7 @@ export default function OrdersPage() {
                         <tbody className="divide-y divide-border">
                           {viewingOrder.items && viewingOrder.items.length > 0 ? (
                             viewingOrder.items.map((item, idx) => (
-                              <tr key={item._id || idx} className="hover:bg-foreground/[0.01]">
+                              <tr key={item._id || idx} className="hover:bg-foreground/1">
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-3">
                                     {item.variant?.thumbnail || item.product?.thumbnail ? (
@@ -1022,10 +1239,14 @@ export default function OrdersPage() {
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-center text-foreground/80">
-                                  {formatCurrency(item.unitPrice)}
+                                  <span>{formatCurrency(item.unitPrice)}</span>
+                                  {item.unit && (
+                                    <span className="text-[10px] text-foreground/50 ml-1">/ {item.unit}</span>
+                                  )}
                                 </td>
                                 <td className="py-3 px-4 text-center font-semibold text-foreground">
-                                  {item.quantity}
+                                  {item.quantity}{' '}
+                                  <span className="text-xs font-normal text-foreground/60">{item.unit || 'pcs'}</span>
                                 </td>
                                 <td className="py-3 px-4 text-right font-bold text-foreground">
                                   {formatCurrency(item.subtotal)}
@@ -1089,6 +1310,10 @@ export default function OrdersPage() {
                         <span>Payment & Invoice Summary</span>
                       </div>
                       <div className="text-xs space-y-2">
+                        <div className="flex justify-between items-center text-foreground/70 pb-1 border-b border-border/40">
+                          <span>Payment Method:</span>
+                          <span>{getPaymentMethodBadge(viewingOrder.paymentMethod)}</span>
+                        </div>
                         <div className="flex justify-between text-foreground/70">
                           <span>Subtotal:</span>
                           <span className="font-medium">
@@ -1097,7 +1322,7 @@ export default function OrdersPage() {
                         </div>
                         {Number(viewingOrder.tax || 0) > 0 && (
                           <div className="flex justify-between text-foreground/70">
-                            <span>Tax:</span>
+                            <span>Tax (18% GST):</span>
                             <span className="font-medium">{formatCurrency(viewingOrder.tax)}</span>
                           </div>
                         )}
@@ -1160,8 +1385,10 @@ export default function OrdersPage() {
             <div className="flex items-center justify-between pb-4 border-b border-border mb-5">
               <div>
                 <h3 className="text-lg font-bold text-foreground">Update Order Status</h3>
-                <p className="text-xs text-foreground/60 mt-0.5">
-                  Order #{editingOrder.orderNumber}
+                <p className="text-xs text-foreground/60 mt-0.5 flex items-center gap-1.5">
+                  <span>Order #{editingOrder.orderNumber}</span>
+                  <span>•</span>
+                  <span>{getPaymentMethodBadge(editingOrder.paymentMethod)}</span>
                 </p>
               </div>
               <button
@@ -1182,7 +1409,7 @@ export default function OrdersPage() {
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-foreground/80 mb-1.5">
-                  Order Status
+                  Order Status (Fulfillment)
                 </label>
                 <select
                   value={editFormData.status}
@@ -1191,13 +1418,16 @@ export default function OrdersPage() {
                   }
                   className="w-full px-3.5 py-2.5 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] text-foreground font-medium cursor-pointer"
                 >
-                  <option value="PENDING">PENDING</option>
-                  <option value="CONFIRMED">CONFIRMED</option>
-                  <option value="PROCESSING">PROCESSING</option>
-                  <option value="SHIPPED">SHIPPED</option>
-                  <option value="DELIVERED">DELIVERED</option>
-                  <option value="CANCELLED">CANCELLED</option>
+                  <option value="PENDING">PENDING (Awaiting Confirmation)</option>
+                  <option value="CONFIRMED">CONFIRMED (Notifies Customer: Confirmed)</option>
+                  <option value="PROCESSING">PROCESSING (Notifies Customer: In Processing)</option>
+                  <option value="SHIPPED">SHIPPED (Notifies Customer: Shipped)</option>
+                  <option value="DELIVERED">DELIVERED (Notifies Customer: Delivered)</option>
+                  <option value="CANCELLED">CANCELLED (Notifies Customer: Cancelled)</option>
                 </select>
+                <p className="text-[11px] text-foreground/50 mt-1">
+                  Changing order status dispatches a real-time socket event & targeted notification to the customer.
+                </p>
               </div>
 
               <div>
@@ -1211,11 +1441,14 @@ export default function OrdersPage() {
                   }
                   className="w-full px-3.5 py-2.5 text-sm bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] text-foreground font-medium cursor-pointer"
                 >
-                  <option value="PENDING">PENDING</option>
-                  <option value="PAID">PAID</option>
-                  <option value="FAILED">FAILED</option>
-                  <option value="REFUNDED">REFUNDED</option>
+                  <option value="PENDING">PENDING (Payment Pending)</option>
+                  <option value="PAID">PAID (Payment Verified / Received)</option>
+                  <option value="FAILED">FAILED (Payment Verification Failed)</option>
+                  <option value="REFUNDED">REFUNDED (Payment Refunded)</option>
                 </select>
+                <p className="text-[11px] text-foreground/50 mt-1">
+                  Marking PAID triggers payment verification notification and syncs with the payments ledger.
+                </p>
               </div>
 
               <div className="pt-4 border-t border-border flex items-center justify-end gap-3">

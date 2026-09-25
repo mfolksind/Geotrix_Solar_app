@@ -34,6 +34,7 @@ export interface ICartItemDocument extends Document {
   product: Types.ObjectId | string;
   variant: Types.ObjectId | string;
   quantity: number;
+  unit: string;
   unitPrice: number;
   subtotal: number;
   createdAt: Date;

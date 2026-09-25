@@ -12,6 +12,13 @@ export interface IProductDocument extends Document {
   updatedAt: Date;
 }
 
+export interface IUnitPrice {
+  unit: string;
+  price: number;
+  discountPrice?: number;
+  isDefault?: boolean;
+}
+
 export interface IProductVariantDocument extends Document {
   product: Types.ObjectId | IProductDocument | string;
   variantName: string;
@@ -25,6 +32,8 @@ export interface IProductVariantDocument extends Document {
   discountPrice?: number;
   stock: number;
   unit?: string;
+  availableUnits?: string[];
+  unitPrices?: IUnitPrice[];
   weight?: number;
   dimensions?: string;
   relatedSystems?: Types.ObjectId[] | string[];

@@ -131,8 +131,9 @@ export class AdminPaymentService {
   public async updateStatus(id: string, status: string, failureReason?: string) {
     if (!Types.ObjectId.isValid(id)) throw new Error('Invalid payment ID');
 
-    const updatePayload: any = { status: status.toUpperCase() };
-    if (status.toUpperCase() === 'SUCCESS') {
+    const formattedStatus = status.toUpperCase();
+    const updatePayload: any = { status: formattedStatus };
+    if (formattedStatus === 'SUCCESS') {
       updatePayload.paidAt = new Date();
     }
     if (failureReason) {
@@ -145,13 +146,68 @@ export class AdminPaymentService {
       .exec();
 
     if (updated && updated.order) {
-      const orderId = typeof updated.order === 'object' && (updated.order as any)._id ? (updated.order as any)._id : updated.order;
-      if (status.toUpperCase() === 'SUCCESS') {
-        await OrderModel.findByIdAndUpdate(orderId, { paymentStatus: 'PAID', status: 'CONFIRMED' }).exec();
-      } else if (status.toUpperCase() === 'REFUNDED') {
-        await OrderModel.findByIdAndUpdate(orderId, { paymentStatus: 'REFUNDED' }).exec();
-      } else if (status.toUpperCase() === 'FAILED') {
-        await OrderModel.findByIdAndUpdate(orderId, { paymentStatus: 'FAILED' }).exec();
+      const orderDoc: any = updated.order;
+      const orderId = typeof orderDoc === 'object' && orderDoc._id ? orderDoc._id : orderDoc;
+      const orderNumber = orderDoc?.orderNumber || 'Order';
+      const customerId =
+        updated.user && typeof updated.user === 'object' && (updated.user as any)._id
+          ? String((updated.user as any)._id)
+          : String(updated.user || orderDoc?.user);
+
+      const mappedPaymentStatus =
+        formattedStatus === 'SUCCESS'
+          ? 'PAID'
+          : formattedStatus === 'REFUNDED'
+          ? 'REFUNDED'
+          : formattedStatus === 'FAILED'
+          ? 'FAILED'
+          : 'PENDING';
+
+      // Update Order paymentStatus only (order status remains PENDING for explicit admin confirmation)
+      await OrderModel.findByIdAndUpdate(orderId, { paymentStatus: mappedPaymentStatus }).exec();
+
+      const { emitToUser, emitToAdmins } = await import('../../socket/socket.server');
+      const { notificationService } = await import('../../modules/notifications/notification.service');
+
+      emitToUser(customerId, 'order:payment_status_updated', {
+        orderId: String(orderId),
+        orderNumber,
+        paymentStatus: mappedPaymentStatus,
+      });
+      emitToAdmins('order:payment_status_updated', {
+        orderId: String(orderId),
+        orderNumber,
+        paymentStatus: mappedPaymentStatus,
+      });
+
+      let notifTitle = `Payment Status Update (#${orderNumber})`;
+      let notifMessage = `Payment status for order #${orderNumber} is now "${mappedPaymentStatus}".`;
+
+      if (mappedPaymentStatus === 'PAID') {
+        notifTitle = `Payment Verified! (#${orderNumber})`;
+        notifMessage = `Your payment of ₹${(updated.amount || 0).toLocaleString()} for order #${orderNumber} has been verified and confirmed by our finance team.`;
+      } else if (mappedPaymentStatus === 'FAILED') {
+        notifTitle = `Payment Verification Failed (#${orderNumber})`;
+        notifMessage = `Payment verification for order #${orderNumber} was not successful. Please contact support.`;
+      } else if (mappedPaymentStatus === 'REFUNDED') {
+        notifTitle = `Payment Refunded (#${orderNumber})`;
+        notifMessage = `A refund of ₹${(updated.amount || 0).toLocaleString()} has been processed for order #${orderNumber}.`;
+      }
+
+      try {
+        await notificationService.sendNotification({
+          recipient: customerId,
+          title: notifTitle,
+          message: notifMessage,
+          type: 'ORDER_PAYMENT',
+          data: {
+            orderId: String(orderId),
+            orderNumber,
+            paymentStatus: mappedPaymentStatus,
+          },
+        });
+      } catch (notifErr) {
+        console.warn('[AdminPaymentService] Failed to dispatch payment notification:', notifErr);
       }
     }
 

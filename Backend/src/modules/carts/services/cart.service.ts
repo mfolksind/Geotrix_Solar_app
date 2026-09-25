@@ -24,7 +24,13 @@ export class CartService {
     };
   }
 
-  public async addToCart(userId: string, productId: string, quantity: number, variantId?: string) {
+  public async addToCart(
+    userId: string,
+    productId: string,
+    quantity: number,
+    variantId?: string,
+    selectedUnit?: string
+  ) {
     let cart = await this.cartRepo.findByUser(userId);
     if (!cart) cart = await this.cartRepo.create(userId);
 
@@ -39,15 +45,31 @@ export class CartService {
     }
     if (!variant) throw new Error('Product variant not found');
 
-    const existing = await this.itemRepo.findByVariant(cart.id, variant.id);
+    // Determine unit
+    const chosenUnit = (selectedUnit || variant.unit || 'pcs').trim();
+
+    // Determine unit price based on multi-unit pricing or default variant price
+    let unitPrice = variant.discountPrice ?? variant.price;
+    if (variant.unitPrices && Array.isArray(variant.unitPrices) && variant.unitPrices.length > 0) {
+      const matchingUnitPrice = variant.unitPrices.find(
+        (up: any) => up.unit?.toLowerCase() === chosenUnit.toLowerCase()
+      );
+      if (matchingUnitPrice) {
+        unitPrice = matchingUnitPrice.discountPrice ?? matchingUnitPrice.price;
+      }
+    }
+
+    const existing = await this.itemRepo.findByVariant(cart.id, variant.id, chosenUnit);
     let item;
     if (existing) {
       const newQty = existing.quantity + quantity;
-      const unitPrice = variant.discountPrice ?? variant.price;
-      item = await this.itemRepo.update(existing.id, { quantity: newQty, subtotal: unitPrice * newQty });
+      item = await this.itemRepo.update(existing.id, {
+        quantity: newQty,
+        unitPrice,
+        subtotal: unitPrice * newQty,
+      });
       await this.recalculateTotals(cart.id);
     } else {
-      const unitPrice = variant.discountPrice ?? variant.price;
       const productIdValue =
         (variant.product as unknown) && typeof (variant.product as any)._id !== 'undefined'
           ? (variant.product as any)._id
@@ -58,6 +80,7 @@ export class CartService {
         product: productIdValue,
         variant: variant.id,
         quantity,
+        unit: chosenUnit,
         unitPrice,
         subtotal: unitPrice * quantity,
       });
@@ -77,8 +100,21 @@ export class CartService {
     const variant = await ProductVariantModel.findById(item.variant).exec();
     if (!variant) throw new Error('Product variant not found');
 
-    const unitPrice = variant.discountPrice ?? variant.price;
-    const updated = await this.itemRepo.update(itemId, { quantity, subtotal: unitPrice * quantity });
+    let unitPrice = item.unitPrice || (variant.discountPrice ?? variant.price);
+    if (item.unit && variant.unitPrices && Array.isArray(variant.unitPrices) && variant.unitPrices.length > 0) {
+      const matchingUnitPrice = variant.unitPrices.find(
+        (up: any) => up.unit?.toLowerCase() === item.unit.toLowerCase()
+      );
+      if (matchingUnitPrice) {
+        unitPrice = matchingUnitPrice.discountPrice ?? matchingUnitPrice.price;
+      }
+    }
+
+    const updated = await this.itemRepo.update(itemId, {
+      quantity,
+      unitPrice,
+      subtotal: unitPrice * quantity,
+    });
     const cart = await this.cartRepo.findById(item.cart.toString());
     await this.recalculateTotals(item.cart.toString());
 

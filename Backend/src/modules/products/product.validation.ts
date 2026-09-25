@@ -14,6 +14,13 @@ export const updateProductSchema = z.object({
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
 });
 
+export const unitPriceSchema = z.object({
+  unit: z.string().trim().min(1, 'Unit name is required'),
+  price: z.number().positive('Unit price must be positive'),
+  discountPrice: z.number().positive().optional(),
+  isDefault: z.boolean().optional(),
+});
+
 export const createVariantSchema = z.object({
   variantName: z.string().trim().min(1),
   slug: z.string().trim().optional(),
@@ -26,6 +33,8 @@ export const createVariantSchema = z.object({
   discountPrice: z.number().positive().optional(),
   stock: z.number().int().nonnegative().optional(),
   unit: z.string().trim().optional(),
+  availableUnits: z.array(z.string().trim()).optional(),
+  unitPrices: z.array(unitPriceSchema).optional(),
   weight: z.number().optional(),
   dimensions: z.string().trim().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
@@ -46,6 +55,8 @@ export const updateVariantSchema = z.object({
   discountPrice: z.number().positive().optional(),
   stock: z.number().int().nonnegative().optional(),
   unit: z.string().trim().optional(),
+  availableUnits: z.array(z.string().trim()).optional(),
+  unitPrices: z.array(unitPriceSchema).optional(),
   weight: z.number().optional(),
   dimensions: z.string().trim().optional(),
   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { fetchApi } from '../../../utils/api';
+import { getAdminSocket } from '../../../utils/socket';
 import {
   CreditCard,
   IndianRupee,
@@ -174,6 +175,23 @@ export default function PaymentsManagementPage() {
 
   useEffect(() => {
     loadStats();
+
+    // Listen for live socket events from backend
+    const socket = getAdminSocket();
+    if (socket) {
+      const handlePaymentUpdate = () => {
+        loadStats();
+        loadPayments();
+      };
+
+      socket.on('order:new', handlePaymentUpdate);
+      socket.on('order:payment_status_updated', handlePaymentUpdate);
+
+      return () => {
+        socket.off('order:new', handlePaymentUpdate);
+        socket.off('order:payment_status_updated', handlePaymentUpdate);
+      };
+    }
   }, []);
 
   useEffect(() => {

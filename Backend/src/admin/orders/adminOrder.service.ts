@@ -12,6 +12,7 @@ export interface AdminOrderQueryParams {
   search?: string;
   status?: string;
   paymentStatus?: string;
+  paymentMethod?: string;
   sort?: string;
   page?: number | string;
   limit?: number | string;
@@ -68,6 +69,10 @@ export class AdminOrderService {
 
     if (query.paymentStatus && query.paymentStatus !== 'ALL') {
       filter.paymentStatus = query.paymentStatus.toUpperCase();
+    }
+
+    if (query.paymentMethod && query.paymentMethod !== 'ALL') {
+      filter.paymentMethod = query.paymentMethod.toUpperCase();
     }
 
     if (query.search && query.search.trim()) {
@@ -247,16 +252,17 @@ export class AdminOrderService {
   }
 
   public async updatePaymentStatus(id: string, status: string) {
-    return OrderModel.findByIdAndUpdate(id, { paymentStatus: status }, { new: true })
-      .populate('user', 'name firstName lastName email phone')
-      .exec();
+    return this.service.updatePaymentStatus(id, status);
   }
 
   public async updateShipping(id: string, payload: Record<string, unknown>) {
-    return OrderModel.findByIdAndUpdate(id, { $set: { shipping: payload } } as any, { new: true }).exec();
+    const updated = await OrderModel.findByIdAndUpdate(id, { $set: { shipping: payload } } as any, { new: true })
+      .populate('user', 'name firstName lastName email phone')
+      .exec();
+    return updated;
   }
 
   public async cancel(id: string) {
-    return this.orderRepo.updateStatus(id, 'CANCELLED');
+    return this.service.updateOrderStatus(id, 'CANCELLED');
   }
 }
