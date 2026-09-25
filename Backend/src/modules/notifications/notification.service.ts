@@ -1,7 +1,7 @@
 import NotificationModel from './notification.model';
 import { INotificationDocument, SendNotificationDTO } from './notification.interface';
 import UserModel from '../users/user.model';
-import { emitToUser, emitToAdmins, emitToRole } from '../../socket/socket.server';
+import { emitToUser, emitToAdmins, emitToRole, isUserOnline } from '../../socket/socket.server';
 import { sendPushNotification } from '../../config/firebase';
 import logger from '../../common/logger/logger';
 import ApiError from '../../common/errors/ApiError';
@@ -50,7 +50,9 @@ export class NotificationService {
       }
 
       // 3. Firebase Cloud Messaging (FCM) Push Dispatch
-      if (!dto.skipPush) {
+      // Smart Dispatch: Only send push if the user is offline to prevent duplicate client notifications
+      const isOnline = isUserOnline(recipientId);
+      if (!dto.skipPush && !isOnline) {
         try {
           const user = await UserModel.findById(dto.recipient).select('fcmTokens').lean();
           if (user && user.fcmTokens && user.fcmTokens.length > 0) {
