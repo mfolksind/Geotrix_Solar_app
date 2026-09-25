@@ -59,7 +59,7 @@ export async function sendPushNotification(
   tokens: string[],
   payload: PushNotificationPayload
 ): Promise<PushNotificationResult> {
-  const cleanTokens = (tokens || []).filter((t) => typeof t === 'string' && t.trim().length > 0);
+  const cleanTokens = [...new Set((tokens || []).filter((t) => typeof t === 'string' && t.trim().length > 0))];
 
   if (cleanTokens.length === 0) {
     return { successCount: 0, failureCount: 0, invalidTokens: [] };
