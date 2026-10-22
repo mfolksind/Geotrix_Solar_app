@@ -97,7 +97,11 @@ export const Header = () => {
 
     // Live In-App Notification Dispatch
     const handleNewNotification = (notif: AdminNotification) => {
-      setNotifications((prev) => [notif, ...prev.slice(0, 19)]);
+      const normalizedNotif: AdminNotification = {
+        ...notif,
+        _id: notif._id || `notif-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      };
+      setNotifications((prev) => [normalizedNotif, ...prev.filter((p) => p._id !== normalizedNotif._id).slice(0, 19)]);
       setUnreadCount((prev) => prev + 1);
 
       // Add floating toast
@@ -108,7 +112,13 @@ export const Header = () => {
           title: notif.title || 'New Notification',
           message: notif.message,
           type: notif.type.includes('ORDER') ? 'order' : notif.type.includes('TICKET') ? 'ticket' : 'system',
-          link: notif.data?.ticketId ? '/dashboard/tickets' : notif.data?.orderId ? '/dashboard/orders' : undefined,
+          link: notif.data?.leadId
+            ? '/dashboard/queries'
+            : notif.data?.ticketId
+            ? '/dashboard/tickets'
+            : notif.data?.orderId
+            ? '/dashboard/orders'
+            : undefined,
         },
         ...prev.slice(0, 4),
       ]);
@@ -156,9 +166,30 @@ export const Header = () => {
       }, 6000);
     };
 
+    // Live Lead / Product Enquiry Created Broadcast
+    const handleNewLead = (lead: any) => {
+      const toastId = `lead-${lead._id || Date.now()}`;
+      const isProduct = lead.inquiryType === 'product';
+      setToasts((prev) => [
+        {
+          id: toastId,
+          title: isProduct ? '⚡ New Earthing Product Enquiry!' : '☀️ New Solar Consultation Request!',
+          message: `${lead.fullName || 'Customer'} from ${lead.city || 'India'} (${lead.whatsappNumber || ''})`,
+          type: 'system',
+          link: '/dashboard/queries',
+        },
+        ...prev.slice(0, 4),
+      ]);
+
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== toastId));
+      }, 7000);
+    };
+
     socket.on('notification:new', handleNewNotification);
     socket.on('order:new', handleNewOrder);
     socket.on('ticket:created', handleNewTicket);
+    socket.on('lead:new', handleNewLead);
 
     return () => {
       socket.off('connect', onConnect);
@@ -166,6 +197,7 @@ export const Header = () => {
       socket.off('notification:new', handleNewNotification);
       socket.off('order:new', handleNewOrder);
       socket.off('ticket:created', handleNewTicket);
+      socket.off('lead:new', handleNewLead);
     };
   }, []);
 
@@ -273,13 +305,14 @@ export const Header = () => {
                       <p>No notifications yet</p>
                     </div>
                   ) : (
-                    notifications.map((n) => (
+                    notifications.map((n, idx) => (
                       <div
-                        key={n._id}
+                        key={n._id || `header-notif-${idx}`}
                         className={`${styles.notifItem} ${!n.isRead ? styles.unreadItem : ''}`}
                         onClick={() => {
-                          if (!n.isRead) handleMarkAsRead(n._id);
-                          if (n.data?.ticketId) router.push('/dashboard/tickets');
+                          if (!n.isRead && n._id) handleMarkAsRead(n._id);
+                          if (n.data?.leadId || n.type?.includes('LEAD')) router.push('/dashboard/queries');
+                          else if (n.data?.ticketId) router.push('/dashboard/tickets');
                           else if (n.data?.orderId) router.push('/dashboard/orders');
                           setIsOpen(false);
                         }}

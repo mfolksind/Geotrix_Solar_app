@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { fetchApi } from '../../../utils/api';
+import { getAdminSocket } from '../../../utils/socket';
 import {
   MessageSquare,
   Search,
@@ -32,15 +33,29 @@ import {
   IndianRupee
 } from 'lucide-react';
 
+interface LeadProductInfo {
+  productId?: string;
+  variantId?: string;
+  productName?: string;
+  variantName?: string;
+  sku?: string;
+  price?: number;
+  imageUrl?: string;
+}
+
 interface Lead {
   _id: string;
   fullName: string;
-  propertyType: string;
-  city: string;
-  pinCode: string;
   whatsappNumber: string;
-  monthlyBill: string;
-  agreedToTerms: boolean;
+  city: string;
+  pinCode?: string;
+  propertyType?: string;
+  monthlyBill?: string;
+  inquiryType?: 'solar' | 'product';
+  product?: LeadProductInfo;
+  quantity?: number;
+  message?: string;
+  agreedToTerms?: boolean;
   status: 'New' | 'Contacted' | 'Qualified' | 'Lost';
   createdAt: string;
   updatedAt?: string;
@@ -52,6 +67,8 @@ interface LeadStats {
   contactedLeads: number;
   qualifiedLeads: number;
   lostLeads: number;
+  solarLeads?: number;
+  productLeads?: number;
 }
 
 export default function QueriesPage() {
@@ -73,6 +90,7 @@ export default function QueriesPage() {
   // Filter & Query States
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
+  const [selectedInquiryType, setSelectedInquiryType] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState('newest');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(15);
@@ -106,6 +124,7 @@ export default function QueriesPage() {
       const params = new URLSearchParams();
       if (searchTerm.trim()) params.append('search', searchTerm.trim());
       if (selectedStatus !== 'ALL') params.append('status', selectedStatus);
+      if (selectedInquiryType !== 'ALL') params.append('inquiryType', selectedInquiryType);
       if (sortBy) params.append('sort', sortBy);
       params.append('page', page.toString());
       params.append('limit', limit.toString());
@@ -126,7 +145,7 @@ export default function QueriesPage() {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, selectedStatus, sortBy, page, limit]);
+  }, [searchTerm, selectedStatus, selectedInquiryType, sortBy, page, limit]);
 
   useEffect(() => {
     loadGlobalStats();
@@ -136,6 +155,24 @@ export default function QueriesPage() {
     loadLeads();
   }, [loadLeads]);
 
+  // Live Socket Listener for incoming inquiries
+  useEffect(() => {
+    const socket = getAdminSocket();
+    if (!socket) return;
+
+    const handleIncomingLead = (newLead: Lead) => {
+      // Prepend to current list if on first page or no specific filters
+      setLeads((prev) => [newLead, ...prev.filter((l) => l._id !== newLead._id)]);
+      setTotal((prev) => prev + 1);
+      loadGlobalStats();
+    };
+
+    socket.on('lead:new', handleIncomingLead);
+    return () => {
+      socket.off('lead:new', handleIncomingLead);
+    };
+  }, [loadGlobalStats]);
+
   // Filter Event Handlers
   const handleSearchChange = (val: string) => {
     setSearchTerm(val);
@@ -144,6 +181,11 @@ export default function QueriesPage() {
 
   const handleStatusFilter = (val: string) => {
     setSelectedStatus(val);
+    setPage(1);
+  };
+
+  const handleInquiryTypeFilter = (val: string) => {
+    setSelectedInquiryType(val);
     setPage(1);
   };
 
@@ -160,11 +202,12 @@ export default function QueriesPage() {
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedStatus('ALL');
+    setSelectedInquiryType('ALL');
     setSortBy('newest');
     setPage(1);
   };
 
-  const hasActiveFilters = searchTerm !== '' || selectedStatus !== 'ALL' || sortBy !== 'newest';
+  const hasActiveFilters = searchTerm !== '' || selectedStatus !== 'ALL' || selectedInquiryType !== 'ALL' || sortBy !== 'newest';
 
   // Copy Phone Helper
   const handleCopyPhone = (phone: string, e?: React.MouseEvent) => {
@@ -430,7 +473,21 @@ export default function QueriesPage() {
         </div>
 
         {/* Dropdown Filters Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-border">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-border">
+          {/* Inquiry Type Filter */}
+          <div>
+            <label className="block text-xs font-medium text-foreground/60 mb-1.5">Inquiry Type</label>
+            <select
+              value={selectedInquiryType}
+              onChange={(e) => handleInquiryTypeFilter(e.target.value)}
+              className="w-full py-2 px-3 text-sm bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-[#57c5cc]/30 focus:border-[#57c5cc] cursor-pointer"
+            >
+              <option value="ALL">All Types (Solar & Earthing)</option>
+              <option value="solar">Solar Consultations</option>
+              <option value="product">Earthing Product Enquiries</option>
+            </select>
+          </div>
+
           {/* Status Filter */}
           <div>
             <label className="block text-xs font-medium text-foreground/60 mb-1.5">Inquiry Status</label>
@@ -494,11 +551,12 @@ export default function QueriesPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-foreground/[0.02] border-b border-border text-foreground/60 text-xs font-semibold uppercase tracking-wider">
+                <tr className="bg-foreground/2 border-b border-border text-foreground/60 text-xs font-semibold uppercase tracking-wider">
                   <th className="py-3.5 px-4 sm:px-6">Customer</th>
+                  <th className="py-3.5 px-4">Type</th>
                   <th className="py-3.5 px-4">WhatsApp Contact</th>
                   <th className="py-3.5 px-4">Location</th>
-                  <th className="py-3.5 px-4 text-center">Property & Bill</th>
+                  <th className="py-3.5 px-4 text-center">Requirement</th>
                   <th className="py-3.5 px-4 text-center">Status</th>
                   <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
                 </tr>
@@ -517,7 +575,7 @@ export default function QueriesPage() {
                     <tr
                       key={lead._id}
                       onClick={() => setViewingLead(lead)}
-                      className="hover:bg-foreground/[0.02] transition-colors group cursor-pointer"
+                      className="hover:bg-foreground/2 transition-colors group cursor-pointer"
                     >
                       <td className="py-4 px-4 sm:px-6">
                         <div className="flex items-center gap-3">
@@ -534,6 +592,18 @@ export default function QueriesPage() {
                             </div>
                           </div>
                         </div>
+                      </td>
+
+                      <td className="py-4 px-4">
+                        {lead.inquiryType === 'product' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
+                            Earthing
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40">
+                            Solar
+                          </span>
+                        )}
                       </td>
 
                       <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
@@ -574,17 +644,28 @@ export default function QueriesPage() {
                       </td>
 
                       <td className="py-4 px-4 text-center">
-                        <div className="inline-flex flex-col items-center gap-0.5">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-background border border-border text-foreground">
-                            <Home size={11} className="text-[#57c5cc]" />
-                            <span>{lead.propertyType}</span>
-                          </span>
-                          {lead.monthlyBill && (
-                            <span className="text-[10px] text-foreground/60 font-mono">
-                              Bill: ₹{lead.monthlyBill}/mo
+                        {lead.inquiryType === 'product' && lead.product ? (
+                          <div className="inline-flex flex-col items-center gap-0.5 max-w-50">
+                            <span className="font-semibold text-xs text-foreground truncate block">
+                              {lead.product.productName || 'Product Enquiry'}
                             </span>
-                          )}
-                        </div>
+                            <span className="text-[10px] text-foreground/60 truncate">
+                              {lead.product.variantName && `${lead.product.variantName} • `}Qty: {lead.quantity || 1}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="inline-flex flex-col items-center gap-0.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-background border border-border text-foreground">
+                              <Home size={11} className="text-[#57c5cc]" />
+                              <span>{lead.propertyType || 'Solar'}</span>
+                            </span>
+                            {lead.monthlyBill && (
+                              <span className="text-[10px] text-foreground/60 font-mono">
+                                Bill: ₹{lead.monthlyBill}/mo
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </td>
 
                       <td className="py-4 px-4 text-center" onClick={(e) => e.stopPropagation()}>
@@ -651,7 +732,18 @@ export default function QueriesPage() {
                         {lead.fullName.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="font-bold text-foreground text-base">{lead.fullName}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-foreground text-base">{lead.fullName}</h3>
+                          {lead.inquiryType === 'product' ? (
+                            <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 border border-emerald-200 px-1.5 py-0.5 rounded-md">
+                              Earthing
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200 px-1.5 py-0.5 rounded-md">
+                              Solar
+                            </span>
+                          )}
+                        </div>
                         <div className="text-xs text-foreground/50 mt-0.5 flex items-center gap-1">
                           <Calendar size={12} />
                           <span>{leadDate}</span>
@@ -664,24 +756,60 @@ export default function QueriesPage() {
 
                   {/* Info Breakdown */}
                   <div className="grid grid-cols-2 gap-2 p-3 bg-background border border-border rounded-xl mb-4 text-xs">
-                    <div>
-                      <div className="text-[10px] text-foreground/50 uppercase tracking-wider font-semibold">
-                        Property Type
-                      </div>
-                      <div className="font-bold text-foreground truncate mt-0.5 flex items-center gap-1">
-                        <Home size={13} className="text-[#57c5cc]" />
-                        <span>{lead.propertyType}</span>
-                      </div>
-                    </div>
+                    {lead.inquiryType === 'product' && lead.product ? (
+                      <>
+                        <div className="col-span-2">
+                          <div className="text-[10px] text-foreground/50 uppercase tracking-wider font-semibold">
+                            Product
+                          </div>
+                          <div className="font-bold text-foreground truncate mt-0.5">
+                            {lead.product.productName || 'Earthing Product'}
+                          </div>
+                          {lead.product.variantName && (
+                            <div className="text-[11px] text-foreground/60 truncate">
+                              Variant: {lead.product.variantName}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-foreground/50 uppercase tracking-wider font-semibold">
+                            Quantity
+                          </div>
+                          <div className="font-bold text-foreground truncate mt-0.5">
+                            {lead.quantity || 1} units
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-foreground/50 uppercase tracking-wider font-semibold">
+                            Est. Unit Price
+                          </div>
+                          <div className="font-bold text-foreground truncate mt-0.5">
+                            {lead.product.price ? `₹${lead.product.price}` : 'N/A'}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <div className="text-[10px] text-foreground/50 uppercase tracking-wider font-semibold">
+                            Property Type
+                          </div>
+                          <div className="font-bold text-foreground truncate mt-0.5 flex items-center gap-1">
+                            <Home size={13} className="text-[#57c5cc]" />
+                            <span>{lead.propertyType || 'Solar'}</span>
+                          </div>
+                        </div>
 
-                    <div>
-                      <div className="text-[10px] text-foreground/50 uppercase tracking-wider font-semibold">
-                        Monthly Bill
-                      </div>
-                      <div className="font-bold text-foreground truncate mt-0.5">
-                        ₹{lead.monthlyBill || 'N/A'}
-                      </div>
-                    </div>
+                        <div>
+                          <div className="text-[10px] text-foreground/50 uppercase tracking-wider font-semibold">
+                            Monthly Bill
+                          </div>
+                          <div className="font-bold text-foreground truncate mt-0.5">
+                            ₹{lead.monthlyBill || 'N/A'}
+                          </div>
+                        </div>
+                      </>
+                    )}
 
                     <div className="col-span-2 pt-2 border-t border-border/60 flex items-center justify-between">
                       <div className="flex items-center gap-1 text-foreground/70 truncate">
@@ -851,22 +979,60 @@ export default function QueriesPage() {
               </div>
 
               {/* Requirement Details */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-background border border-border rounded-2xl p-3.5 space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-foreground/50">Property Type</span>
-                  <p className="text-sm font-bold text-foreground">{viewingLead.propertyType}</p>
+              {viewingLead.inquiryType === 'product' && viewingLead.product ? (
+                <div className="bg-background border border-border rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                      Earthing Product Enquiry
+                    </span>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 border border-emerald-200">
+                      Qty: {viewingLead.quantity || 1}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-foreground">
+                      {viewingLead.product.productName || 'Product'}
+                    </h4>
+                    {viewingLead.product.variantName && (
+                      <p className="text-xs text-foreground/70 mt-0.5">
+                        Variant: {viewingLead.product.variantName}
+                      </p>
+                    )}
+                    {viewingLead.product.price && (
+                      <p className="text-xs font-mono font-semibold text-foreground/90 mt-1">
+                        Price: ₹{viewingLead.product.price}
+                      </p>
+                    )}
+                  </div>
+                  {viewingLead.message && (
+                    <div className="pt-2 border-t border-border/60">
+                      <span className="text-[10px] uppercase font-bold text-foreground/50 block mb-1">
+                        Customer Note / Message
+                      </span>
+                      <p className="text-xs text-foreground/80 whitespace-pre-wrap bg-surface p-2.5 rounded-xl border border-border">
+                        {viewingLead.message}
+                      </p>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-background border border-border rounded-2xl p-3.5 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-foreground/50">Property Type</span>
+                    <p className="text-sm font-bold text-foreground">{viewingLead.propertyType || 'Solar'}</p>
+                  </div>
 
-                <div className="bg-background border border-border rounded-2xl p-3.5 space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-foreground/50">Monthly Bill</span>
-                  <p className="text-sm font-bold text-foreground">₹{viewingLead.monthlyBill || 'Not specified'}</p>
+                  <div className="bg-background border border-border rounded-2xl p-3.5 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-foreground/50">Monthly Bill</span>
+                    <p className="text-sm font-bold text-foreground">₹{viewingLead.monthlyBill || 'Not specified'}</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Location Card */}
               <div className="bg-background border border-border rounded-2xl p-4 space-y-1.5">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-foreground/60 block">
-                  Installation Location
+                  Location
                 </span>
                 <p className="text-foreground text-sm font-semibold">
                   {viewingLead.city}

@@ -9,7 +9,8 @@ export type NotificationType =
   | 'ORDER_PAYMENT'
   | 'CART_REMINDER'
   | 'SYSTEM_ALERT'
-  | 'PROMOTION';
+  | 'PROMOTION'
+  | 'LEAD_CREATED';
 
 export type NotificationChannel = 'IN_APP' | 'PUSH' | 'SOCKET' | 'EMAIL';
 

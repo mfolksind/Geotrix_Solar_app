@@ -8,10 +8,9 @@ const leadSchema = new Schema<ILead>(
       required: [true, 'Full Name is required'],
       trim: true,
     },
-    propertyType: {
+    whatsappNumber: {
       type: String,
-      required: [true, 'Property Type is required'],
-      enum: ['Residential', 'Commercial', 'Industrial'],
+      required: [true, 'Whatsapp Number is required'],
       trim: true,
     },
     city: {
@@ -21,22 +20,42 @@ const leadSchema = new Schema<ILead>(
     },
     pinCode: {
       type: String,
-      required: [true, 'PIN Code is required'],
       trim: true,
+      default: '',
     },
-    whatsappNumber: {
+    propertyType: {
       type: String,
-      required: [true, 'Whatsapp Number is required'],
       trim: true,
     },
     monthlyBill: {
       type: String,
-      required: [true, 'Monthly Bill is required'],
+      trim: true,
+    },
+    inquiryType: {
+      type: String,
+      enum: ['solar', 'product'],
+      default: 'solar',
+    },
+    product: {
+      productId: { type: String, trim: true },
+      variantId: { type: String, trim: true },
+      productName: { type: String, trim: true },
+      variantName: { type: String, trim: true },
+      sku: { type: String, trim: true },
+      price: { type: Number },
+      imageUrl: { type: String, trim: true },
+    },
+    quantity: {
+      type: Number,
+      default: 1,
+    },
+    message: {
+      type: String,
       trim: true,
     },
     agreedToTerms: {
       type: Boolean,
-      required: [true, 'Must agree to terms'],
+      default: true,
     },
     status: {
       type: String,

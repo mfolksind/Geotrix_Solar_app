@@ -19,6 +19,7 @@ const notificationSchema = new Schema<INotificationDocument>(
         'CART_REMINDER',
         'SYSTEM_ALERT',
         'PROMOTION',
+        'LEAD_CREATED',
       ],
       default: 'SYSTEM_ALERT',
       index: true,

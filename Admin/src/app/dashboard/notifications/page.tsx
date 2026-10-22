@@ -17,6 +17,7 @@ import {
   X,
   ExternalLink,
   CheckCircle,
+  Zap,
 } from 'lucide-react';
 import { fetchApi } from '../../../utils/api';
 import { getAdminSocket } from '../../../utils/socket';
@@ -38,7 +39,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<'ALL' | 'UNREAD' | 'ORDERS' | 'TICKETS' | 'SYSTEM'>('ALL');
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'UNREAD' | 'INQUIRIES' | 'ORDERS' | 'TICKETS' | 'SYSTEM'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -163,6 +164,7 @@ export default function NotificationsPage() {
   const filteredNotifications = notifications.filter((n) => {
     // 1. Filter Tab
     if (activeFilter === 'UNREAD' && n.isRead) return false;
+    if (activeFilter === 'INQUIRIES' && !n.type.includes('LEAD')) return false;
     if (activeFilter === 'ORDERS' && !n.type.includes('ORDER')) return false;
     if (activeFilter === 'TICKETS' && !n.type.includes('TICKET')) return false;
     if (activeFilter === 'SYSTEM' && !n.type.includes('SYSTEM')) return false;
@@ -180,6 +182,7 @@ export default function NotificationsPage() {
   });
 
   const getNotificationIcon = (type: string) => {
+    if (type.includes('LEAD')) return <Zap size={20} style={{ color: '#0B7A5E' }} />;
     if (type.includes('ORDER')) return <ShoppingCart size={20} style={{ color: '#10b981' }} />;
     if (type.includes('TICKET')) return <LifeBuoy size={20} style={{ color: '#3b82f6' }} />;
     if (type.includes('SYSTEM')) return <Megaphone size={20} style={{ color: '#f59e0b' }} />;
@@ -242,6 +245,15 @@ export default function NotificationsPage() {
             <span className={styles.countChip}>{unreadCount}</span>
           </button>
           <button
+            className={`${styles.filterTab} ${activeFilter === 'INQUIRIES' ? styles.activeFilterTab : ''}`}
+            onClick={() => setActiveFilter('INQUIRIES')}
+          >
+            Inquiries
+            <span className={styles.countChip}>
+              {notifications.filter((n) => n.type.includes('LEAD')).length}
+            </span>
+          </button>
+          <button
             className={`${styles.filterTab} ${activeFilter === 'ORDERS' ? styles.activeFilterTab : ''}`}
             onClick={() => setActiveFilter('ORDERS')}
           >
@@ -301,7 +313,8 @@ export default function NotificationsPage() {
               className={`${styles.notifCard} ${!notif.isRead ? styles.unreadCard : ''}`}
               onClick={() => {
                 if (!notif.isRead) handleMarkAsRead(notif._id);
-                if (notif.data?.ticketId) router.push('/dashboard/tickets');
+                if (notif.data?.leadId || notif.type.includes('LEAD')) router.push('/dashboard/queries');
+                else if (notif.data?.ticketId) router.push('/dashboard/tickets');
                 else if (notif.data?.orderId) router.push('/dashboard/orders');
               }}
             >
